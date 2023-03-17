@@ -1,0 +1,93 @@
+[toc]
+
+
+
+
+
+## 简单使用
+
+ ### 创建和删除数据库
+
+```javascript
+//创建数据库
+var request = window.indexedDB.open("mydb", 1.0);
+request.onerror = function() {
+    console.log("创建或打开数据库失败");
+}
+request.onsuccess = function(e) {
+    console.log("创建或打开数据成功");
+    var db = e.target.result;
+    console.log(db);
+}
+```
+
+```javascript
+//删除数据库
+var request = window.indexedDB.deleteDatabase("mydb");
+request.onerror = function() {
+    console.log("删除数据库失败");
+}
+request.onsuccess = function() {
+    console.log("删除数据库成功");
+}
+```
+
+### 升级数据库
+
+indexedDB中，是没有“表”这个概念的，而是用“对象仓库（Object Store）”来代替，即：在indexedDB中，一个对象仓库就是一张表。
+
+`db.objectStoreNames.contains("对象仓库名")`判断对象仓库是否存在。
+
+```javascript
+var data = [{
+    id: 1,
+    name: "xiaobai",
+    age: 18
+}, {
+    id: 2,
+    name: "xiaohong",
+    age: 19
+}, {
+    id: 3,
+    name: "xiaohei",
+    age: 20
+}];
+var request = window.indexedDB.open("mydb", 2.0);
+request.onerror = function() {
+    console.log("创建或打开数据库失败");
+}
+request.onsuccess = function() {
+    console.log("创建或打开数据成功");
+}
+//升级
+request.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    if (!db.objectStoreNames.contains("students")) {
+        var store = db.createObjectStore("students", {
+            keyPath: "id"
+        });
+        for (var i = 0; i < data.length; i++) {
+            var addRequest = store.add(data[i]);
+            addRequest.onerror = function() {
+                console.log("添加数据失败");
+            }
+            addRequest.onsuccess = function() {
+                console.log("添加数据成功");
+            }
+        }
+    }
+}
+```
+
+### 增加数据
+
+凡是涉及对象仓库的增删查改，都需要用事务来处理。
+
+
+
+
+
+
+
+
+

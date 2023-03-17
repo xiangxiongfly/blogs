@@ -1,0 +1,478 @@
+[TOC]
+
+# jQuery 工具函数
+
+## 概述
+
+工具函数，指的是在jQuery对象上定义的函数，属于全局性函数。
+
+简单来说，工具函数就是jQuery内置的一些函数。
+
+工具函数对应的官方地址是http://api.jquery.com/category/utilities。
+
+在jQuery中，主要有以下5大类工具函数：
+
+- 字符串操作。
+- URL操作。
+- 数组操作。
+- 对象操作。
+- 检测操作。
+
+
+
+## 字符串操作
+
+### $.trim()
+
+**语法**
+
+```
+$.trim("字符串")
+```
+
+**说明**
+
+去除空格后。
+
+**使用**
+
+```
+var str = "  hello wrold  ";
+console.log(str.length); //15
+var newStr = $.trim(str);
+console.log(newStr.length); //11
+```
+
+
+
+## URL操作
+
+### $.param(）
+
+**语法**
+
+```
+$.param(对象或数组)
+```
+
+**说明**
+
+在jQuery中，我们可以使用`$.param()`方法将数组或对象使用URL编码转化为字符串序列，以便用于URL查询字符串或Ajax请求。
+
+**使用**
+
+```
+var person = {
+    name: "小明",
+    age: 18,
+    address: "beijing"
+};
+var str = $.param(person);
+console.log(str); //name=%E5%B0%8F%E6%98%8E&age=18&address=beijing
+```
+
+
+
+## 数组操作
+
+| 函数          | 说明                           |
+| ------------- | ------------------------------ |
+| $.inArray()   | 判断元素是否在数组中           |
+| $.merge()     | 合并数组                       |
+| $.makeArray() | 将“类数组对象”转换为真正的数组 |
+| $.grep()      | 过滤数组                       |
+| $.each()      | 遍历数组                       |
+
+### $.inArray()
+
+**语法**
+
+```
+$.inArray(value, array)
+```
+
+**说明**
+
+判断元素是否在数组中。如果存在，则返回下标；否则返回-1。
+
+**使用**
+
+```
+var arr = ["a", "b", "c", "d"];
+var index = $.inArray("a", arr);
+console.log(index); //0
+```
+
+
+
+### $.merge()
+
+**语法**
+
+```
+$merge(数组1, 数组2)
+```
+
+**说明**
+
+合并2个数组并返回一个新数组。
+
+**使用**
+
+```
+var arr1 = ["a", "b", "c", "d"];
+var arr2 = [1, 2, 3, 4];
+var newArr = $.merge(arr1, arr2);
+console.log(newArr); //["a", "b", "c", "d", 1, 2, 3, 4]
+```
+
+
+
+### $.makeArray()
+
+**语法**
+
+```
+$.makeArray(类数组对象)
+```
+
+**说明**
+
+将类数组对象转化为真正的对象，如果不是类数组对象则返回一个空数组。
+
+**使用1**
+
+```
+function test() {
+    console.log(arguments);
+    var arr = $.makeArray(arguments);
+    console.log(arr); //["a", 1, true, {…}]
+}
+
+test("a", 1, true, {
+	name: "小明"
+});
+```
+
+**使用2**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				var arr = $.makeArray($("li"));
+				var textArr = [];
+				arr.forEach(function(value) {
+					textArr.push(value.innerText)
+				});
+				console.log(textArr); //["HTML", "CSS", "JavaScript", "jQuery", "Vue"]
+			})
+		</script>
+	</head>
+	<body>
+		<ul>
+			<li>HTML</li>
+			<li>CSS</li>
+			<li>JavaScript</li>
+			<li>jQuery</li>
+			<li>Vue</li>
+		</ul>
+	</body>
+</html>
+```
+
+
+
+### $.grep()
+
+**语法**
+
+```
+$.grep(数组，过滤函数，布尔值)
+```
+
+**说明**
+
+第1个参数array是一个数组。
+
+第2个参数是一个匿名函数。该匿名函数有两个形参：value表示当前元素的“值”，index表示当前元素的“索引”。
+
+第3个参数是一个布尔值。如果该值为false，则$.grep()只会收集函数返回true的数组元素；如果该值为true，则$.grep()只会收集函数返回false的数组元素。
+
+**使用**
+
+```
+var arr = [1, 3, 6, 7, 4];
+var newArr = $.grep(arr, function(value, index) {
+	return value > 5;
+}, false);
+console.log(newArr); //[6, 7]
+```
+
+
+
+### $.each()
+
+**语法**
+
+```
+$.each(数组, 遍历函数)
+```
+
+**说明**
+
+第1个参数array是一个数组。
+
+第2个参数是一个匿名函数。该匿名函数有两个形参：index表示当前元素的“索引”，value表示当前元素的“值”。
+
+**使用**
+
+```
+var arr = ["HTML", "CSS", "JavaScript", "jQuery"];
+$.each(arr, function(value, index) {
+	console.log("下标：" + index + " 值：" + value);
+});
+// 下标：HTML 值：0
+// 下标：CSS 值：1
+// 下标：JavaScript 值：2
+// 下标：jQuery 值：3
+```
+
+
+
+## 对象操作
+
+### $.each()
+
+**语法**
+
+```
+$.each(对象, 遍历函数)
+```
+
+**使用**
+
+```
+var person = {
+    name: "小明",
+    age: 18,
+    address: "beijing"
+}
+$.each(person, function(key, value) {
+	console.log(key + "-" + value);
+});
+// name-小明
+// age-18
+// address-beijing
+```
+
+
+
+## 检测操作
+
+| 函数              | 说明                   |
+| ----------------- | ---------------------- |
+| $.isFunction()    | 判断变量是否为函数     |
+| $.isArray()       | 判断变量是否为数组     |
+| $.isEmptyObject() | 判断变量是否为空对象   |
+| $.isPlainObject() | 判断变量是否为原始对象 |
+| $.contains()      | 检测是否包含元素       |
+
+### $.isFunction()
+
+**语法**
+
+```
+$.isFunction(变量)
+```
+
+**说明**
+
+判断变量是否为函数 。
+
+**使用**
+
+```
+var func = function() {};
+console.log($.isFunction(func)); //true
+```
+
+
+
+### $.isArray()
+
+**语法**
+
+```
+$.isArray(变量)
+```
+
+**说明**
+
+判断变量是否为数组。
+
+**使用**
+
+```
+var arr = [1, 2, 3, 4];
+console.log($.isArray(arr)); //true
+```
+
+
+
+#### 原生JavaScript判断是否为数组
+
+```
+function isArray(arr) {
+	return Object.prototype.toString.call(arr) == "[object Array]";
+}
+var arr = [1, 2, 3, 4];
+console.log(isArray(arr)); //true
+```
+
+
+
+### $.isEmptyObject()
+
+**语法**
+
+```
+$.isEmptyObject(变量)
+```
+
+**说明**
+
+判断变量是否为空对象。
+
+**使用**
+
+```
+var a = {};
+var b = {
+    name: "小明",
+    age: 18,
+    address: "beijing"
+};
+console.log($.isEmptyObject(a)); //true
+console.log($.isEmptyObject(b)); //false
+```
+
+
+
+### $.isPlainObject()
+
+**语法**
+
+```
+$.isPlainObject(对象)
+```
+
+**说明**
+
+判断变量是否为原始对象。
+
+**使用**
+
+```
+var person = {
+    name: "小明",
+    age: 18,
+    address: "beijing"
+};
+console.log($.isPlainObject(person)); //true
+
+function Box(width, height) {
+    this.width = width;
+    this.height = height;
+}
+var box = Box(1, 2);
+console.log($.isPlainObject(box)); //false
+```
+
+
+
+### $.contains()
+
+**语法**
+
+```
+$.contains(DOM元素A, DOM元素B)
+```
+
+**说明**
+
+检测元素A是否包含元素B。
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				var $div = $("div")[0];
+				var $strong = $("strong")[0];
+				console.log($.contains($div, $strong)); //true
+			})
+		</script>
+	</head>
+	<body>
+		<div>
+			<strong>hello</strong>
+		</div>
+	</body>
+</html>
+```
+
+
+
+## 自定义工具函数
+
+**概述**
+
+在jQuery中，我们可以使用`$.extend()`方法来自定义工具函数，以便自己开发使用。
+
+**语法**
+
+```
+(function($){
+    $.extend({ 
+        "函数名": function(参数){ 
+            …… 
+        } 
+    }); 
+})(jQuery); 
+```
+
+**说明**
+
+`(function(){})()`是JavaScript立即执行函数，这种语法在高级开发中经常用到。
+
+**使用**
+
+```
+(function($) {
+    $.extend({
+        "maxNum": function(m, n) {
+       		return m > n ? m : n;
+        }
+    });
+})(jQuery);
+
+$(function() {
+    var result = $.maxNum(2, 3);
+    console.log(result); //3
+})
+```
+
+
+

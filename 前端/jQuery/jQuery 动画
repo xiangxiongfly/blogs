@@ -1,0 +1,856 @@
+[TOC]
+
+# jQuery 动画
+
+## 概述
+
+在实际开发中，使用CSS3来实现动画有一定的局限性，有些地方必须使用jQuery才能实现动画，例如下面几种情况：
+
+- 控制动画的执行。
+- 结合DOM操作。
+- 动画执行后返回一个函数。
+
+
+
+## 显示和隐藏动画
+
+在jQuery中，如果想要实现元素的显示与隐藏效果，有以下两种方式：
+
+- show()和hide()
+- toggle()
+
+### show() 和 hide()
+
+**语法**
+
+```
+$(元素).show(speed, fn)
+$(元素).hide(speed, fn)
+```
+
+**说明**
+
+`show()`方法会把元素由`display:none;`还原为原来的状态（display:block、display:inline-block等）。
+
+`hide()`方法会为元素定义`display:none;`。
+
+speed参数：可选参数。有2种取值，一种是具体的数值；另一种是关键字，slow表示200毫秒、normal表示400毫秒、fast表示600毫秒。
+
+fn参数：可选参数。表示动画执行完后的回调函数。
+
+**无动画使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("#show-btn").click(function() {
+					$("img").show();
+				});
+				$("#hide-btn").click(function() {
+					$("img").hide();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="show-btn" type="button" value="显示">
+		<input id="hide-btn" type="button" value="隐藏">
+		<br>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/f4937e92e63c4e8ab80e995784fd779d.gif)
+
+**有动画使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("#show-btn").click(function() {
+					$("img").show("normal");
+				});
+				$("#hide-btn").click(function() {
+					$("img").hide("normal");
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="show-btn" type="button" value="显示">
+		<input id="hide-btn" type="button" value="隐藏">
+		<br>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/8f868b72100147c59f3e0ca461615c0b.gif)
+
+
+
+### toggle()
+
+**语法**
+
+```
+$(元素).toggle(speed, fn)
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("#toggle-btn").click(function() {
+					$("img").toggle("normal");
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="toggle-btn" type="button" value="切换">
+		<br>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/864ca5660a154abebfc4c770bf5a11b3.gif)
+
+
+
+## 淡入和淡出动画
+
+### fadeIn() 和 fadeOut()
+
+**语法**
+
+```
+$(元素).fadeIn(speed, fn)
+$(元素).fadeOut(speed, fn) 
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("#show-btn").click(function() {
+					$("img").fadeIn();
+				});
+				$("#hide-btn").click(function() {
+					$("img").fadeOut();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="show-btn" type="button" value="淡出">
+		<input id="hide-btn" type="button" value="淡入">
+		<br>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/707fb8cd5b6e42289d1ca5547d6353f9.gif)
+
+
+
+### fadeToggle()
+
+**语法**
+
+```
+$(元素).fadeToggle(speed, fn) 
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("#toggle-btn").click(function() {
+					$("img").fadeToggle();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="toggle-btn" type="button" value="切换">
+		<br>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d84f5d5b27b84695b25b1819e3c6b4f1.gif)
+
+
+
+### fadeTo()
+
+**语法**
+
+```
+$(元素).fadeTo(speed, opacity, fn) 
+```
+
+**说明**
+
+opacity参数：表示元素指定的透明度，取值范围为0.0~1.0。
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("img").hover(function() {
+					$(this).fadeTo(500, 0.6);
+				}, function() {
+					$(this).fadeTo(500, 1.0);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<img src="img/a.png" width="50%">
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/71830db5a0564ebe85973aff07fd8380.gif)
+
+
+
+## 滑上和滑下动画
+
+在jQuery中，如果想要实现元素的滑动效果，我们有以下两种方式：
+
+- slideUp()和slideDown()
+- slideToggle()
+
+### slideUp()和slideDown()
+
+**语法**
+
+```
+$(元素).slideUp(speed, fn)
+$(元素).slideDown(speed, fn)
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 300px;
+			}
+
+			h3 {
+				text-align: center;
+				padding: 10px;
+				background-color: #EEE;
+			}
+
+			h3:hover {
+				background-color: #ddd;
+				cursor: pointer;
+			}
+
+			p {
+				background-color: #f1f1f1;
+				padding: 8px;
+				line-height: 24px;
+				display: none;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("h3").hover(function() {
+					$("p").slideDown();
+				}, function() {
+					$("p").slideUp();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div>
+			<h3>hello world</h3>
+			<p>
+				这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。
+			</p>
+		</div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d2701522be714815be0dac329ca722d8.gif)
+
+
+
+### slideToggle()
+
+**语法**
+
+```
+$(元素).slideToggle(speed, fn) 
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 300px;
+			}
+
+			h3 {
+				text-align: center;
+				padding: 10px;
+				background-color: #EEE;
+			}
+
+			h3:hover {
+				background-color: #ddd;
+				cursor: pointer;
+			}
+
+			p {
+				background-color: #f1f1f1;
+				padding: 8px;
+				line-height: 24px;
+				display: none;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("h3").hover(function() {
+					$("p").slideToggle();
+				}, function() {
+					$("p").slideToggle();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div>
+			<h3>hello world</h3>
+			<p>
+				这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。这些一些内容。
+			</p>
+		</div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d2701522be714815be0dac329ca722d8.gif)
+
+
+
+## 自定义动画
+
+### 简单动画
+
+**语法**
+
+```
+$(元素).animate(params, speed, fn) 
+```
+
+**说明**
+
+params参数：属性值列表。
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script>
+			$(function() {
+				$("div").hover(function() {
+					$(this).animate({
+						"width": "100px",
+						"height": "100px"
+					}, 1000);
+				}, function() {
+					$(this).animate({
+						"width": "50px",
+						"height": "50px"
+					}, 1000);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div> </div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/5d88e3584c154eb3a21fb619a8c59847.gif)
+
+
+
+#### jquery.color.js
+
+jQuery本身有一个缺陷，就是使用animate()方法时会无法识别background-color、border-color等颜色属性。因此，我们需要引入第三方插件jquery.color.js来修复这个bug。
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("div").hover(function() {
+					$(this).animate({
+						"width": "100px",
+						"height": "100px",
+						"background-color": "blue"
+					}, 1000);
+				}, function() {
+					$(this).animate({
+						"width": "50px",
+						"height": "50px",
+						"background-color": "red"
+					}, 1000);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div> </div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/350e61bc0fcc49689ab38867531c6bb7.gif)
+
+
+
+### 累积动画
+
+在jQuery中，对于元素的宽度和高度，我们可以结合“+=”和“-=”这两个运算符来实现累积动画的效果。
+
+例如：`{"width":"+=100px"}`表示以元素本身的width为基点加上100px，而`{"width":"-=100px"}`表示以元素本身的width为基点减去100px。
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("div").hover(function() {
+					$(this).animate({
+						"width": "+=50px",
+						"height": "+=50px",
+						"background-color": "blue"
+					}, 1000);
+				}, function() {
+					$(this).animate({
+						"width": "-=50px",
+						"height": "-=50px",
+						"background-color": "red"
+					}, 1000);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div> </div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/e9f88842697648a9ad9db6f2c6fdeb71.gif)
+
+
+
+### 回调函数
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("div").hover(function() {
+					$(this).animate({
+						"width": "+=50px",
+						"height": "+=50px",
+						"background-color": "blue"
+					}, 1000, function() {
+						$(this).css("border", "2px solid green")
+					});
+				}, function() {
+					$(this).animate({
+						"width": "-=50px",
+						"height": "-=50px",
+						"background-color": "red"
+					}, 1000, function() {
+						$(this).css("border", "none")
+					});
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div> </div>
+	</body>
+</html>
+```
+
+说明：在动画执行完后调用回调函数。
+
+
+
+## 队列动画
+
+**语法**
+
+```
+$(元素).animate().animate()....
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("div").mouseover(function() {
+					$(this).animate({
+							"width": "100px"
+						}, 1000)
+						.animate({
+							"height": "100px"
+						}, 1000)
+						.animate({
+							"background-color": "blue"
+						}, 1000)
+						.fadeOut(1000)
+						.fadeIn(1000);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<div> </div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c0bd284318a541539ca9a23fabc1cd72.gif)
+
+
+
+## 取消动画
+
+**语法**
+
+```
+$(元素).stop(clearQueue, jumpToEnd)
+```
+
+**说明**
+
+clearQueue参数：是否清空队列动画。
+
+jumpToEnd参数：是否立即完成最终动画。
+
+stop()方法有4种形式：
+
+- stop()：等价于stop(false,false)，只停止当前动画，后续动画仍然继续执行。
+- stop(true)：等价于stop(true,false)，停止所有动画。
+- stop(true,true)：当前动画继续执行，停止后续动画，
+- stop(false,true)：立即执行完当前动画。
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("#start-btn").click(function() {
+					$("div").animate({
+							"width": "100px"
+						}, 2000)
+						.animate({
+							"height": "100px"
+						}, 2000)
+						.animate({
+							"background-color": "blue"
+						}, 2000)
+						.animate({
+							"background-color": "yellow"
+						}, 2000);
+				});
+				$("#end-btn").click(function() {
+					$("div").stop();
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="start-btn" type="button" value="开始">
+		<input id="end-btn" type="button" value="停止">
+		<br>
+		<div></div>
+	</body>
+</html>
+```
+
+
+
+## 延迟动画
+
+**语法**
+
+```
+$(元素).delay(speed) 
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			div {
+				width: 50px;
+				height: 50px;
+				background-color: red;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("#start-btn").click(function() {
+					$("div").animate({
+							"width": "100px"
+						}, 1000)
+						.delay(2000)
+						.animate({
+							"height": "100px"
+						}, 1000);
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<input id="start-btn" type="button" value="开始">
+		<div></div>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2e0d2ff26e4c441a8abe7a7af00d365a.gif)
+
+
+
+## 判断动画状态
+
+**语法**
+
+```
+$(元素).is(":animated")
+```
+
+**说明**
+
+表示正在动画状态。
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			figure {
+				position: relative;
+				width: 240px;
+				height: 200px;
+				overflow: hidden;
+			}
+
+			img {
+				width: 240px;
+				height: 200px;
+			}
+
+			figcaption {
+				position: absolute;
+				left: 0;
+				bottom: -30px;
+				width: 100%;
+				height: 30px;
+				line-height: 30px;
+				text-align: center;
+				font-family: "微软雅黑";
+				background-color: rgba(0, 0, 0, 0.6);
+				color: white;
+			}
+		</style>
+		<script src="js/jquery-1.12.4.min.js"></script>
+		<script src="js/jquery.color.js"></script>
+		<script>
+			$(function() {
+				$("figure").hover(function() {
+					if (!$("figcaption").is(":animated")) {
+						$("figcaption").animate({
+							"bottom": "0px"
+						}, 200);
+					}
+				}, function() {
+					if (!$("figcaption").is(":animated")) {
+						$("figcaption").animate({
+							"bottom": "-30px"
+						}, 200);
+					}
+				});
+			})
+		</script>
+	</head>
+	<body>
+		<figure>
+			<img src="img/a.png">
+			<figcaption>hello world</figcaption>
+		</figure>
+	</body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/dc6441df22b2444e9115030511dcfb07.gif)
+
+
+
