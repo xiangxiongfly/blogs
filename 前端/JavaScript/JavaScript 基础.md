@@ -203,6 +203,29 @@ Number.isNaN(123);        // false
 
 
 
+## 引用数据类型与基本数据类型区别
+
+基本数据类型包括：stirng、number、boolean、null、undefined、symbol。
+
+引用数据类型包括：Object类型、Array类型、Date类型、RegExp类型、Math类型、Function类型，和基本数据类型的包装类型如Number类型、String类型、Boolean类型等。
+
+一、存储分配不同：
+
+- 基本数据类型存储在栈中。
+- 引用数据类型存储在堆中。
+
+二、访问机制不同：
+
+- 基本数据类型是通过值传递的。
+- 引用数据类型是通过引用传递的。
+
+三、复制操作不同：
+
+- 基本数据类型是直接复制值。
+- 引用数据类型是复制引用地址。
+
+
+
 ## 运算符
 
 ### 等于运算符
@@ -388,11 +411,4 @@ console.log(is0OrNaN(o3)); //true
 ```
 
 
-
-## 引用数据类型与基本数据类型区别
-
-JavaScript中常用的引用数据类型包括Object类型、Array类型、Date类型、RegExp类型、Math类型、Function类型，和基本数据类型的包装类型，如Number类型、String类型、Boolean类型等。
-
-- 基本数据类型是通过值传递的。
-- 引用数据量是通过引用传递的。
 

@@ -171,7 +171,7 @@ console.log(result); //30
 简而言之，闭包就是函数嵌套函数的一种使用方法，可以缓存内部变量，防止内部变量被外界污染。
 
 ```javascript
-function func() {
+var obj = (function () {
     //私有值
     var count = 0;
 
@@ -190,15 +190,14 @@ function func() {
     return {
         add: add,
         decrease: decrease,
-        getCount: getCount
-    }
-}
+        getCount: getCount,
+    };
+})();
 
-var obj = func();
-obj.add()
-obj.add()
-obj.add()
-obj.decrease()
+obj.add();
+obj.add();
+obj.add();
+obj.decrease();
 
 console.log(obj.getCount()); //2
 ```
