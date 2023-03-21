@@ -1,6 +1,6 @@
 [TOC]
 
-# ES6特性
+# ES6 特性
 
 ## 概述
 
@@ -12,59 +12,52 @@
 
 
 
-## let和const
+## var & let & const
 
-其实在ES6之前，只存在全局作用域和函数作用域，并不存在块级作用域，这就会导致变量提升的问题。
-
-[变量提升和函数提升](https://blog.csdn.net/qq_14876133/article/details/128701606)
+在ES6之前，只有全局作用域和函数作用域，在使用var变量时会出现变量提升的问题。
 
 在ES6中新增了块级作用域来避免这个问题的出现。
+
+[变量提升和函数提升](https://blog.csdn.net/qq_14876133/article/details/128701606)
 
 let关键字用于声明变量，和var关键字的用法类似。
 
 使用const声明的值为一个常量，一旦声明将不会再改变。
 
-**let特性：**
+**var & let & count区别：**
 
-- 不存在变量提升。
-- 不能重复声明。
-- 不再是全局对象的属性。
+- var声明的变量的作用域为函数作用域或全局作用域，let变量和const变量为块级作用域（如一个函数内部或一个`{}`代码块内部）。
+- 在同一作用域内，var可以被重复声明，而let和const则不允许。
+- var变量可以在声明之前使用，但值为undefined，而let和const在声明之前使用会抛出异常。
+- var和let声明的变量可以被重复赋值，但const声明的变量则不能重新赋值，如果重新赋值会抛出异常。
 
-**let优点：**
+**var运用：**
 
-- 避免内存泄露。
-- 避免出现变量提升导致的变量覆盖问题。
-- 代替立即执行函数。
-
-**const特性：**
-
-- 在块级作用域内有效。
-- 不存在变量提升。
-- 不能重复声明变量。
-- 不再是全局对象的属性。
-
-### var和let运用
-
-```javascript
-//var必须使用闭包防止变量提升带来的副作用
-var btns = document.querySelectorAll("button");
-for (var i = 0; i < btns.length; i++) {
-    (function(i) {
-        btns[i].addEventListener("click", function() {
-            alert(i);
-        }, true);
-    })(i);
+```js
+var a = 10;
+console.log(a); //10
+if (true) {
+    var a = 20;
+    console.log(a); //20
 }
+console.log(window.a); //20
 ```
 
-```javascript
-//let不会产生变量提升
-var btns = document.querySelectorAll("button");
-for (let i = 0; i < btns.length; i++) {
-    btns[i].addEventListener("click", function() {
-        alert(i);
-    }, true);
+```js
+console.log(a); //undefined
+var a = 10;
+```
+
+**let运用：**
+
+```js
+let a = 10;
+console.log(a); //10
+if (true) {
+    let a = 20;
+    console.log(a); //20
 }
+console.log(window.a); //undefined
 ```
 
 

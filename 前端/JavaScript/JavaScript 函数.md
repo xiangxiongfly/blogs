@@ -166,40 +166,60 @@ console.log(result); //30
 
 ## 闭包
 
-在JavaScript中存在一种内部函数，即函数声明和函数表达式可以位于另一个函数的函数体内，在内部函数中可以访问外部函数声明的变量，当这个内部函数在包含它们的外部函数之外被调用时，就会形成闭包。
+闭包的结构是：函数嵌套函数结构，内部函数可以访问和操作外部函数的变量，外部函数负责缓存变量。
 
-简而言之，闭包就是函数嵌套函数的一种使用方法，可以缓存内部变量，防止内部变量被外界污染。
+闭包可以缓存内部变量，防止内部变量被外界污染。
 
-```javascript
-var obj = (function () {
-    //私有值
+**闭包缓存内部变量：**
+
+```js
+function outerFun() {
     var count = 0;
 
-    function add() {
+    function innerFun() {
         count++;
+        console.log(count);
     }
+    return innerFun;
+}
+var closure = outerFun();
+closure(); //1
+closure(); //2
+closure(); //3
+```
 
-    function decrease() {
-        count--;
+**闭包防止内部变量被污染：**
+
+不使用闭包：
+
+变量i是var声明的，在函数作用域内会出现变量提升问题，因此i最终变为5。
+
+```js
+var arr = [];
+for (var i = 0; i < 5; i++) {
+    arr[i] = function() {
+        return i;
     }
+}
+console.log(arr[1]()); //5
+console.log(arr[4]()); //5
+```
 
-    function getCount() {
-        return count;
-    }
+使用闭包：
 
-    return {
-        add: add,
-        decrease: decrease,
-        getCount: getCount,
-    };
-})();
-
-obj.add();
-obj.add();
-obj.add();
-obj.decrease();
-
-console.log(obj.getCount()); //2
+```js
+var arr = [];
+for (var i = 0; i < 5; i++) {
+    arr[i] = (function() {
+        //闭包
+        var j = i; //缓存变量
+        return function() {
+            return j;
+        };
+    })();
+}
+console.log(arr[1]()); //1
+console.log(arr[4]()); //4
 ```
 
 

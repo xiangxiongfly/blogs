@@ -5,7 +5,7 @@
 ## 创建数组
 
 ```javascript
-//完整写法
+//通过构造函数创建
 var arr = new Array(1, 2, 3, 4, 5);
 
 //简写
@@ -14,25 +14,7 @@ var arr = [1, 2, 3, 4, 5];
 
 
 
-## 判断数组类型
-
-方式一：通过`instanceof`关键字判断。
-
-方式二：通过`Array.isArray()`方法判断，是H5新增方法，IE9及以上版本支持。
-
-```javascript
-var arr = [1, 2, 3];
-var str = "hello";
-
-console.log(arr instanceof Array); //true
-console.log(str instanceof Array); //false
-console.log(Array.isArray(arr)); //true
-console.log(Array.isArray(str)); //false
-```
-
-
-
-## 操作数据
+## 操作数组
 
 ### 获取和赋值
 
@@ -180,6 +162,58 @@ for (var i = 0; i < arr.length; i++) {
 arr.forEach(function(value, index, arr) {
     console.log(value);
 });
+```
+
+
+
+## 判断是否为空数组
+
+```javascript
+function isEmptyArray(arr) {
+    return arr instanceof Array && arr.length === 0;
+}
+
+var o1 = [];
+var o2 = [1, 2, 3];
+console.log(isEmptyArray(o1)); //true
+console.log(isEmptyArray(o2)); //false
+```
+
+
+
+## 判断是否数组类型
+
+方式一：通过`instanceof`关键字判断。
+
+方式二：通过`Array.isArray()`方法判断，是ES5新增方法。
+
+方式三：通过`Object.prototype.toString.call()`函数判断。
+
+方式四：通过原型链判断。
+
+方式五：通过`Array.prototype.isPrototypeof()`函数判断。
+
+```js
+console.log([] instanceof Array); //true
+```
+
+```js
+console.log(Array.isArray([])); //true
+```
+
+```js
+function isArray(arr) {
+    return Object.prototype.toString.call(arr).slice(8, -1) === "Array";
+}
+console.log(isArray([])); //true
+```
+
+```js
+console.log([].__proto__ === Array.prototype); //true
+```
+
+```js
+console.log(Array.prototype.isPrototypeOf([])); //true
 ```
 
 

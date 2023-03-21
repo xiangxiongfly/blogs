@@ -99,32 +99,6 @@ var CONST = 1;
 - undefined。
 - null。
 
-undefined表示变量未定义，通常有2种场景：1.变量声明了但未赋值；2.读取对象不存在的属性。
-
-null表示空指针对象，指变量没有分配内存空间。
-
-
-
-### typeof
-
-typeof运算符用于返回操作数的数据类型。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/75b51298f4e641fb9ba656332e18b1ac.png)
-
-```javascript
-console.log(typeof undefined); //undefined
-console.log(typeof null); //object
-console.log(typeof true); //boolean
-console.log(typeof 10); //number
-console.log(typeof "hello"); //string
-
-function func() {}
-console.log(typeof func); //function
-
-let user = {};
-console.log(typeof user); //object
-```
-
 
 
 ### 类型转换
@@ -160,6 +134,45 @@ parseInt(0x12, 16);    // 24，由于传入的是十六进制数，所以会先�
 - toString()
 - 空字符串拼接
 
+### undefined & null区别
+
+- null表示空对象，指变量没有分配内存空间。
+- undefined表示变量未定义，通常有2种场景：
+  1. 变量声明了但未赋值；
+  2. 读取对象不存在的属性。
+  3. 函数没有返回值。
+  4. 函数参数没有传递值。
+- 转为数值也不同，null转为0，undefined转为NaN。
+
+```js
+console.log(Number(null)); //0
+console.log(Number(undefined)); //NaN
+```
+
+**案例**
+
+```js
+var a;
+console.log(a); //undefined
+
+var b = null;
+console.log(b); //null
+
+var obj = {
+    name: "小明"
+};
+console.log(obj.age); //undefined
+
+function fun() {}
+var result = fun();
+console.log(result); //undefined
+
+function foo(param) {
+    console.log(param); //undefined
+}
+foo();
+```
+
 
 
 ### NaN
@@ -168,6 +181,37 @@ NaN（Not a Number，即不是一个数字）是一个数值类，Number类型�
 
 ```
 console.log(0 / 0); //NaN
+```
+
+
+
+### typeof
+
+typeof运算符用于返回操作数的数据类型。
+
+| 类型      | 结果        |
+| --------- | ----------- |
+| Undefined | "undefined" |
+| Null      | "object"    |
+| Boolean   | "boolean"   |
+| Number    | "number"    |
+| String    | "string"    |
+| Symbol    | "symbol"    |
+| 函数对象  | "function"  |
+| 其他对象  | "object"    |
+
+```javascript
+console.log(typeof undefined); //undefined
+console.log(typeof null); //object
+console.log(typeof true); //boolean
+console.log(typeof 10); //number
+console.log(typeof "hello"); //string
+
+function func() {}
+console.log(typeof func); //function
+
+let user = {};
+console.log(typeof user); //object
 ```
 
 
@@ -230,7 +274,7 @@ Number.isNaN(123);        // false
 
 ### 等于运算符
 
-JavaScript中相等的比较分为双等于（==）比较和三等于（===）比较：
+JavaScript中相等的比较分为双等于（`==`）比较和三等于（`===`）比较：
 
 - 双等于运算符在比较时，会将两端的变量进行隐式类型转换，然后比较值的大小。
 - 三等于运算符在比较时，会优先比较数据类型，数据类型相同才去判断值的大小，如果类型不同则直接返回“false”。

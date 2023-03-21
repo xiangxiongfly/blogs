@@ -1,22 +1,24 @@
 [toc]
 
-# JavaScript 分析instanceof运算符
+# JavaScript instanceof原理
 
 ## 概述
 
-使用typeof运算符时，存在一个比较大的问题，即对于任何引用数据类型的值都会返回“object”，从而无法判断对象的具体类型。因此，在JavaScript中，又引入了一个新的运算符instanceof，用来帮助我们确定对象的具体类型。
+在使用typeof运算符时，存在一个比较大的问题，即对于任何引用数据类型的值都会返回“object”，从而无法判断对象的具体类型。
+
+因此，在JavaScript中，可以使用instanceof运算符判断一个对象是否属于某个构造函数的实例。其原理是通过检查对象的原型链来确定对象是否是指定构造函数的实例。
 
 
 
 ## 使用
 
-**语法**
+### 语法
 
 ```
 实例对象 instanceof 类型
 ```
 
-**使用**
+### 简单使用
 
 ```javascript
 var strObj = new String("hello");
@@ -27,9 +29,7 @@ var f = new Foo();
 console.log(f instanceof Foo); //true
 ```
 
-
-
-## 继承判断
+### 继承判断
 
 判断一个实例对象是否属于它的父类。
 
@@ -47,7 +47,7 @@ console.log(b instanceof A); //true
 
 
 
-## 复杂用法
+## instanceof原理分析
 
 ```javascript
 function Foo() {}
@@ -60,7 +60,9 @@ console.log(Foo instanceof Function); //true
 console.log(Foo instanceof Foo); //false
 ```
 
-instanceof运算符推演代码：
+### 推演代码
+
+instanceof 运算符会沿着对象的原型链向上查找，直到找到 Object.prototype 为止。如果在这个过程中找到了指定构造函数的 prototype 对象，则返回 true；否则返回 false。
 
 ```javascript
 function Foo() {}
