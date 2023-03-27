@@ -6,7 +6,7 @@
 
 Promise是在ES6中新增的一种用于解决异步编程的方案。
 
-Promise可以用来解决层层嵌套的回调函数问题（回调地狱）。
+Promise可以用来解决回调地狱问题。
 
 
 
@@ -18,7 +18,7 @@ Promise可以用来解决层层嵌套的回调函数问题（回调地狱）。
 - fulfilled：已完成
 - rejected：已失败
 
-Promise在创建时处于pending状态，执行成功时，由pending转为fulfilled状态，执行失败时，由pending转为rejected状态。
+Promise在创建时处于pending状态；执行成功时，由pending转为fulfilled状态；执行失败时，由pending转为rejected状态。
 
 状态一旦发生改变，就不能再改变。
 
@@ -31,8 +31,8 @@ Promise在创建时处于pending状态，执行成功时，由pending转为fulfi
 Promise创建后会立即执行。
 
 Promise构造函数会接收一个函数，该函数有两个参数分为为resolve和reject：
-- 执行resolve()方法：Promise状态由pending转变为fulfilled，表示执行成功。
-- 执行reject()方法：Promise状态由pending转变为rejected，表示执行失败。
+- 执行`resolve()`方法：Promise状态由pending转变为fulfilled，表示执行成功。
+- 执行`reject()`方法：Promise状态由pending转变为rejected，表示执行失败。
 
 ```javascript
 let promise = new Promise(function(resolve, reject) {
@@ -390,6 +390,35 @@ Promise.resolve()
 
 
 ## 案例
+
+### 使用Promise封装Ajax请求
+
+```javascript
+function ajax(url, method, data) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.response);
+            } else {
+                reject(new Error(xhr.statusText));
+            }
+        };
+        xhr.onerror = function() {
+            reject(new Error("Network error"));
+        }
+        xhr.send(data);
+    });
+}
+
+ajax("https://jsonplaceholder.typicode.com/posts", "GET")
+    .then(response => {
+    console.log(JSON.parse(response));
+}).catch(error => {
+    console.log(error.message);
+});
+```
 
 ### 异步加载图片
 

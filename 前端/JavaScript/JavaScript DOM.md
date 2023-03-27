@@ -1329,7 +1329,7 @@ DOM对象.hasAttribute("属性")
 
 `getComputedStyle()`方法仅支持Google、Firefox、IE9及以上版本的浏览器，不支持IE6、IE7、IE8。
 
-``getComputedStyle()`方法从名字上就可看出，获取计算后的样式（get computed style）。
+`getComputedStyle()`方法从名字上就可看出，获取计算后的样式（get computed style），返回string类型。
 
 **语法**
 
@@ -1394,7 +1394,7 @@ DOM对象.style.属性 = "属性值"
 DOM对象.style["属性"] = "属性值"
 ```
 
-**简单属性**
+**设置简单属性**
 
 ```html
 <!DOCTYPE html>
@@ -1426,7 +1426,7 @@ DOM对象.style["属性"] = "属性值"
 </html>
 ```
 
-**复合属性**
+**设置复合属性**
 
 ```html
 <!DOCTYPE html>
@@ -1460,14 +1460,15 @@ DOM对象.style["属性"] = "属性值"
 
 
 
-#### cssText属性
+### cssText属性
 
-cssText属性可以同时设置多个CSS属性。
+cssText属性可以同时设置多个CSS属性和查看CSS属性。
 
 **语法**
 
 ```
-DOM对象.style.cssText = "属性值"
+//设置CSS样式
+DOM元素.style.cssText = "属性值"
 ```
 
 **使用**
@@ -1487,22 +1488,30 @@ DOM对象.style.cssText = "属性值"
 		</style>
 		<script>
 			window.onload = function() {
-				var oBtn = document.getElementById("btn");
+				console.log("onload");
 				var oBox = document.getElementById("box");
-				oBtn.onclick = function() {
-					oBox.style.cssText = "width:200;height:200px;background-color:green;border:2px dashed black;";
-				}
+				var btnChange = document.querySelectorAll("button")[0];
+				var btnQuery = document.querySelectorAll("button")[1];
+				btnChange.onclick = function() {
+					oBox.style.cssText = "width:200;height:200px; background-color:green; border:2px dashed black;";
+				};
+				btnQuery.onclick = function() {
+					console.log(oBox.style.cssText);
+				};
 			}
 		</script>
 	</head>
 	<body>
 		<div id="box"></div>
-		<input id="btn" type="button" value="修改样式">
+		<button>修改样式</button>
+		<button>查看样式</button>
 	</body>
 </html>
 ```
 
-#### className
+### className
+
+className属性用于获取或设置元素的class属性值。
 
 **语法**
 
@@ -1545,6 +1554,90 @@ DOM对象.className = "类名"
 	<body>
 		<div id="box" class="oldBox"></div>
 		<input id="btn" type="button" value="修改样式">
+	</body>
+</html>
+```
+
+### classList
+
+classList是一个相对较新的DOM API，因此它的兼容性并不完美。以下是classList的主要兼容性问题：
+
+1. 不支持IE9及以下版本：classList在IE9及以下版本的浏览器中不被支持。
+2. 部分浏览器不支持多个参数：在某些浏览器（如Android 2.3及更早版本）中，classList的方法不支持传递多个参数。
+3. 部分浏览器不支持contains()方法：在某些浏览器（如iOS 5及更早版本）中，classList的contains()方法不被支持。
+
+**语法**
+
+```
+//添加CSS属性
+DOM元素.classList.add(class样式)
+
+//删除CSS属性
+DOM元素.classList.remove(class样式)
+
+//切换CSS属性
+DOM元素.classList.toggle(class样式)
+
+//判断是否包含
+DOM元素.classList.contains(class样式)
+```
+
+**使用**
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			.sizeStyle {
+				width: 100px;
+				height: 100px;
+			}
+
+			.borderStyle {
+				border: 1px solid red
+			}
+
+			.textStyle {
+				color: red;
+				font-weight: bold;
+				font-size: 30px;
+			}
+		</style>
+		<script>
+			window.onload = function() {
+				var p = document.querySelector("p");
+				var btnAdd = document.querySelectorAll("button")[0];
+				var btnDel = document.querySelectorAll("button")[1];
+				var btnToggle = document.querySelectorAll("button")[2];
+				var btnContains = document.querySelectorAll("button")[3];
+				btnAdd.onclick = function() {
+					p.classList.add("sizeStyle", "borderStyle", "textStyle")
+				};
+				btnDel.onclick = function() {
+					p.classList.remove("borderStyle", )
+				};
+				btnToggle.onclick = function() {
+					p.classList.toggle("borderStyle")
+				};
+				btnContains.onclick = function() {
+					if (p.classList.contains("borderStyle")) {
+						alert("borderStyle存在");
+					} else {
+						alert("borderStyle不存在");
+					}
+				};
+			}
+		</script>
+	</head>
+	<body>
+		<p>hello world</p>
+		<button>添加属性</button>
+		<button>删除属性</button>
+		<button>toggle属性</button>
+		<button>判断</button>
 	</body>
 </html>
 ```

@@ -14,7 +14,7 @@
 
 ## 对象
 
-### 属性简写
+### 对象简写
 
 传统的JavaScript中，对象都会采用{key: value}的写法，但是在ES6中，可以直接在对象中写入变量，key相当于变量名，value相当于变量值，并且可以直接省略value，通过key表示一个对象的完整属性。
 
@@ -51,7 +51,7 @@ obj.sayHello();
 
 
 
-### 属性遍历
+### 遍历对象
 
 常用5种方法遍历属性：
 
@@ -77,7 +77,8 @@ Cat.prototype = new Animal();
 Cat.prototype.constructor = Cat;
 
 let cat = new Cat(12, "10kg");
-
+```
+```javascript
 //for...in
 for (let key in cat) {
     console.log(key);
@@ -87,7 +88,8 @@ for (let key in cat) {
 //name
 //type
 //constructor
-
+```
+```javascript
 //Object,keys
 console.log(Object.keys(cat)); //["age", "weight"]
 

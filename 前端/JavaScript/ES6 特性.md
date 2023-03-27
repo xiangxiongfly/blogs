@@ -94,125 +94,11 @@ console.log(`名字：${user.name} 年龄：${user.age} 性别：${user.sex}`); 
 
 
 
-## 解构赋值
+## 解构操作
 
 解构可以将值从数组或者对象中提取出来，并赋值到不同的变量中。
 
-### 数组
-
-```js
-//一般情况
-const [a, b, c] = [1, 2, 3];
-console.log(a, b, c); //1 2 3
-```
-
-```js
-//忽略值
-const [a, [, , b], c] = [1, [2, 3, 4], 5];
-console.log(a, b, c); //1 4 5
-```
-
-```js
-//默认值，默认值生效的条件是对应的属性值严格等于undefined。
-const [a = 1, b = 2, c = 3] = [undefined, undefined, ];
-console.log(a, b, c); //1 2 3
-```
-
-```js
-//变量交换
-let a = 1;
-let b = 2;
-[b, a] = [a, b];
-console.log(a, b); //2 1
-```
-
-```js
-//数据返回
-function fn() {
-    return [1, 2];
-}
-let [a, b] = fn();
-console.log(a, b); //1 2
-```
-
-```js
-//嵌套数组
-let [a, b, [c]] = [1, [2, 3],
-                   [4, 5, 6]
-                  ]
-console.log(a); //1
-console.log(b); //[2,3]
-console.log(c); //4
-```
-
-### 对象
-
-在对象中，属性是没有顺序的，这就要求右侧解构对象的属性名和左侧定义对象的变量名必须相同，这样才可以进行解构。
-
-```js
-//一般情况
-const user = {
-    name: "Tom",
-    age: 18,
-    sex: "man"
-};
-const {
-    age,
-    name,
-    sex
-} = user;
-console.log(name, age, sex); //Tom 18 man	
-```
-
-```js
-//默认值，默认值生效的条件是对应的属性值严格等于undefined。
-const {
-    a,
-    b = 1,
-    c = true
-} = {
-    a: "xiaoming",
-    b: null,
-    c: undefined
-};
-console.log(a); //xiaoming
-console.log(b); //null
-console.log(c); //true
-```
-
-```js
-//嵌套对象
-let {
-    a: [b, {
-        c: name
-    }]
-} = {
-    a: ["hello", {
-        c: "world"
-    }]
-};
-console.log(b); //hello
-console.log(name); //world
-```
-
-```js
-//函数参数
-function fn({
-    name: name,
-    age: age,
-    address: address
-}) {
-    console.log(`姓名：${name},年龄：${age},地址：${address[0]}${address[1]}`);
-}
-const user = {
-    name: "小明",
-    age: 18,
-    address: ["广东省", "广州市"]
-};
-fn(user); //姓名：小明,年龄：18,地址：广东省广州市
-```
-
-### 字符串
+### 字符串解构
 
 ```js
 const [a, b, , , c] = "hello";
@@ -227,18 +113,95 @@ const {
 console.log(a, b); //h l
 ```
 
-### 剩余参数
+### 数组解构
 
-```javascript
-const [a, ...args] = [1, 2, 3, 4];
-console.log(a, args); //1 [2, 3, 4]
+```js
+//一般情况
+const [a, b, c] = [1, 2, 3];
+console.log(a, b, c); //1 2 3
+```
+
+```js
+//忽略值
+const [a, , , , c] = [1, 2, 3, 4, 5];
+console.log(a, c); //1 5
+```
+
+```js
+//默认值
+//默认值生效的条件是对应的属性值严格等于undefined。
+const [a = 1, b = 2, c = 3] = [undefined, undefined, ];
+console.log(a, b, c); //1 2 3
+```
+
+```js
+//变量交换
+let a = 1;
+let b = 2;
+[b, a] = [a, b];
+console.log(a, b); //2 1
+```
+
+```js
+//嵌套数组
+let [a, b, [c]] = [1, [2, 3], [4, 5, 6]];
+console.log(a); //1
+console.log(b); //[2,3]
+console.log(c); //4
+```
+
+### 对象解构
+
+在对象中，属性是没有顺序的，这就要求右侧解构对象的属性名和左侧定义对象的变量名必须相同，这样才可以进行解构。
+
+```js
+//一般情况
+const user = {
+    name: "Tom",
+    age: 18,
+    sex: "man"
+};
+const {age, name, sex} = user;
+console.log(name, age, sex); //Tom 18 man	
+```
+
+```js
+//默认值，默认值生效的条件是对应的属性值严格等于undefined。
+const {a, b = 1, c = true} = {a: "xiaoming", b: null, c: undefined};
+console.log(a); //xiaoming
+console.log(b); //null
+console.log(c); //true
+```
+
+```js
+//嵌套对象
+let user = {
+    name: "小明",
+    age: 18,
+    address: {
+        province: "湖北省",
+        city: "武汉市"
+    }
+};
+let {
+    name,
+    age,
+    address: {
+        province,
+        city
+    }
+} = user;
+console.log(name); //小明
+console.log(age); //18
+console.log(province); //湖北省
+console.log(city); //武汉市
 ```
 
 
 
-## ...扩展运算符
+## ... 扩展运算符
 
-扩展运算符用3个点表示（...），用于将一个数组或类数组对象转换为用逗号分隔的值序列。
+扩展运算符用3个点表示（...），可以将字符串、数组或类数组、对象转转换为值序列。
 
 ### 字符串
 
@@ -254,33 +217,36 @@ console.log(...str); //h e l l o
 let arr = [1, 2, 3, 4];
 console.log(...arr); //1 2 3 4
 
+//浅拷贝数组
+let newArr = [...arr];
+console.log(newArr); //[1, 2, 3, 4]
+
 //合并数组
 const a = [1, 2, 3];
 const b = [4, 5];
-const arr = [...a, ...b];
-console.log(arr); //[1, 2, 3, 4, 5]
+const newArr = [...a, ...b];
+console.log(newArr); //[1, 2, 3, 4, 5]
 
 //Set去重
 let a = [1, 2, 2, 3];
-let arr = [...new Set(a)];
-console.log(arr); //[1, 2, 3]
+let newArr = [...new Set(a)];
+console.log(newArr); //[1, 2, 3]
 ```
 
 ### 对象
 
 ```javascript
-//展开对象
 let user = {
     name: "Tom",
     age: 18,
     address: "beijing"
 }
+
+//浅拷贝对象
 let newUser = {
     ...user
 };
-
 console.log(newUser); //{name: "Tom", age: 18, address: "beijing"}
-
 
 //合并对象
 var user1 = {
@@ -297,17 +263,14 @@ var newUser = {
     ...user1,
     ...user2
 };
-
 console.log(newUser); //{name: "Jake", age: 18, sex: "man", address: "beijing", email: "360@qq.com"}
 ```
 
 
 
-## rest运算符
+## ... rest运算符
 
-rest运算符同样使用3个点表示（...），其作用与扩展运算符相反，用于将以逗号分隔的值序列转换成数组。
-
-解构会将相同数据结构对应的值赋给对应的变量，但是当我们想将其中的一部分值统一赋给一个变量时，可以使用rest运算符。
+rest运算符（剩余参数运算符）同样使用3个点表示（...），其作用与扩展运算符相反，可以将多个参数合并成一个数组。
 
 ### 数组
 
@@ -334,7 +297,11 @@ let {
 console.log(a); //1
 console.log(b); //2
 console.log(c); //{m: 3, n: 4}
+```
 
+### 函数
+
+```javascript
 function fn(...args) {
     for (let arg of args) {
         console.log(arg);

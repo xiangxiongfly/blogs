@@ -469,113 +469,30 @@ console.log(Object.keys(obj)); //["age", "sayHello"]
 
 
 
-## 克隆对象
+## 判断空对象
 
-克隆是指通过一定的程序将某个变量的值复制至另一个变量的过程。根据复制后的变量与原始变量值的影响情况，克隆可以分为浅克隆和深克隆两种方式。
-
-针对不同的数据类型，浅克隆和深克隆会有不同的表现，主要表现于基本数据类型和引用数据类型在内存中存储的值不同：
-
-- 对于基本数据类型的值，变量存储的是值本身，存放在栈内存的简单数据段中，可以直接进行访问。
-- 对于引用类型的值，变量存储的是值在内存中的地址，地址指向内存中的某个位置。如果有多个变量同时指向同一个内存地址，则其中一个变量对值进行修改时，会影响到其他的变量。引用数据类型如果执行的是浅克隆，对克隆后值的修改会影响到原始值；如果执行的是深克隆，则克隆的对象和原始对象相互独立，不会彼此影响。
-
-### 浅克隆
-
-浅克隆由于只克隆对象最外层的属性，如果对象存在更深层的属性，则不进行处理，这就会导致克隆对象和原始对象的深层属性仍然指向同一块内存。
+### 使用JSON.stringify
 
 ```javascript
-//浅克隆
-function shallowClone(obj) {
-    var result = {};
-    for (var k in obj) {
-        result[k] = obj[k];
-    }
-    return result;
+function isEmptyObject(obj) {
+    return JSON.stringify(obj) === "{}";
 }
 
-var obj = {
-    a: 1,
-    b: true,
-    c: ["red", "green", "blue"]
-}
-var newObj = shallowClone(obj);
-console.log(obj); //{a: 1, b: true, c: Array(3)}
-console.log(newObj); //{a: 1, b: true, c: Array(3)}
+var obj = {};
+var obj2 = {
+    name: "小明"
+};
 
-obj.a = 100;
-obj.b = false;
-obj.c.push("yellow");
-console.log(obj); //{a: 100, b: false, c: Array(4)}
-console.log(newObj); //{a: 1, b: true, c: Array(4)}
+console.log(isEmptyObject(obj)); //true
+console.log(isEmptyObject(obj2)); //false
 ```
 
-### 深克隆
-
-深克隆指克隆对象的全貌，整体克隆
-
-#### 方式一：JSON序列化和反序列化
-
-先使用JSON.stringify()函数将原始对象序列化为字符串，再使用JSON.parse()函数将字符串反序列化为一个对象，这样得到的对象就是深克隆后的对象。
+### 使用Object.keys
 
 ```javascript
-//深克隆
-function deepClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
+function isEmptyObject(obj) {
+    return Object.keys(obj).length === 0;
 }
-
-var obj = {
-    a: 1,
-    b: true,
-    c: ["red", "green", "blue"]
-}
-var newObj = deepClone(obj);
-console.log(obj); //{a: 1, b: true, c: Array(3)}
-console.log(newObj); //{a: 1, b: true, c: Array(3)}
-
-obj.a = 100;
-obj.b = false;
-obj.c.push("yellow");
-console.log(obj); //{a: 100, b: false, c: Array(4)}
-console.log(newObj); //{a: 1, b: true, c: Array(3)}
-```
-
-#### 方式二：自定义深克隆
-
-深克隆需要使用递归。
-
-```javascript
-//深克隆
-function deepClone(obj) {
-    var result;
-    if (Array.isArray(obj)) {
-        result = [];
-        for (var i = 0; i < obj.length; i++) {
-            result.push(deepClone(obj[i]));
-        }
-    } else if (typeof obj == "object") {
-        result = {};
-        for (var k in obj) {
-            result[k] = deepClone(obj[k]);
-        }
-    } else {
-        result = obj;
-    }
-    return result;
-}
-
-var obj = {
-    a: 1,
-    b: true,
-    c: ["red", "green", "blue"]
-}
-var newObj = deepClone(obj);
-console.log(obj); //{a: 1, b: true, c: Array(3)}
-console.log(newObj); //{a: 1, b: true, c: Array(3)}
-
-obj.a = 100;
-obj.b = false;
-obj.c.push("yellow");
-console.log(obj); //{a: 100, b: false, c: Array(4)}
-console.log(newObj); //{a: 1, b: true, c: Array(3)}
 ```
 
 

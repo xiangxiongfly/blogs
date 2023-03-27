@@ -148,6 +148,16 @@ console.log(delArr); //["B","C"]
 console.log(arr); //["A","1","2","D","E"] 
 ```
 
+#### reduce 累积计算
+
+```javascript
+var arr = [1, 2, 3, 4, 5];
+var result = arr.reduce((pre, item) => {
+    return pre + item;
+});
+console.log(result); //15
+```
+
 
 
 ### 遍历数组
@@ -155,18 +165,25 @@ console.log(arr); //["A","1","2","D","E"]
 ```javascript
 var arr = ["HTML", "CSS", "JavaScript", "jQuery"];
 
+//for循环
 for (var i = 0; i < arr.length; i++) {
     console.log(arr[i]);
 }
 
+//forEach
 arr.forEach(function(value, index, arr) {
     console.log(value);
 });
+
+//for...of
+for (let i of arr) {
+    console.log(i);
+}
 ```
 
 
 
-## 判断是否为空数组
+## 判断空数组
 
 ```javascript
 function isEmptyArray(arr) {
@@ -181,7 +198,7 @@ console.log(isEmptyArray(o2)); //false
 
 
 
-## 判断是否数组类型
+## 判断数组类型
 
 方式一：通过`instanceof`关键字判断。
 

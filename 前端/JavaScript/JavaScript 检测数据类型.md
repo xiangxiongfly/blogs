@@ -1,6 +1,6 @@
 [toc]
 
-# JavaScript 检测数据类型方式
+# JavaScript 检测数据类型
 
 检测数据类型方式：
 
