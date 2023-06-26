@@ -18,9 +18,30 @@ npm install -g json-server
 json-server --watch db.json
 ```
 
-启动时修改端口号：
+
+
+## 配置
+
+常用选项列表：
+
+配置项	简写	描述
+–help	-h	查看所有命令选项
+–watch	-w	是否监视文件自动刷新数据
+–host	-H	设置域，默认为localhost
+–port	-p	设置端口号，默认为3000
+–routes	-r	指定路由文件
+–static	-s	设置静态资源目录
+–config	-c	指定配置文件，默认为“json-serer.json
+–version	-v	查看json-server版本号
+–middlewares	-m	指定中间件文件
+–no-gzip	-ng	不能压缩
+–delay	-d	设置延迟响应
+–id	-i	设置数据项/库的id属性，默认为id
+
+如：
 
 ```
+启动时修改端口号：
 json-server --watch db.json --port 5001
 ```
 
@@ -318,7 +339,9 @@ http://localhost:5001/users/2/comments
 
 ### 静态资源
 
-在server目录下，新建public文件夹，在public目录下新建images文件夹，在images目录里放入图片。
+在server目录下，新建public文件夹，可以用于存放静态资源。
+
+如果需要存放图片资源，可以在public目录下新建images文件夹，在images目录里放入图片。
 
 这时可以通过`http://localhost:5001/images/a.jpg`访问图片。
 
@@ -333,3 +356,6 @@ http://localhost:5001/users/2/comments
 
 
 ## [免费api接口](https://juejin.cn/post/7041461420818432030)
+
+
+

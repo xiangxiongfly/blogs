@@ -1,6 +1,6 @@
 [toc]
 
-# Pinia
+# Pinia 状态管理
 
 ## 概述
 

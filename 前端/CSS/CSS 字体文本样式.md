@@ -1042,14 +1042,14 @@ color参数：边框颜色。
 
 
 
-## iconfont 字体图标 
+## 使用图标 字体
 
-- 主要用于网页中通用、常用的小图标。
+**简介**
+
+- 主要用于网页中的小图标。
 - 轻量级：字体图标体积小，渲染快。 
 - 灵活性：字体图标本质属于字体，可以很随意的改变颜色、产生阴影、透明效果等。
 - 兼容性：几乎支持所有的浏览器
-
-
 
 **常用图标字体网站**
 
@@ -1059,36 +1059,36 @@ https://www.iconfont.cn
 
 http://icomoon.io       
 
+**使用图标字体**
 
-
-### 使用阿里的字体库
+下载字体图标解压后，放在`fonts/iconfont`目录下，引入iconfont.css文件，就可以使用了。
 
 ```html
-<link rel="stylesheet" href="iconfont/iconfont.css">
-<style>
-    i {
-        font-style: normal;
-    }
-
-    i.iconfont {
-        font-size: 100px;
-    }
-
-    .i1::before {
-        content: '\e637';
-        font-family: 'iconfont';
-        font-size: 100px;
-    }
-</style>
-
-<body>
-    <i class="i1"></i>
-    <i class="iconfont">&#xe633;</i>
-    <i class="iconfont">&#xe634;</i>
-    <i class="iconfont icon-icon-test2"></i>
-    <i class="iconfont icon-icon-test3"></i>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link rel="stylesheet" href="./fonts/iconfont/iconfont.css" />
+    </head>
+    <body>
+        <div>
+            <i class="iconfont icon-xiaoxi-zhihui"></i>
+            <i class="iconfont icon-xihuan"></i>
+            <i class="iconfont icon-shouye-zhihui"></i>
+            <i class="iconfont icon-fanhui"></i>
+        </div>
+        <div>
+            <i class="iconfont">&#xe61d;</i>
+            <i class="iconfont">&#xe61e;</i>
+            <i class="iconfont">&#xe61f;</i>
+            <i class="iconfont">&#xe620;</i>
+        </div>
+    </body>
+</html>
 ```
 
-
+![在这里插入图片描述](https://img-blog.csdnimg.cn/abf8795fd4f94b4baadc93592701323f.png)
 

@@ -4,17 +4,15 @@
 
 ## 概述
 
-JSON数据在网络传输时存在两种类型，一种是JSON对象类型，一种是JSON字符串类型，两种类型的转换涉及JSON序列化和反序列化的知识。
+JSON序列化指将JSON对象转换为JSON字符串。J实现方式有两种：一种是调用JSON对象内置的`stringify()`函数，一种是为对象自定义`toJSON()`函数。
 
-JSON序列化即将JSON对象处理为JSON字符串的过程，以方便数据的传输。JSON序列化可以通过两种方式来实现，一种是调用JSON对象内置的stringify()函数，一种是为对象自定义toJSON()函数。
-
-JSON反序列化即将JSON字符串转换为JSON对象的过程，得到的结果用于在JavaScript中做逻辑处理。JSON反序列化的实现方式有两种，一种是使用JSON对象内置的parse()函数，一种是使用eval()函数。
+JSON反序列化指将JSON字符串转换为JSON对象。实现方式有两种：一种是使用JSON对象内置的`parse()`函数，一种是使用`eval()`函数。
 
 
 
-## JSON序列化
+## 序列化
 
-### JSON.stringify()
+### 方式一：JSON.stringify()
 
 **语法**
 
@@ -155,9 +153,7 @@ console.log(jsonStr);
 //[null,null,null]
 ```
 
-
-
-### 自定义toJson
+### 方式二：自定义toJson
 
 如果一个被序列化的对象拥有toJSON()函数，那么toJSON()函数就会覆盖默认的序列化行为，被序列化的值将不再是原来的属性值，而是toJSON()函数的返回值。
 
@@ -195,7 +191,7 @@ console.log(jsonStr);
 
 ## 反序列化
 
-### JSON.parse()
+### 方式一：JSON.parse()
 
 **语法**
 
@@ -256,9 +252,7 @@ var result = JSON.parse(objStr, function(key, value) {
 console.log(result); //{name: "xiaoming先生", age: "18岁", address: "beijing"}
 ```
 
-
-
-### eval()
+### 方式二eval()
 
 eval()函数用于计算JavaScript字符串，并把它作为脚本来执行。
 

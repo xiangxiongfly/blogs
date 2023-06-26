@@ -49,6 +49,21 @@ console.log("hello");
 // resolve
 ```
 
+```javascript
+let promise = new Promise(function(resolve, reject) {
+    console.log("hello promise");
+    reject();
+});
+promise.catch(function() {
+    console.log("resolve");
+});
+console.log("hello");
+
+// hello promise
+// hello
+// resolve
+```
+
 
 
 ### then

@@ -6,11 +6,9 @@
 
 JavaScript的事件包含3部分：
 
-- 事件主角：元素。
-- 事件类型：点击事件、移动事件等。
-- 事件过程：事件触发。
-
-
+*   事件主角：元素。
+*   事件类型：点击事件、移动事件等。
+*   事件过程：事件触发。
 
 ## 事件调用方式
 
@@ -18,11 +16,9 @@ JavaScript的事件包含3部分：
 
 **语法**
 
-```
-DOM对象.事件 = function() {
-	//...
-}
-```
+    DOM对象.事件 = function() {
+    	//...
+    }
 
 **使用**
 
@@ -82,14 +78,12 @@ DOM对象.事件 = function() {
 </html>
 ```
 
-
-
 ## 常用事件
 
 ### 鼠标事件
 
-| 事件        | 说明     |
-| ----------- | -------- |
+| 事件          | 说明   |
+| ----------- | ---- |
 | onclick     | 点击事件 |
 | ondblclick  | 双击事件 |
 | onmouseover | 移入事件 |
@@ -104,12 +98,10 @@ document.getElementById("btn").onclick = function() {
 }
 ```
 
-
-
 ### 键盘事件
 
-| 事件      | 说明 |
-| --------- | ---- |
+| 事件        | 说明 |
+| --------- | -- |
 | onkeydown | 按下 |
 | onkeyup   | 抬起 |
 
@@ -134,19 +126,17 @@ document.getElementById("btn").onclick = function() {
 </html>
 ```
 
-
-
 ### 表单事件
 
-| 事件     | 说明                                     |
-| -------- | ---------------------------------------- |
-| onfocus  | 获取焦点事件                             |
-| onblur   | 失去焦点事件                             |
+| 事件       | 说明                   |
+| -------- | -------------------- |
+| onfocus  | 获取焦点事件               |
+| onblur   | 失去焦点事件               |
 | onselect | 单行文本框、多行文本框内选中文本触发事件 |
-| onchange | 单选框、复选框、下拉框触发事件           |
-| oninput  | 文本框输入时触发事件                     |
-| onsubmit | 表单提交时触发                           |
-| onreset  | 表单重置时触发                           |
+| onchange | 单选框、复选框、下拉框触发事件      |
+| oninput  | 文本框输入时触发事件           |
+| onsubmit | 表单提交时触发              |
+| onreset  | 表单重置时触发              |
 
 `focus()`方法表示输入框获取焦点。
 
@@ -176,16 +166,14 @@ document.getElementById("btn").onclick = function() {
 </html>
 ```
 
-
-
 ### 编辑事件
 
-| 事件          | 说明                                        |
-| ------------- | ------------------------------------------- |
-| oncopy        | 可以利用oncopy事件防止页面内容被复制        |
-| onselectstart | 可以利用onselectstart事件防止页面内容被选取 |
-| oncontextmenu | 可以利用oncontextmenu事件禁止使用鼠标右键   |
-oncopy、onselectstart和oncontextmenu在大多数情况下都是用来保护版权的，通常情况是综合使用。
+| 事件                                                            | 说明                           |
+| ------------------------------------------------------------- | ---------------------------- |
+| oncopy                                                        | 可以利用oncopy事件防止页面内容被复制        |
+| onselectstart                                                 | 可以利用onselectstart事件防止页面内容被选取 |
+| oncontextmenu                                                 | 可以利用oncontextmenu事件禁止使用鼠标右键  |
+| oncopy、onselectstart和oncontextmenu在大多数情况下都是用来保护版权的，通常情况是综合使用。 |                              |
 
 #### 防止页面内容被复制
 
@@ -253,16 +241,14 @@ oncopy、onselectstart和oncontextmenu在大多数情况下都是用来保护版
 </html>
 ```
 
-
-
 ### 页面事件
 
-| 事件             | 说明                                                        |
-| ---------------- | ----------------------------------------------------------- |
+| 事件               | 说明                               |
+| ---------------- | -------------------------------- |
 | DOMContentLoaded | 文档结构加载完后执行事件，不包含图片、flash等非文字媒体内容 |
-| onload           | 文档加载完后执行事件（文档中包含图片、flash等元素）         |
-| onbeforeunload   | 页面离开前触发事件                                          |
-| onresize         | 窗口重新调整时触发事件                                      |
+| onload           | 文档加载完后执行事件（文档中包含图片、flash等元素）     |
+| onbeforeunload   | 页面离开前触发事件                        |
+| onresize         | 窗口重新调整时触发事件                      |
 
 ```js
 window.onload = function() {
@@ -281,8 +267,6 @@ document.addEventListener("DOMContentLoaded", function() {
   
 });
 ```
-
-
 
 ## 事件处理器
 
@@ -315,8 +299,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </html>
 ```
 
-
-
 ### onclick的缺陷
 
 ```html
@@ -348,21 +330,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
 注：点击按钮时，JS只会执行最后一次onclick，这说明onclick不能为同一个元素添加多个相同事件。
 
-
-
 ### addEventListener
 
 **语法**
 
-```
-DOM对象.addEventListner(type, fun, false)
-```
+    DOM对象.addEventListner(type, fun, false)
 
 **取值**
 
-- type是一个字符串，指事件类型，如单机事件用"click"，鼠标移入用“mouseover”等。
-- fun是一个函数。
-- false表示事件冒泡，true表示事件捕获。
+*   type是一个字符串，指事件类型，如单机事件用"click"，鼠标移入用“mouseover”等。
+*   fun是一个函数。
+*   false表示事件冒泡，true表示事件捕获。
 
 **使用**
 
@@ -395,19 +373,13 @@ DOM对象.addEventListner(type, fun, false)
 
 注：点击按钮后，会依次执行3个事件代码，这说明addEventListener是可以添加多个相同事件。
 
-
-
 ### removeEventListener
 
 解除事件绑定。
 
 **语法**
 
-```
-DOM对象.removeEventListener(type, fun, false)
-```
-
-
+    DOM对象.removeEventListener(type, fun, false)
 
 ## this
 
@@ -441,22 +413,4 @@ this可以理解为哪个对象调用了函数，函数里的this就指向这个
 	</body>
 </html>
 ```
-
-
-
-## [Event对象](https://blog.csdn.net/qq_14876133/article/details/128673186)
-
-
-
-## [事件流](https://blog.csdn.net/qq_14876133/article/details/128630155)
-
-
-
-## [事件委托](https://blog.csdn.net/qq_14876133/article/details/128673087)
-
-
-
-## [案例](https://blog.csdn.net/qq_14876133/article/details/128673252)
-
-
 

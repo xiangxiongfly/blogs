@@ -1,6 +1,6 @@
 [toc]
 
-# NVM
+# Node NVM
 
 ## 概述
 
@@ -45,6 +45,4 @@ nvm uninstall 19.16.1 //卸载指定版本
 
 nvm use 19.16.1 //使用指定版本
 ```
-
-
 

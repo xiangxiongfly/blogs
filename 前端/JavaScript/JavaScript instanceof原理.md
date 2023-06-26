@@ -49,17 +49,6 @@ console.log(b instanceof A); //true
 
 ## instanceof原理分析
 
-```javascript
-function Foo() {}
-console.log(Object instanceof Object); //true
-console.log(Function instanceof Function); //true
-console.log(Number instanceof Number); //false
-console.log(String instanceof String); //false
-console.log(Function instanceof Object); //true
-console.log(Foo instanceof Function); //true
-console.log(Foo instanceof Foo); //false
-```
-
 ### 推演代码
 
 instanceof 运算符会沿着对象的原型链向上查找，直到找到 Object.prototype 为止。如果在这个过程中找到了指定构造函数的 prototype 对象，则返回 true；否则返回 false。
@@ -111,7 +100,5 @@ function instanceOf(L, R) {
 
 ### 分析 String instanceof String 返回false
 
-因为`String.__proto__`指向`Function.prototype`，`Function.prototype.__proto__`指向`Object.prototype`，``Object.prototype.__proto__`指向null，因此`String instanceof String`返回false。
-
-
+因为`String.__proto__`指向`Function.prototype`，`Function.prototype.__proto__`指向`Object.prototype`，`Object.prototype.__proto__`指向null，因此`String instanceof String`返回false。
 

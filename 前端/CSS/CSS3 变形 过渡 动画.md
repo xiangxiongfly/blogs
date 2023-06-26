@@ -1,12 +1,12 @@
 [TOC]
 
-# CSS3 变形 过渡 动画
+# CSS3 2D变形 3D变形 过渡 动画
 
-在CSS3中，动画效果包括3个部分：变形（transform）、过渡（transition）、动画（animation）。
+在CSS3中，动画效果包括4个部分：变形（transform）、3D变形、过渡（transition）、动画（animation）。
 
 
 
-## transform(变形)
+## transform(2D变形)
 
 ### 概述
 
@@ -228,7 +228,7 @@ transform-origin属性取值有两种：一种是“长度值”，另一种是�
 
 当取值为长度值时，单位可以为px、em和百分比等。
 
-当取值为关键字时，transform-origin属性取值跟background-position属性取值是相似的.
+当取值为关键字时，transform-origin属性取值跟background-position属性取值是相似的。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/6dbd3a6bc76d458b8dbf2a013c0b9d4e.png)
 
@@ -237,37 +237,489 @@ transform-origin属性取值有两种：一种是“长度值”，另一种是�
 ```html
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title></title>
-		<style type="text/css">
-			div {
-				width: 150px;
-				height: 100px;
-			}
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style type="text/css">
+      div {
+        width: 150px;
+        height: 100px;
+      }
 
-			.box {
-				border: 1px dashed silver;
-				margin: 50px auto;
-			}
+      .box {
+        border: 1px dashed silver;
+        margin: 100px auto;
+      }
 
-			.current {
-				background-color: rgb(30, 170, 250);
-				opacity: 0.5;
-				transform-origin: right center;
-				transform: rotate(-90deg);
-			}
-		</style>
-	</head>
-	<body>
-		<div class="box">
-			<div class="current"></div>
-		</div>
-	</body>
+      .current {
+        background-color: rgb(30, 170, 250);
+        opacity: 0.5;
+        transform-origin: top right;
+        transform: rotate(-90deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="current"></div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/03246befa4294cc7bdfcb5af7562a136.png)
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style type="text/css">
+      div {
+        width: 150px;
+        height: 100px;
+      }
+
+      .box {
+        border: 1px dashed silver;
+        margin: 100px auto;
+      }
+
+      .current {
+        background-color: rgb(30, 170, 250);
+        opacity: 0.5;
+        transform-origin: right center;
+        transform: rotate(-90deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="current"></div>
+    </div>
+  </body>
 </html>
 ```
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/34804a1e37a744bb99a4fd49f808e7f7.png)
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style type="text/css">
+      div {
+        width: 150px;
+        height: 100px;
+      }
+
+      .box {
+        border: 1px dashed silver;
+        margin: 100px auto;
+      }
+
+      .current {
+        background-color: rgb(30, 170, 250);
+        opacity: 0.5;
+        transform: scale(0.5, 0.5);
+        transform-origin: center center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="current"></div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/18a88dcba5c94334a1ecafe90819787a.png)
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style type="text/css">
+      div {
+        width: 150px;
+        height: 100px;
+      }
+
+      .box {
+        border: 1px dashed silver;
+        margin: 100px auto;
+      }
+
+      .current {
+        background-color: rgb(30, 170, 250);
+        opacity: 0.5;
+        transform: scale(0.5, 0.5);
+        transform-origin: center top;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="current"></div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/78f22d7cea9744a584561e4e50edee88.png)
+
+
+
+## 3D变形
+
+### 开启3D空间
+
+元素进行 3D 变换的首要操作：**父元素**必须开启 3D 空间。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D变形</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 100px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: deepskyblue;
+        transform: rotateX(30deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="inner">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/5720bc41df094ce5a2c6e762ede64941.png)
+
+### 设置透视点位置
+
+所谓透视点位置，就是观察者位置；默认的透视点在元素的中心。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D变形</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 20px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: deepskyblue;
+        transform: rotateX(45deg);
+      }
+      .outer1 {
+        /* 透视点位置 */
+        perspective-origin: 102px 102px;
+      }
+      .outer2 {
+        /* 透视点位置 */
+        perspective-origin: left;
+      }
+      .outer3 {
+        /* 透视点位置 */
+        perspective-origin: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer outer1">
+      <div class="inner">hello world</div>
+    </div>
+    <div class="outer outer2">
+      <div class="inner">hello world</div>
+    </div>
+    <div class="outer outer3">
+      <div class="inner">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/bfb530f8422b43d19bd0cd9bccc65c2b.png)
+
+### 平移
+
+3D 位移是在 2D 位移的基础上，可以让元素沿 z 轴位移，具体使用方式如下：
+
+1. 先给元素添加 **转换属性** transform。
+2. 编写 transform 的具体值， 3D 相关可选值如下：
+
+| 属性值      | 说明                                                         |
+| ----------- | ------------------------------------------------------------ |
+| translateZ  | 设置 z 轴位移，需指定长度值，正值向屏幕外，负值向屏幕里，且不能写百分比。 |
+| translate3d | 第1个参数对应 x 轴，第2个参数对应 y 轴，第3个参数对应 z 轴，且均 |
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D平移</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 100px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: rgba(0, 191, 255, 0.356);
+        transform: rotateX(45deg);
+      }
+      .inner1 {
+        transform: translateZ(150px);
+      }
+      .inner2 {
+        transform: translate3d(0, 0, 150px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="inner inner1">hello world</div>
+    </div>
+    <div class="outer">
+      <div class="inner inner1">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/bdf8692779ec4e4c91b7c794e9301ed9.png)
+
+### 旋转
+
+3D 旋转是在 2D 旋转的基础上，可以让元素沿 x 轴和 y 轴旋转，具体使用方式如下：
+
+1. 先给元素添加 **转换属性** transform。
+2. 编写 transform 的具体值， 3D 相关可选值如下：
+
+| 属性值   | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| rotateX  | 设置 x 轴旋转角度，需指定一个角度值( deg )，面对 x 轴正方向：正值顺时针，负值逆时针 |
+| rotateY  | 设置 y 轴旋转角度，需指定一个角度值( deg )，面对 y 轴正方向：正值顺时针，负值逆时针。 |
+| rotate3d | 前 3 个参数分别表示坐标轴： x , y , z ，第 4 个参数表示旋转的角度，参数不允许省略。<br />例如： transform: rotate3d(1,1,1,30deg) ，意思是： x 、 y 、 z 分别旋转 |
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D旋转</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 100px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: rgba(0, 191, 255, 0.356);
+      }
+      .inner1 {
+        transform: rotateX(45deg);
+      }
+      .inner2 {
+        transform: rotate3d(1, 0, 0, 45deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="inner inner1">hello world</div>
+    </div>
+    <div class="outer">
+      <div class="inner inner2">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/31a79c26002d4084a06d391f66198d10.png)
+
+### 3D缩放
+
+3D 缩放是在 2D 缩放的基础上，可以让元素沿 z 轴缩放，具体使用方式如下：
+
+1. 先给元素添加 **转换属性** transform
+
+2. 编写 transform 的具体值， 3D 相关可选值如下：
+
+| 属性值  | 说明                                                         |
+| ------- | ------------------------------------------------------------ |
+| scaleZ  | 设置 z 轴方向的缩放比例，值为一个数字， 1 表示不缩放，大于 1 放大，小于 1 缩小。 |
+| scale3d | 第1个参数对应 x 轴，第2个参数对应 y 轴，第3个参数对应 z 轴，参数不允许省略。 |
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D缩放</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 100px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: rgba(0, 191, 255, 0.356);
+      }
+      .inner1 {
+        transform: scaleZ(2) rotateX(45deg);
+      }
+      .inner2 {
+        transform: scale3d(1, 1, 2) rotateX(45deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="inner inner1">hello world</div>
+    </div>
+    <div class="outer">
+      <div class="inner inner2">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/c501c604f2ef46138a921cc3ff701ad9.png)
+
+### 多重变形
+
+多个变换，可以同时使用一个 transform 来编写。
+
+```
+transform: translateZ(100px) scaleZ(3) rotateY(40deg);
+```
+
+### 背部可见性
+
+使用 backface-visibility 指定元素背面，在面向用户时是否可见，常用值如下：
+
+| 属性值  | 说明                                       |
+| ------- | ------------------------------------------ |
+| visible | 默认值，元素背面可见，允许显示正面的镜像。 |
+| hidden  | 元素背面不可见。                           |
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D背部可见性</title>
+    <style>
+      .outer {
+        width: 200px;
+        height: 200px;
+        border: 2px solid red;
+        margin: 0 auto;
+        margin-top: 100px;
+        /* 开启3D空间 */
+        transform-style: preserve-3d;
+        /* 设置景深（产生立体效果） */
+        perspective: 500px;
+      }
+      .inner {
+        width: 200px;
+        height: 200px;
+        background-color: rgba(0, 191, 255, 0.356);
+        transform: rotateY(118deg);
+      }
+      .inner1 {
+        backface-visibility: visible;
+      }
+      .inner2 {
+        backface-visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="inner inner1">hello world</div>
+    </div>
+    <div class="outer">
+      <div class="inner inner2">hello world</div>
+    </div>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4aed78e0508c449d95d2237e83fb109b.png)
 
 
 

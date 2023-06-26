@@ -1,0 +1,493 @@
+[toc]
+
+# Webpack4 应用
+
+## 处理CSS文件
+
+- `css-loader` ：用于解析`@import`和`url()`这类CSS导入文件语句，例如在 CSS 文件中引入其他 CSS 或图片等资源，会将这些资源当做依赖处理并打包。
+
+- `style-loader` ：将 css-loader 加载的 CSS 代码注入到 HTML 页面中的`<style>`标签中，使 CSS 样式能够被实际渲染出来，也就是内部样式表。
+
+- `mini-css-extract-plugin` ：用于将从 JavaScript 中分离出来的 CSS 代码提取为独立的 CSS 文件，使其能够缓存、并行加载和减小文件体积，也就是外部样式表。
+
+### 使用css-loader和style-loader内联CSS
+
+#### 安装
+
+```
+// 安装webpack
+npm install --save-dev webpack-cli@3.3.12 webpack@4.44.1
+// 安装html插件
+npm install --save-dev html-webpack-plugin@4.3.0
+// 安装css-loader
+npm install --save-dev css-loader@4.1.1
+// 安装style-loader
+npm install --save-dev style-loader@1.2.1
+```
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+  ],
+};
+```
+
+#### 编写源代码
+
+新建 `index.html` 文件，并写入：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <p>index</p>
+  </body>
+</html>
+```
+
+新建 `src/index.css` 文件，并写入：
+
+```css
+body {
+    background-color: red;
+}
+```
+
+新建 `src/index.js` 文件，并写入：
+
+```js
+import "./index.css";
+```
+
+#### 编译打包
+
+```
+npm run webpack
+```
+
+编译完成后如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/5795cff72ad14a18a27b372ff6029477.png)
+
+打开`dist/index.html`  可以看到CSS样式被内联到里面了。
+
+
+
+### 使用css-loader和mini-css-extract-plugin外部链接CSS
+
+#### 安装
+
+```
+npm install --save-dev mini-css-extract-plugin@0.9.0
+```
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+    new MiniCssExtractPlugin({
+      filename: "css/[name].css",
+    }),
+  ],
+};
+```
+
+#### 编译打包
+
+执行命令：
+
+```
+npm run webpack
+```
+
+编译完后生成如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/09f6d0bf91f3425a8be12b214203046e.png)
+
+
+
+## 处理图片
+
+### 使用file-loader处理CSS图片
+
+#### 安装file-loader
+
+```
+npm install --save-dev file-loader@6.0.0
+```
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: "../",
+            },
+          },
+          "css-loader",
+        ],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: {
+          loader: "file-loader",
+          options: {
+            name: "img/[name].[ext]",
+          },
+        },
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+    new MiniCssExtractPlugin({
+      filename: "css/[name].css",
+    }),
+  ],
+};
+```
+
+#### 编译打包
+
+执行命令：
+
+```
+npm run webpack
+```
+
+编译完后生成如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/ca48a923a1ca4b399847774f6affdaf3.png)
+
+### 使用html-withimg-loader处理HTML图片
+
+#### 安装html-withimg-loader
+
+```
+npm install --save-dev html-withimg-loader@0.1.16
+```
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: {
+          loader: "file-loader",
+          options: {
+            name: "img/[name].[ext]",
+            esModule: false,
+          },
+        },
+      },
+      {
+        test: /\.(htm|html)$/,
+        loader: "html-withimg-loader",
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+  ],
+};
+```
+
+#### 编译打包
+
+执行命令：
+
+```
+npm run webpack
+```
+
+编译完后生成如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/37b17cbd082b4b4688a313c7e5028064.png)
+
+
+
+### 使用file-loader处理JS图片
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: "../",
+            },
+          },
+          "css-loader",
+        ],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: {
+          loader: "file-loader",
+          options: {
+            name: "img/[name].[ext]",
+          },
+        },
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+    new MiniCssExtractPlugin({
+      filename: "css/[name].css",
+    }),
+  ],
+};
+```
+
+#### 编写index.js处理JS图片
+
+```js
+import "./index.css";
+
+import img from "./images/a.jpg";
+
+console.log(img); // img/a.jpg
+
+let imgEl = document.createElement("img");
+imgEl.src = img;
+document.body.appendChild(imgEl);
+```
+
+#### 编译打包
+
+执行命令：
+
+```
+npm run webpack
+```
+
+编译完后生成如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/d07c496adecc4b47b4d914a2e1da3852.png)
+
+
+
+### 使用url-loader处理图片
+
+`url-loader`可以讲图片文件转换为Base64字符串，并嵌入打包后的JS文件中，可以减少网页请求次数。
+
+使用`url-loader`时，它会先比较文件大小，如果文件小于限制值则转Base64，如果大于限制值则使用`file-loader`处理。
+
+#### 安装url-loader
+
+```
+npm install --save-dev url-loader@4.1.0
+```
+
+#### 配置webpack.config.js
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "development",
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(htm|html)$/,
+        loader: "html-withimg-loader",
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            name: "img/[name].[ext]",
+            esModule: false,
+            limit: 10 * 1024, // 文件10KB以下转为base64
+          },
+        },
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      filename: "index.html",
+    }),
+  ],
+};
+```
+
+#### 编译打包
+
+执行命令：
+
+```
+npm run webpack
+```
+
+编译完后生成如下：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2138013aa2b245bc9403cb4e401a5d1d.png)
+
+
+
+## webpack-dev-server
+
+`webpack-dev-server`是Webpack提供的一个开发服务器，它在本地启动一个服务器，并且实时监听项目文件的变化，在文件发生变化时自动重新编译，并重新刷新浏览器。开发者可以通过`webpack-dev-server`来在本地快速开发运行Webpack项目，它大大提升了前端开发效率。
+
+### 安装webpack-dev-server
+
+```
+npm install --save-dev webpack-dev-server@3.11.0
+```
+
+### 配置package.json
+
+```js
+{
+  "name": "use_webpack-dev-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    // 打包命令
+    "webpack": "webpack", 
+    // 开发阶段
+    "dev": "webpack-dev-server --open chrome"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^4.1.1",
+    "html-webpack-plugin": "^4.3.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
+```
+
+### 执行命令
+
+```
+npm run dev
+```
+
+执行命令后，就可以热更新修改代码，所生成的代码都在内存中不会保持在本地磁盘。
+
+
+
+## [代码下载](https://github.com/xiangxiongfly/MyH5/tree/main/webpack_demo)
+

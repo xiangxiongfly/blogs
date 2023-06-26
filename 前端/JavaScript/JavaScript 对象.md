@@ -1,12 +1,12 @@
 [TOC]
 
-# 对象
+# JavaScript 对象
 
 ## 概述
 
-对象（object）是JavaScript的核心概念，也是最重要的数据类型。JavaScript的所有数据都可以被视为对象。
-
 JavaScript是一门面向对象的语言，但JavaScript没有类的概念，一切都是对象。任意一个对象都是某种引用类型的实例，都是通过已有的引用类型创建。引用类型可以是原生的，也可以是自定义的。
+
+对象（object）是JavaScript的核心概念，是键值对的集合，表示属性和值得映射关系。JavaScript的所有数据都可以被视为对象。
 
 
 
@@ -218,6 +218,8 @@ const user = {
 ```
 
 **for-in**
+
+`for-in` 可以遍历对象的每个键。
 
 ```javascript
 for (let k in user) {
@@ -493,98 +495,6 @@ console.log(isEmptyObject(obj2)); //false
 function isEmptyObject(obj) {
     return Object.keys(obj).length === 0;
 }
-```
-
-
-
-## 原型和原型链
-
-### new的流程
-
-```
-var person = new Person();
-```
-
-等价于：
-
-```
-var person = {};
-person.__proto__ = Person.prototype;
-Person.call(person);
-```
-
-1. 创建一个空对象。
-2. 空对象的`__proto__`隐式属性指向Person对象的prototype属性。
-3. 将Person()函数的this指向person对象。
-
-### 原型对象、构造函数、实例
-
-构造函数在创建时都拥有一个prototype属性，prototype属性也就是指向函数的原型对象。在默认情况下，所有的原型对象都会增加一个constructor属性， 并指向prototype属性所在的函数，即构造函数。
-
-通过new调用构造函数创建的实例，实例拥有一个`__proto__`属性，指向构造函数的原型对象，因此`__proto__`属性可以看作是一个连接实例与构造函数的原型对象的桥梁。
-
-**场景一**
-
-```javascript
-function Person(name, age) {
-    this.name = name;
-    this.age = age;
-}
-var person1 = new Person("小明", 18);
-var person2 = new Person("小花", 28);
-console.log(Person.prototype === person1.__proto__); //true
-console.log(Person.prototype === person2.__proto__); //true
-console.log(Person.prototype.constructor === Person); //true
-```
-
-说明：构造函数Person的`prototype`属性指向Person的原型对象，person1实例和person2实例的`__proto__`隐式属性指向Person的原型对象。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/4e0801ff62b4403c81dd1a9fbc2238af.png)
-
-**场景二**
-
-```javascript
-function Foo() {}
-console.log(typeof Object); //function
-console.log(Object.__proto__ === Function.prototype); //true
-console.log(Object.__proto__.__proto__ === Function.prototype.__proto__); //true
-console.log(Function.prototype.__proto__ === Object.prototype); //true
-console.log(Object.__proto__.__proto__ === Object.prototype); //true
-console.log(Object.prototype.__proto__); //null
-```
-
-说明：Object是一个function类型，因此Object的`__proto__`隐式属性指向Function的原型对象。
-
-
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/66e6f21670264be0a7119c02836ceb19.png)
-
-### 属性访问顺序
-
-当我们通过对象的实例读取某个属性时，是有一个搜索过程的。它会先在实例本身去找指定的属性，如果找到了，则直接返回该属性的值；如果没找到，则会继续沿着原型对象寻找；如果在原型对象中找到了该属性，则返回该属性的值。
-
-```javascript
-function Person() {
-    this.name = "小明";
-}
-Person.prototype.name = "小花";
-var p = new Person();
-console.log(p.name); //小明
-```
-
-### 原型链
-
-对象的每个实例都具有一个`__proto__`属性，指向的是构造函数的原型对象，而原型对象同样存在一个`__proto__`属性指向上一级构造函数的原型对象，就这样层层往上，直到最上层某个原型对象为`null`。
-
-在JavaScript中几乎所有的对象都具有`__proto__`属性，由`__proto__`属性连接而成的链路构成了JavaScript的原型链，原型链的顶端是`Object.prototype`，它的`__proto__`属性为`null`。
-
-```javascript
-function Person() {}
-var p = new Person();
-console.log(p.__proto__ === Person.prototype); //true
-console.log(p.__proto__.__proto__ === Person.prototype.__proto__); //true
-console.log(p.__proto__.__proto__ === Object.prototype); //true
-console.log(p.__proto__.__proto__.__proto__ === null); //true
 ```
 
 

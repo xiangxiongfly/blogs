@@ -1,4 +1,4 @@
-[toc]
+[TOC]
 
 # Vue3 基础
 
@@ -8,105 +8,83 @@ Vue (发音为 /vjuː/，类似 view) 是一款用于构建用户界面的 JavaS
 
 Vue 的两个核心功能：
 
-- **声明式渲染**：Vue 基于标准 HTML 拓展了一套模板语法，使得我们可以声明式地描述最终输出的 HTML 和 JavaScript 状态之间的关系。
-- **响应性**：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM。
+*   **声明式渲染**：Vue 基于标准 HTML 拓展了一套模板语法，使得我们可以声明式地描述最终输出的 HTML 和 JavaScript 状态之间的关系。
+*   **响应性**：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM。
 
-[Vue3 官方文档](https://cn.vuejs.org/)
+[Vue3官方文档](https://cn.vuejs.org/)
 
+[Vite官方文档](https://cn.vitejs.dev/)
 
+## 安装Vue
 
-## 安装
+方式一：使用CDN
 
-一、使用CDN
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-```
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-```
+方式二：npm安装
 
-二、npm安装
+    npm init vue@latest
 
-```
-npm init vue@latest
-```
-
-三、下载JavaScript文件自行托管
-
-
-
-### 使用JS的方式引入Vue
+方式三：使用JS的方式引入Vue
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vue3简单使用</title>
-    <script src="./vue3.js"></script>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>vue3简单使用</title>
+        <script src="./vue3.js"></script>
+    </head>
 
-<body>
-    <div id="counter">
-        <p>{{uname}}</p>
-        <p>{{age}}</p>
-    </div>
+    <body>
+        <div id="counter">
+            <p>{{uname}}</p>
+            <p>{{age}}</p>
+        </div>
 
-    <script>
-        // 配置对象
-        const counter = {
-            data: function () {
-                return {
-                    uname: "小明",
-                    age: 0
+        <script>
+            // 配置对象
+            const counter = {
+                data: function () {
+                    return {
+                        uname: "小明",
+                        age: 0
+                    }
                 }
-            }
-        };
+            };
 
-        // 使用createApp函数创建一个应用实例
-        // 传入配置对象
-        let app = Vue.createApp(counter)
-            // 应用实例必须调用mount函数，挂载后才会渲染出来
-            .mount("#counter");
+            // 使用createApp函数创建一个应用实例
+            // 传入配置对象
+            let app = Vue.createApp(counter)
+                // 应用实例必须调用mount函数，挂载后才会渲染出来
+                .mount("#counter");
 
-        //数据双向绑定
-        app.age = 18;
-    </script>
-</body>
+            //数据双向绑定
+            app.age = 18;
+        </script>
+    </body>
 
 </html>
 ```
 
-
-
-## 使用vite
-
-### 简介
+## 使用Vite构建项目
 
 Vite是要给web开发构建工具，由于其原生ES模块导入方式，可以实现闪电般的冷服务器启动。
 
-### 使用vite搭建项目
-
-```
-npm create vite@latest
-```
+    npm create vite@latest
 
 或者：
 
-```
-npm create vite@latest my-vue-app -- --template vue
-```
+    npm create vite@latest my-vue-app -- --template vue
 
 接着依次执行命令启动vue项目：
 
-```
-cd my-vue-app
-npm install
-npm run dev
-```
-
-
+    cd my-vue-app
+    npm install
+    npm run dev
 
 ## 模板语法
 
@@ -124,27 +102,7 @@ export default {
             name: "小明123",
             age: 18,
             num: 0,
-            rawHtml: "<h2 style='color:red;'>hello msg</h2>",
-            myid: "id01",
-            isBtnDisabled: true,
-            objAttrs: {
-                id: "id01",
-                class: "box"
-            },
-            imgUrl: "https://cn.vitejs.dev/logo-with-shadow.png",
-            attributeName: "id",
-            mouseEvent: "click",
-        }
-    },
-    methods: {
-        changeNum() {
-            this.num++;
-        },
-        changeColor() {
-            this.id = "id01";
-        },
-        alertMsg() {
-            alert("hello world");
+            rawHtml: "<h2 style='color:red;'>hello msg</h2>"            
         }
     }
 }
@@ -156,65 +114,13 @@ export default {
     <p>年龄：{{ age }}</p>
     <p>数量：{{ num }}</p>
 
-    <!-- 仅修改一次 -->
-    <p v-once>数量：{{ num }}</p>
-    <button @click="changeNum">修改num</button>
-
     <!-- 使用html -->
     <p v-html="rawHtml"></p>
-
-    <!-- 属性绑定 -->
-    <p v-bind:id="myid">v-bind</p>
-    <!-- v-bind简写 -->
-    <p :id="myid">v-bind2</p>
-    <!-- 布尔类型 -->
-    <button :disabled="isBtnDisabled">v-bind2</button><br>
-    <!-- 绑定多个属性 -->
-    <p v-bind="objAttrs">hello world</p>
-
-    <!-- 动态参数 -->
-    <p v-bind:[attributeName]="myid">动态属性1</p>
-    <img v-bind:src="imgUrl" style="width: 50px;">
-    <!-- 简写 -->
-    <p :[attributeName]="myid">动态属性2</p>
-    <button @[mouseEvent]="attributeName = 'class'">动态事件</button>
-    <button @click="mouseEvent = 'mouseover'">改变事件</button><br>
-
-    <!-- 点击事件 -->
-    <button v-on:click="changeColor">修改颜色</button>
-    <!-- 简写 -->
-    <button @click="changeColor">修改颜色</button><br>
-
+    
     <!-- 使用JavaScript表达式 -->
     <p>{{ num + 1 }}</p>
     <p>{{ name.split("").reverse().join("") }}</p>
 </template>
-
-<style>
-#id01 {
-    color: red;
-}
-
-#id02 {
-    color: blue;
-}
-
-.id01 {
-    color: green;
-}
-
-.id02 {
-    color: yellowgreen;
-}
-
-.active {
-    color: red;
-}
-
-.box {
-    border: 1px dashed red;
-}
-</style>
 ```
 
 ### 条件渲染
@@ -240,14 +146,13 @@ export default {
 <!-- v-show，本质是display:none; -->
 <p v-show="isShow">
     hello template
-    </p>
+</p>
 </template>
 ```
 
-- `v-if`：会根据条件进行渲染，切换时元素会被销毁或重建，因此切换开销大。
-- `v-for`：本质是通过`display`进行显示和隐藏。
-
-
+*   `v-if`：会根据条件进行渲染，切换时元素会被销毁或重建，因此切换开销大。
+*   `v-for`：本质是通过`display`进行显示和隐藏。
+*   `<template>` 标签可以作为占位符使用。
 
 ### 列表渲染
 
@@ -334,23 +239,19 @@ Vue 默认按照“就地更新”的策略来更新通过 `v-for` 渲染的元�
 </template>
 ```
 
-
-
 ### 数组变化侦测
 
 Vue 能够侦听响应式数组的变更方法，并在它们被调用时触发相关的更新。这些变更方法包括：
 
-- `push()`
-- `pop()`
-- `shift()`
-- `unshift()`
-- `splice()`
-- `sort()`
-- `reverse()`
+*   `push()`
+*   `pop()`
+*   `shift()`
+*   `unshift()`
+*   `splice()`
+*   `sort()`
+*   `reverse()`
 
-
-
-## 计算属性
+## computed 计算属性
 
 计算属性只会在依赖值发生变化时才会重新计算。
 
@@ -410,9 +311,7 @@ export default {
 
 点击按钮修改了message属性，会重复上面操作，说明计算属性只有依赖值发生变化时才会重新计算。
 
-
-
-## 侦听器
+## watch 侦听器
 
 监听状态变化。
 
@@ -441,7 +340,6 @@ export default {
         //         this.isHidden = true;
         //     }
         // }
-
         // 侦听器，方式二，初始化时触发
         message: {
             immediate: true, // 是否初始化时调用
@@ -481,11 +379,10 @@ export default {
 </template>
 ```
 
-
-
 ## v-bind 属性绑定
 
-- `v-bind:`可简写为`:`，如`v-bind:class`简写为`:class`。
+*   动态的绑定一个或多个 attribute，也可以是组件的 prop。
+*   `v-bind:`可简写为`:`，如`v-bind:class`简写为`:class`。
 
 ```vue
 <script >
@@ -542,7 +439,6 @@ export default {
     <button @click="isActive = !isActive">修改active</button>
     <button @click="isBgColor = !isBgColor">修改bgColor</button>
 
-
     <!-- 使用内联样式 -->
     <p style="color:red;">hello1</p>
     <!-- 绑定对象 -->
@@ -564,11 +460,21 @@ export default {
 </style>
 ```
 
-
-
 ## v-on 事件绑定
 
-- `v-on`可以简写为`@`，如`v-on:click`简写为`@click`。
+*   给元素绑定事件监听器。
+*   `v-on`可以简写为`@`，如`v-on:click`简写为`@click`。
+*   **修饰符：**
+    - `.stop` - 调用 `event.stopPropagation()`。
+    - `.prevent` - 调用 `event.preventDefault()`。
+    - `.capture` - 在捕获模式添加事件监听器。
+    - `.self` - 只有事件从元素本身发出才触发处理函数。
+    - `.{keyAlias}` - 只在某些按键下触发处理函数。
+    - `.once` - 最多触发一次处理函数。
+    - `.left` - 只在鼠标左键事件触发处理函数。
+    - `.right` - 只在鼠标右键事件触发处理函数。
+    - `.middle` - 只在鼠标中键事件触发处理函数。
+    - `.passive` - 通过 `{ passive: true }` 附加一个 DOM 事件。
 
 ```vue
 <script >
@@ -646,7 +552,12 @@ export default {
     <div @click="fatherClick">
         <button @click.stop="childClick">阻止事件冒泡</button>
     </div>
-    <!-- 阻止默认提交 -->
+ 	<!-- 只触发自身事件 -->
+    <div @click.self="fatherClick">
+        父元素点击
+        <button @click="childClick">子元素点击</button>
+    </div>
+    <!-- 阻止默认行为 -->
     <form action="">
         <input type="submit" value="阻止默认提交" @click.prevent="mclick">
     </form>
@@ -668,11 +579,19 @@ export default {
 </template>
 ```
 
-
-
 ## v-model 双向绑定
 
-`v-model` 可以在组件上使用以实现双向绑定。
+`v-model` 可以在表单输入元素或组件上创建双向绑定。
+
+- **仅限：**
+  - `<input>`
+  - `<select>`
+  - `<textarea>`
+  - components
+- **修饰符：**
+  - [`.lazy`](https://cn.vuejs.org/guide/essentials/forms.html#lazy) - 监听 `change` 事件而不是 `input`
+  - [`.number`](https://cn.vuejs.org/guide/essentials/forms.html#number) - 将输入的合法字符串转为数字
+  - [`.trim`](https://cn.vuejs.org/guide/essentials/forms.html#trim) - 移除输入内容两端空格
 
 ```vue
 <script >
@@ -746,12 +665,10 @@ export default {
     <input type="text" v-model.lazy="desc">
     <p>{{ desc }}</p>
     <!-- .number 将输入框的内容转为number类型 -->
-    <input type="text" v-model.number="num">
+    <input type="text" v-model.number="num" type="number">
     <p>{{ num }} 类型：{{ typeof num }}</p>
     <!-- .trim 清楚前后空格 -->
     <input type="text" v-model.trim="inputMsg" @input="changeInput">
 </template>
 ```
-
-
 

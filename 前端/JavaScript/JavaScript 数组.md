@@ -183,6 +183,31 @@ for (let i of arr) {
 
 
 
+### 清空数组
+
+**直接赋值为空数组**
+
+```
+let arr = [1, 2, 3];
+arr = [];
+```
+
+**使用splice()方法**
+
+```
+arr.splice(0);
+```
+
+**使用pop()方法**
+
+```
+while (arr.length) {
+	arr.pop();
+}
+```
+
+
+
 ## 判断空数组
 
 ```javascript

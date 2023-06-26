@@ -21,15 +21,38 @@
 
 
 
+## localStorage和sessionStorage区别
+
+`localStorage`和`sessionStorage`是HTML5中提供的两个Web存储API，用于在浏览器端存储数据。
+
+**相同点**
+
+`localStorage`和`sessionStorage`都可以存储键值对数据，并且它们都是基于同源策略的。这意味着只有在相同的协议、主机名和端口号下，才能访问同一个`localStorage`或`sessionStorage`对象。
+
+**区别**
+
+- `localStorage`：
+  - 存储在`localStorage`中的数据没有过期时间，除非被显式删除。
+  - 作用域为整个域名，在同一域名下的所有页面都可以访问同一个`localStorage`对象。
+  - 每个域名的容量限制为5MB或更大。
+- `sessionStorage`：
+  - 存储在`sessionStorage`中的数据仅在当前会话期间有效。当用户关闭浏览器窗口时，`sessionStorage`中的数据将被删除。
+  - 作用域限制在当前窗口或标签页，不同的标签页或窗口无法共享同一个`sessionStorage`对象。
+  - 容量限制则相对较小，一般为5MB以下。
+
+以下是各个浏览器对于localStorage和sessionStorage容量限制的具体情况：
+
+- Chrome：localStorage和sessionStorage的容量限制都为5MB。
+- Firefox：localStorage和sessionStorage的容量限制都为10MB。
+- Safari：localStorage和sessionStorage的容量限制都为5MB。
+- Internet Explorer：localStorage和sessionStorage的容量限制都为10MB。
+- Microsoft Edge：localStorage和sessionStorage的容量限制都为10MB。
+
+
+
 ## localStorage
 
-### 简介
-
-在HTML5中，我们可以使用localStorage对象来“永久”保存客户端的少量数据。即使浏览器被关闭了，使用localStorage对象保存的数据也不会丢失，下次打开浏览器访问网站时仍然可以继续使用。
-
-对于localStorage来说，每一个域名可以保存5MB数据，现在绝大多数浏览器都已经支持localStorage。
-
-localStorage对象的常用方法有5种：
+### 常用方法
 
 | 方法                | 说明                 |
 | ------------------- | -------------------- |
@@ -181,7 +204,7 @@ localStorage对象的常用方法有5种：
 
 ## sessionStorage
 
-### 简介
+### 常用方法
 
 在HTML5中，我们可以使用sessionStorage对象来“暂时”保存客户端的少量数据。sessionStorage对象跟localStorage对象非常相似，两者有着完全相同的方法。
 
@@ -192,10 +215,6 @@ localStorage对象的常用方法有5种：
 | removeItem(key)     | 删除数据             |
 | clear()             | 清空所有数据         |
 | key(n)              | 获取第n个值，n为整数 |
-
-sessionStorage对象跟localStorage对象也有本质上的区别：sessionStorage对象保存的是“临时数据”，用户关闭浏览器后，数据就会丢失；而localStorage对象保存的是“永久数据”，用户关闭浏览器后，数据依然存在。
-
-此外，localStorage和sessionStorage都是window对象下的子对象。也就是说，localStorage.getItem()其实是window.localStorage.getItem()的简写。
 
 
 

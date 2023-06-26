@@ -110,4 +110,70 @@
 
 
 
+## loading
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/941ef166525746eb9249bb468e146327.gif)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>loading</title>
+    <style>
+      .loading {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 80px;
+        height: 40px;
+        margin: 50px auto;
+      }
+      .loading span {
+        display: inline-block;
+        width: 8px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: lightblue;
+        animation: loadingAnim 1s ease infinite;
+      }
+      @keyframes loadingAnim {
+        0%,
+        100% {
+          height: 40px;
+        }
+        50% {
+          height: 20px;
+        }
+      }
+      .loading span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .loading span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      .loading span:nth-child(4) {
+        animation-delay: 0.6s;
+      }
+      .loading span:nth-child(5) {
+        animation-delay: 0.8s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </body>
+</html>
+```
+
+
+
 ## [代码下载](https://github.com/xiangxiongfly/MyHtmlCssJs/tree/main/%E5%8A%A0%E8%BD%BD%E8%BF%9B%E5%BA%A6%E6%9D%A1)

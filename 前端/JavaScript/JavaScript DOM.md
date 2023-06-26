@@ -53,7 +53,7 @@ DOM采用树状结构，每一个树节点都对应页面中的元素。
 
 ### 元素和节点的关系
 
-JavaScript会把元素、属性、文本当作不同的节点处理。表示元素的叫做“元素节点”，表示属性的叫做“属性没电”，表示文本的叫做“文本节点”。
+JavaScript会把元素、属性、文本当作不同的节点处理。表示元素的叫做“元素节点”，表示属性的叫做“属性节点”，表示文本的叫做“文本节点”。
 
 总而言之，节点和元素是不一样的概念，节点是包括元素的。
 
@@ -418,8 +418,9 @@ JavaScript会把元素、属性、文本当作不同的节点处理。表示元�
 
 插入元素可以通过以下方法：
 
-- appendChild()：
-- insertBefore()：
+- appendChild()
+- append()
+- insertBefore()
 
 #### appendChild()
 
@@ -466,6 +467,44 @@ JavaScript会把元素、属性、文本当作不同的节点处理。表示元�
 ```
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/3c95d51a7bb8495eba46f15e21567a29.png)
+
+#### append()
+
+依次添加多个子元素。
+
+- `appendChild()`：只能添加一个子元素，并且只能接受元素节点。
+- `append()`：可以添加多个子元素，可以接受文本节点、元素节点、文档碎片等。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="parent1"></div>
+    <div id="parent2"></div>
+    <script>
+      const parent1 = document.getElementById("parent1");
+      const span = document.createElement("span");
+      span.innerText = "hello";
+      const textNode = document.createTextNode("world");
+      parent1.appendChild(span);
+      parent1.appendChild(textNode);
+
+      const parent2 = document.getElementById("parent2");
+      const span2 = document.createElement("span");
+      span2.innerText = "hello";
+      parent2.append(span2, "world");
+    </script>
+  </body>
+</html>
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/3fb8a0c256974454a966f47a1611967a.png)
 
 
 
@@ -679,15 +718,40 @@ JavaScript会把元素、属性、文本当作不同的节点处理。表示元�
 
 ### 获取父元素
 
-#### parentNode
+#### parentNode 和 parentElement 区别
 
-**语法**
+- parentNode：返回一个节点对象，包含元素节点、文本节点等，兼容性较好。
+- parentElement：返回一个元素节点，如果父元素不是元素节点则返回null。
 
+**案例一：**
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+  </head>
+  <body>
+    <div id="parent">hello world!</div>
+    <script>
+      var parent = document.getElementById("parent");
+
+      var firstChild = parent.firstChild;
+      console.log(firstChild); //#text
+      console.log(firstChild.parentNode); //div#parent
+      console.log(firstChild.parentElement); //div#parent
+
+      var html = document.querySelector("html");
+      console.log(html); //html
+      console.log(html.parentNode); //#document
+      console.log(html.parentElement); //null
+    </script>
+  </body>
+</html>
 ```
-DOM对象.parentNode
-```
 
-**使用**
+**案例二：**
 
 ```html
 <!DOCTYPE html>
@@ -759,42 +823,6 @@ DOM对象.parentNode
 - firstElementChild：获取第一个子元素节点。
 - lastElementChild：获取最后一个子元素节点。
 
-#### childNodes 和 children 区别
-
-```html
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<title></title>
-		<script>
-			window.onload = function() {
-				var oUl = document.getElementsByTagName("ul")[0];
-				console.log(oUl.childNodes.length); //7
-				console.log(oUl.children.length); //3
-
-				var c1 = oUl.childNodes;
-				var c2 = oUl.children;
-				console.log(c1); //[text, li, text, li, text, li, text]
-				console.log(c2); //[li, li, li]
-			}
-		</script>
-	</head>
-	<body>
-		<ul>
-			<li>HTML</li>
-			<li>CSS</li>
-			<li>JavaScript</li>
-		</ul>
-	</body>
-</html>
-```
-
-说明：
-
-- childNodes：获取所有子节点，包含3个元素节点和4个文本节点。
-- children：获取所有子元素，只有3个元素节点。
-
 #### firstChild 和 firstElementChild 区别
 
 ```html
@@ -825,6 +853,48 @@ DOM对象.parentNode
 
 - firstChild：ul元素里存在换行符，所以获取的第一个子节点是文本节点。
 - firstElementChild：获取第一个子元素节点。
+
+#### childNodes 和 children 区别
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script>
+      window.onload = function () {
+        var oUl = document.getElementsByTagName("ul")[0];
+
+        console.log(oUl.childNodes.length); //7
+        console.log(oUl.children.length); //3
+
+        var c1 = oUl.childNodes;
+        var c2 = oUl.children;
+        console.log(c1); //[text, li, text, li, text, li, text]
+        console.log(c2); //[li, li, li]
+
+        var first1 = oUl.childNodes[0];
+        var first2 = oUl.children[0];
+        console.log(first1); //#text
+        console.log(first2); //<li>HTML</li>
+      };
+    </script>
+  </head>
+  <body>
+    <ul>
+      <li>HTML</li>
+      <li>CSS</li>
+      <li>JavaScript</li>
+    </ul>
+  </body>
+</html>
+```
+
+说明：
+
+- childNodes：获取所有子节点，包含3个元素节点和4个文本节点。
+- children：获取所有子元素，只有3个元素节点。
 
 
 
@@ -1679,6 +1749,4 @@ DOM元素.classList.contains(class样式)
 ```
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/5bad9dea2da04f5d80c53ada4bdd5963.png)
-
-
 

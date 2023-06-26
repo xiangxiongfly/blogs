@@ -1,6 +1,6 @@
 [toc]
 
-# CSS3 flex 弹性盒子模型
+# CSS3 flex弹性布局
 
 ## 概述
 
@@ -10,20 +10,20 @@ CSS3新增了一种新型的弹性盒子模型。通过弹性盒子模型，我�
 
 
 
-## 弹性盒子模型属性
+## flex属性
 
-| 属性            | 说明                                         |
-| --------------- | -------------------------------------------- |
-| flex-grow       | 定义子元素的放大比例                         |
-| flex-shrink     | 定义子元素的缩小比例                         |
-| flex-basis      | 定义子元素的宽度                             |
-| flex            | 复合属性，flex-grow、flex-shrink、flex-basis |
-| flex-direction  | 定义子元素的排列方向                         |
-| flex-wrap       | 定义子元素是单行显示，还是多行显示           |
-| flex-flow       | 复合属性，flex-direction、flex-wrap          |
-| order           | 定义子元素的排列顺序                         |
-| justify-content | 定义子元素在“横轴”上的对齐方式               |
-| align-items     | 定义子元素在“纵轴”上的对齐方式               |
+| 属性            | 说明                                               |
+| --------------- | -------------------------------------------------- |
+| flex-grow       | 定义子元素的放大比例                               |
+| flex-shrink     | 定义子元素的缩小比例                               |
+| flex-basis      | 定义子元素的宽度，替代width属性                    |
+| flex            | 复合属性，flex-grow、flex-shrink、flex-basis的简写 |
+| flex-direction  | 定义子元素的排列方向                               |
+| flex-wrap       | 定义子元素是单行显示，还是多行显示                 |
+| flex-flow       | 复合属性，flex-direction、flex-wrap                |
+| order           | 定义子元素的排列顺序                               |
+| justify-content | 定义子元素在“主轴”上的对齐方式                     |
+| align-items     | 定义子元素在“纵轴”上的对齐方式                     |
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/a9d6f84c2e484496bac3d4ba8fe4a96c.png)
 
@@ -131,6 +131,8 @@ CSS3新增了一种新型的弹性盒子模型。通过弹性盒子模型，我�
 
 在CSS3中，我们可以使用flex-grow属性来定义弹性盒子内部子元素的放大比例。也就是当所有子元素宽度之和小于父元素的宽度时，子元素如何分配父元素的剩余空间。
 
+默认值为 0，即不放大。当容器空间有剩余时，会按照各个项目设置的 `flex-grow` 值来分配剩余空间。如果一个项目的 `flex-grow` 设为 2，另一个项目设为 1，则前者占据的剩余空间是后者的两倍。
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -145,19 +147,25 @@ CSS3新增了一种新型的弹性盒子模型。通过弹性盒子模型，我�
 				border: 1px dashed silver;
 			}
 
+			#box1,
+			#box2,
+			#box3 {
+				width: 50px;
+			}
+
 			#box1 {
 				background: red;
-				flex-grow: 1;
+				flex-grow: 0;
 			}
 
 			#box2 {
 				background: blue;
-				flex-grow: 2;
+				flex-grow: 1;
 			}
 
 			#box3 {
 				background: orange;
-				flex-grow: 1;
+				flex-grow: 2;
 			}
 		</style>
 	</head>
@@ -171,11 +179,13 @@ CSS3新增了一种新型的弹性盒子模型。通过弹性盒子模型，我�
 </html>
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/8276580ce59548239d767671d2558ac5.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/0267b1cf42554d6391a5f15e983038c8.png)
 
 ### flex-shrink 缩小比例
 
 在CSS3中，flex-shrink属性用于定义弹性盒子内部子元素的缩小比例。也就是当所有子元素宽度之和大于父元素的宽度时，子元素如何缩小自己的宽度。
+
+默认值为 1，即缩小到最小值。当容器空间不足时，会按照各个项目设置的 `flex-shrink` 值来分配缺少的空间。与 `flex-grow` 对应的是，`flex-shrink` 数值越大的项目会被优先缩小。
 
 ```html
 <!DOCTYPE html>
@@ -393,7 +403,7 @@ flex属性的默认值为“0 1 auto”。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/42eb46214bfe4ebd967ba35512c9a89e.png)
 
-### flex-wrap
+### flex-wrap 换行
 
 在CSS3中，我们可以使用flex-wrap属性来定义弹性盒子内部“子元素”是单行显示还是多行显示。
 
@@ -1123,3 +1133,8 @@ flex属性的默认值为“0 1 auto”。
 
 
 
+## 案例2
+
+[代码下载](https://github.com/xiangxiongfly/MyHtmlCssJs/tree/main/%E5%B8%B8%E7%94%A8%E5%B8%83%E5%B1%80%E6%96%B9%E5%BC%8F/%E5%BC%B9%E6%80%A7%E5%B8%83%E5%B1%80)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/f458548b1f0d454dad032674e94f9513.png)

@@ -69,51 +69,87 @@ onMounted(() => {
 
 ## 响应式
 
-- 基本数据类型使用`ref()`函数。需要通过`value`属性获取其值。
-- 引用数据类型使用`reactive()`函数。
-- 在`setup()`函数中return暴露数据。
+- `ref()`函数，返回值是`Ref`类型，当数据发生变化时，值也会自动更新：
+  - 支持数据类型：
+    - 基本数据类型：数字、字符串、布尔值；
+    - 对象类型：对象、数组、函数；
+    - null、undefined。
+  - 需要通过`.value`属性获取和修改值。
+- `reactive()`函数，将普通对象或数组转换为响应式对象，主要用于复杂数据结构：
+  - 支持数据类型：对象、数组。
+  - 可以使用`toRefs()`函数和`toRef()`函数解构数据，解构出的值是`Ref`类型。
 
 ```vue
-<script>
-import { ref, reactive } from 'vue'
+<script >
+import { ref, reactive, toRefs, toRef } from 'vue'
 export default {
     // 组合式API，将同一逻辑关联在一起
+    // setup在created之前调用，也就是实例被完全初始化之前
     setup() {
-        // 在组件创建前调用
         console.log("setup");
         console.log(this); //undefined，this不会指向应用实例
 
-        let msg = "hello"; //不是响应式
-        function changeMsg() {
-            msg = "你好";
+        //不是响应式
+        let message1 = "hello";
+        function changeMessage1() {
+            message1 = "你好";
         }
 
-        let message = ref("hello2"); //响应式，基本数据类型需要使用`ref`
-        function changeMessage() {
-            message.value = "你好2";
+        // ref
+        //响应式：基本数据类型需要使用`ref`
+        const count = ref(100);
+        function changeCount() {
+            count.value = 200;
         }
 
-        const obj = reactive({ //响应式，引用数据类型需要使用`reactive`
-            name: "小明",
-            name: "小明",
-            age: 18
-        });
-        function changeObjName() {
-            obj.name = "xiaoming";
+        // reactive & toRefs
+        // 响应式：引用数据类型需要使用`reactive`
+        const user = reactive({ name1: "小明", age1: 36 });
+        // 解构后仍然具有响应式
+        const { name1, age1 } = toRefs(user);
+        function changeUser() {
+            name1.value = "小白";
+            age1.value = 18;
+        }
+        function changeUser2() {
+            user.name1 = "小黑";
+            user.age1 = "28;"
         }
 
-        return { msg, changeMsg, message, changeMessage, obj, changeObjName };
+        // reactive & toRef
+        const student = reactive({ name2: "小明", age2: 36 });
+        // 解构
+        const age = toRef(student, "age2");
+        function changeAge() {
+            age.value = 666;
+        }
+
+        return { message1, changeMessage1, count, changeCount, name1, age1, changeUser, changeUser2, age, changeAge };
     }
 }
 </script>
 
 <template>
-    <p> {{ msg }}</p>
-    <button @click="changeMsg()">改变msg</button>
-    <p> {{ message }}</p>
-    <button @click="changeMessage()">改变message</button>
-    <p>{{ obj.name }}</p>
-    <button @click="changeObjName()">改变obj.name</button>
+    <div>
+        <p>{{ message1 }}</p>
+        <button @click="changeMessage1">修改message1</button>
+    </div>
+    <hr>
+    <div>
+        <p>{{ count }}</p>
+        <button @click="changeCount">修改count</button>
+    </div>
+    <hr>
+    <div>
+        <p>{{ name1 }} - {{ age1 }}</p>
+        <button @click="changeUser">修改user</button>
+        <button @click="changeUser2">修改user2</button>
+    </div>
+    <hr>
+    <div>
+        <p>{{ age }}</p>
+        <button @click="changeAge">修改age</button>
+    </div>
 </template>
 ```
 
@@ -177,7 +213,40 @@ export default {
         const reverseMsg = computed(() => {
             return msg.value.split("").reverse().join("");
         });
-        return { msg, reverseMsg };
+
+        //计算属性
+        const name = ref("小明");
+        const age = ref(18);
+        const userInfo = computed({
+            get() {
+                return name.value + "-" + age.value;
+            },
+            set(newValue) {
+                [name.value, age.value] = newValue.split(",");
+            }
+        })
+        function handleClick() {
+            userInfo.value = "小红,38";
+        }
+
+        //计算属性
+        const userObj = reactive({
+            name: "小白",
+            age: 10
+        });
+        const userComputed = computed({
+            get() {
+                return userObj.name + "-" + userObj.age;
+            },
+            set(newValue) {
+                [userObj.name, userObj.age] = newValue.split(",");
+            }
+        })
+        function handleClick2() {
+            userComputed.value = "小黑,20";
+        }
+
+        return { msg, reverseMsg, userInfo, handleClick, userComputed, handleClick2 };
     }
 }
 </script>
@@ -185,6 +254,14 @@ export default {
 <template>
     <p> {{ msg }}</p>
     <p> {{ reverseMsg }}</p>
+    <div>
+        <p> {{ userInfo }}</p>
+        <button @click="handleClick">点击</button>
+    </div>
+    <div>
+        <p>{{ userComputed }}</p>
+        <button @click="handleClick2">点击2</button>
+    </div>
 </template>
 ```
 
@@ -319,6 +396,4 @@ function add() {
 
 <style></style>
 ```
-
-
 

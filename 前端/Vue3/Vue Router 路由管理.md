@@ -1,6 +1,6 @@
 [toc]
 
-# Vue Router
+# Vue Router 路由管理
 
 ## 概述
 
@@ -96,8 +96,8 @@ app.mount("#app");
 
 ### 使用路由
 
-- `<router-link`：负责导航，类似于a链接。
-- `<router-view>`：负责渲染。
+- `<router-link`：使用 router-link 组件进行导航，类似于a链接。
+- `<router-view>`：渲染路由匹配到的组件。
 
 在App.vue组件中使用：
 
@@ -118,12 +118,27 @@ app.mount("#app");
 
 
 
+## 路由懒加载
+
+当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。如果我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样就会更加高效。
+
+Vue Router 支持开箱即用的[动态导入](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports)，这意味着你可以用动态导入代替静态导入：
+
+```js
+// 动态导入
+const User = () => import("../views/User.vue");
+```
+
+
+
 ## 动态路由
 
-### 配置动态路由
+### 使用动态路由
 
 - 路径参数用冒号`:`表示。
 - 用`this.$route.params`获取路径参数。
+
+**定义动态路由：**
 
 在router/index.js文件中配置动态路由：
 
@@ -135,6 +150,17 @@ const routes = [
   { path: "/about/name/:name/age/:age", component: About },
 ];
 ```
+
+**使用动态路由：**
+
+```html
+<p>
+    <router-link to="/about/name/小白/age/18">跳转About页面（方式一）</router-link><br>
+    <router-link :to="{ name: 'about', params: { name: '小黑', age: 28 } }">跳转About页面（方式二）</router-link>
+</p>
+```
+
+**接收参数：**
 
 在About.vue组件中使用：
 
@@ -153,6 +179,36 @@ export default {
         console.log(params); //{name: '小明', age: '18'}
         this.name = params.name;
         this.age = params.age;
+    }
+}
+
+</script>
+<template>
+    <h2>About页面</h2>
+    <p>name:{{ name }} age:{{ age }}</p>
+</template>
+```
+
+
+
+### 组合式API 接收参数
+
+在 `setup` 里面没有访问 `this`，所以我们不能再直接访问 `this.$router` 或 `this.$route`。作为替代，我们使用 `useRouter` 和 `useRoute` 函数：
+
+```vue
+<script>
+import { ref } from "vue";
+import { useRoute } from 'vue-router';
+export default {
+    setup() {
+        const name = ref("")
+        const age = ref(0)
+        const route = useRoute()
+        name.value = route.params.name
+        age.value = route.params.age
+        return {
+            name, age
+        }
     }
 }
 
@@ -259,9 +315,9 @@ const routes = [
 ];
 ```
 
-创建Parent.vue/One.vue/Two.vue组件：
-
 **One.vue组件：**
+
+创建`One.vue`组件：
 
 ```vue
 <template>
@@ -277,6 +333,8 @@ const routes = [
 
 **Two.vue组件：**
 
+创建`Two.vue`组件：
+
 ```vue
 <template>
     <p>样式二</p>
@@ -290,6 +348,8 @@ const routes = [
 ```
 
 **Parent.vue组件：**
+
+创建`Parent.vue`组件：
 
 ```vue
 <template>
@@ -322,13 +382,15 @@ const routes = [
 **router-link中使用**
 
 ```vue
-<router-link :to="{ name: 'about', params: { name: '小明', age: 18 } }">跳转About页面</router-link>
+<router-link :to="{ name: 'about', params: { name: '小明', age: 18 } }">
+    跳转About页面
+</router-link>
 ```
 
 **编程式导航中使用**
 
 ```js
- this.$router.push({ name: "about", params: { name: "小明", age: "18" } })
+this.$router.push({ name: "about", params: { name: "小明", age: "18" } })
 ```
 
 
@@ -540,6 +602,14 @@ const routes = [
 ];
 ```
 
+### 多个别名
+
+```js
+const routes = [
+     { path: "/", name: "homePage", alias: ["/home", "/index"], component: Home },
+];
+```
+
 
 
 ## props传值
@@ -588,18 +658,45 @@ vue-router 提供的导航守卫主要用来通过跳转或取消的方式守卫
 守卫方法参数：
 
 - to：表示将要进入的目标。
-- from：表示要离开的目标。
+- from：表示正要离开的目标。
 - next：可选参数，表示执行路由。
+- 返回值为false：表示取消当前导航。如果返回`undefined` 或返回 `true`，表示导航是有效的。
+- 返回值为路由地址：通过一个路由地址跳转到一个不同的地址。
 
-`return false`表示取消导航。
+**返回值为false：**
+
+```js
+router.beforeEach((to, from) => {
+  console.log("全局前置守卫");
+  console.log(to);
+  console.log(from);
+  return false;
+});
+```
+
+**返回值为路由地址：**
+
+```js
+router.beforeEach(async (to, from) => {
+  //重定向到Login页面
+  let isLogin = false;
+  if (to.name !== "login" && !isLogin) {
+    return { name: "login" };
+  }
+});
+```
+
+**使用next：**
 
 ```js
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login' && !isAuth) 
-      next({ name: 'Login' })
-  else 
-      next()
-})
+  let isLogin = true;
+  if (to.name !== "login" && !isLogin) {
+    next({ name: "login" });
+  } else {
+    next();
+  }
+});
 ```
 
 ### 独享守卫
@@ -619,21 +716,6 @@ const routes = [
     },
   },
 ]
-```
-
-
-
-## 路由懒加载
-
-当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。如果我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样就会更加高效。
-
-Vue Router 支持开箱即用的[动态导入](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports)，这意味着你可以用动态导入代替静态导入：
-
-```js
-import User from "../views/User.vue";
-
-替换为：
-const User = () => import("../views/User.vue");
 ```
 
 
@@ -681,3 +763,4 @@ const router = createRouter({
 
 
 ## [源码下载](https://github.com/xiangxiongfly/MyVueProject)
+

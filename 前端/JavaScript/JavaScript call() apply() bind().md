@@ -4,7 +4,7 @@
 
 ## 简介
 
-在JavaScript中，`call() apply() bind() `这3个函数都是用于改变函数执行时的上下文，也就this的指向。
+在JavaScript中，`call()` `apply()` `bind() ` 可以指定函数的上下文。
 
 call()和apply()的作用相同，都是立即调用一个函数并且可以指定函数内部的this指向。它们的区别在于传递参数的方式不同：call()接受一系列参数列表，而apply()接受一个数组作为参数。
 

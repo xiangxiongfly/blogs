@@ -18,47 +18,22 @@
 
 在ES6中新增了块级作用域来避免这个问题的出现。
 
-[变量提升和函数提升](https://blog.csdn.net/qq_14876133/article/details/128701606)
-
-let关键字用于声明变量，和var关键字的用法类似。
-
-使用const声明的值为一个常量，一旦声明将不会再改变。
-
 **var & let & count区别：**
 
-- var声明的变量的作用域为函数作用域或全局作用域，let变量和const变量为块级作用域（如一个函数内部或一个`{}`代码块内部）。
-- 在同一作用域内，var可以被重复声明，而let和const则不允许。
-- var变量可以在声明之前使用，但值为undefined，而let和const在声明之前使用会抛出异常。
-- var和let声明的变量可以被重复赋值，但const声明的变量则不能重新赋值，如果重新赋值会抛出异常。
+|              | var                                               | let        | const          |
+| ------------ | ------------------------------------------------- | ---------- | -------------- |
+| 作用域       | 函数作用域或全局作用域                            | 块级作用域 | 块级作用域     |
+| 变量提升     | 存在变量提升                                      | 不存在     | 不存在         |
+| 变量重复声明 | 可以重复声明                                      | 不可以     | 不可以         |
+| 全局对象属性 | 在全局作用域下，var声明的变量会称为全局对象的属性 | 不会       | 不会           |
+| 初始值设置   | 可以不用                                          | 可以不用   | 必须设置初始值 |
+| 重新赋值     | 可以                                              | 可以       | 不可以         |
 
-**var运用：**
+let声明的变量更加安全可空，避免了变量提升和作用域混淆的问题。
 
-```js
-var a = 10;
-console.log(a); //10
-if (true) {
-    var a = 20;
-    console.log(a); //20
-}
-console.log(window.a); //20
-```
+[变量提升和函数提升](https://blog.csdn.net/qq_14876133/article/details/128701606)
 
-```js
-console.log(a); //undefined
-var a = 10;
-```
-
-**let运用：**
-
-```js
-let a = 10;
-console.log(a); //10
-if (true) {
-    let a = 20;
-    console.log(a); //20
-}
-console.log(window.a); //undefined
-```
+[JavaScript var & let区别](https://blog.csdn.net/qq_14876133/article/details/129884254)
 
 
 
@@ -380,7 +355,7 @@ say("a"); //a undefined []
 say("a", "b", "c", "d", "e"); //a b (3) ["c", "d", "e"]
 ```
 
-### this问题
+### this指向问题
 
 在普通函数中，this永远指向函数的调用者。
 
@@ -406,9 +381,13 @@ const person2 = {
 person2.sayHello(); //姓名：undefined 年龄：undefined
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/fc6f781aa46944778040003130bd488d.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/db5316a068d74d4bbbc04f9bfdfeb648.png)
 
-说明：代码一的sayHello()是普通函数，this指向函数的调用体，即person1对象，因此正常输出”姓名：小明 年龄：18“；代码二的sayHello()是剪头函数，this指向外层作用域，即window对象，window没有name2和age2属性，因此输出undefined。
+说明：
+
+代码一中的sayHello()是普通函数，this指向函数的调用体，即person1对象，因此正常输出”姓名：小明 年龄：18“；
+
+代码二中的sayHello()是剪头函数，this指向外层作用域，即window对象，window没有name2和age2属性，因此输出undefined。
 
 
 

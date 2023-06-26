@@ -8,6 +8,20 @@
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/0ac220ff8cb446739066713e0e4b6d91.png)
 
+## 根组件
+
+我们传入 `createApp` 的对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件。
+
+如果你使用的是单文件组件，我们可以直接从另一个文件中导入根组件。
+
+```vue
+import { createApp } from 'vue'
+// 从一个单文件组件中导入根组件
+import App from './App.vue'
+
+const app = createApp(App)
+```
+
 
 
 ## 简单使用
@@ -71,6 +85,9 @@ export default {
 ### 父组件 -> 子组件
 
 **父组件：Father.vue**
+
+- 静态prop：在定义组件时确定值，如`abc="ABC"`。
+- 动态prop：在组件被渲染时确定值，需要使用 `v-bind` 或缩写 `:` 来进行动态绑定的 props，如`:message="msg"`和`:list="list"`。
 
 ```vue
 <script>

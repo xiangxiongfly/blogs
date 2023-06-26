@@ -1,69 +1,83 @@
 [toc]
 
-# JavaScript client screen offset scroll
+# JavaScript 尺寸和坐标
 
-## offsetWidth & clientWidth & scrollWidth
+## 元素宽高
 
-| 属性/方法   | 说明                                                         |
-| ----------- | ------------------------------------------------------------ |
-| offsetWidth | 获取元素的整体宽度，包含元素宽度、内边距、边框、滚动条，但不包含外边距。 |
-| clientWidth | 获取元素的可视区域的宽度，包含元素宽度、内边距，但不包含滚动条、边框、外边距。<br />因此，clientWidth的值小于等于offsetWidth的值。 |
-| scrollWidth | 获取元素的内容宽度，包括因为溢出而没有显示出来的部分。<br />如果元素的内容没有溢出，则scrollWidth等于clientWidth；如果元素溢出，则scrollWidth大于clientWidth。 |
+- el.clientWidth：获取元素可视区域宽度，包含元素宽、内边距，不包含滚动条、边框、外边距。
+- el.offsetWidth：获取元素整体宽度，包含元素宽、内边距、边框、滚动条。clientWidth的值小于等于offsetWidth的值。
+- el.scrollWidth：获取元素的实际宽度，包括因为溢出而没有显示出来的部分。如果元素的内容没有溢出，则scrollWidth等于clientWidth；如果元素溢出，则scrollWidth大于clientWidth。
+- el.clientTop：获取元素上边框的宽度。
+- el.offsetTop：获取元素距离定位父元素的顶部距离。
+- el.scrollTop：垂直移动距离。
 
 ```html
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-		<style>
-			#box {
-				width: 100px;
-				height: 100px;
-				padding: 10px;
-				border: 1px solid red;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="box"></div>
-		<script>
-			let box = document.getElementById("box");
-			console.log(box.offsetWidth); //122，元素宽度+内边距+边框
-			console.log(box.clientWidth); //120，元素宽度+内边距
-		</script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+      #box {
+        width: 200px;
+        height: 200px;
+        padding: 10px;
+        border: 1px solid red;
+        margin: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box"></div>
+    <script>
+      let box = document.getElementById("box");
+      console.log(box.clientWidth); //220
+      console.log(box.offsetWidth); //222
+      console.log(box.clientTop); //1
+      console.log(box.offsetTop); //50
+    </script>
+  </body>
 </html>
 ```
 
+![在这里插入图片描述](https://img-blog.csdnimg.cn/48c9482e25d04f5d890625f9c2bc78fc.png)
+
 ```html
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-		<style>
-			#box {
-				width: 100px;
-				height: 100px;
-			}
-
-			p {
-				width: 300px;
-				height: 50px;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="box">
-			<p></p>
-		</div>
-		<script>
-			let box = document.getElementById("box");
-			console.log(box.clientWidth); //100px，内容宽度
-			console.log(box.scrollWidth); //300px，实际内容宽度，包括溢出的部分
-		</script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+      #box {
+        width: 200px;
+        height: 200px;
+        padding: 10px;
+        border: 1px solid red;
+        margin: 50px;
+        overflow: auto;
+          background-color: yellowgreen;
+      }
+      p {
+        width: 2000px;
+        height: 2000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box">
+      <p></p>
+    </div>
+    <script>
+      let box = document.getElementById("box");
+      console.log(box.clientWidth); //205
+      console.log(box.offsetWidth); //222
+      console.log(box.scrollWidth); //2020
+      console.log(box.clientTop); //1
+      console.log(box.offsetTop); //50
+      console.log(box.scrollTop); //0
+    </script>
+  </body>
 </html>
 ```
 
@@ -79,7 +93,7 @@
 | clientX   | 获取鼠标相对于视口（即浏览器窗口）的X轴坐标。         |
 | pageX     | 获取鼠标相对于整个文档（包含文档的滚动条）的X轴坐标。 |
 | offsetX   | 获取鼠标相对于目标元素（即触发事件的元素）的X轴坐标。 |
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2857f637ef624df1a3de31515232a658.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/21e1290d7b3f4d85a758762e9bb96b97.png)
 
 ```html
 <!doctype html>
@@ -131,51 +145,41 @@
 
 
 
-## window.outerWidth & window.innerWidth & document.documentElement.clientWidth
+## window
 
-| 属性/方法                            | 说明                                                         |
-| ------------------------------------ | ------------------------------------------------------------ |
-| window.outerWidth                    | 获取整个浏览器窗口的高度（单位：像素），包括侧边栏（如果存在）、窗口镶边（window chrome）和窗口调正边框（window resizing borders/handles）。 |
-| window.innerWidth                    | 获取浏览器视口，包含滚动条                                   |
-| document.documentElement.clientWidth | 获取内容区域，不包含滚动条                                   |
+- window.innerWidth：获取浏览器视口宽度（包含滚动条）。
+- window.innerHeight：获取浏览器视口高度（包含滚动条）。
+- window.outerWidth：获取整个浏览器宽度。
+- window.outerHeight：获取整个浏览器高度。
 
-```html
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-		<style>
-			* {
-				margin: 0;
-				padding: 0;
-			}
-
-			body {
-				width: 2000px;
-				height: 2000px;
-			}
-		</style>
-		<script>
-			window.onload = function() {
-				var body = document.querySelector("body");
-				body.innerHTML = `
-				window.outerWidth: ${window.outerWidth} <br>
-				window.outerHeight: ${window.outerHeight} <br>
-				window.innerWidth: ${window.innerWidth} <br>
-				window.innerHeight: ${window.innerHeight} <br>					
-				document.documentElement.clientWidth: ${document.documentElement.clientWidth} <br>
-				document.documentElement.clientHeight: ${document.documentElement.clientHeight} <br>
-					`;
-			}
-		</script>
-	</head>
-	<body>
-	</body>
-</html>
+```javascript
+console.log(window.innerWidth); //638
+console.log(window.innerHeight); //861
+console.log(window.outerWidth); //1531
+console.log(window.outerHeight); //981
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/4c91a6a5ffed4a8988b2bcf3c0de93b8.png)
 
 
+## document.documentElement
+
+- document.documentElement.clientWidth：获取html根元素的宽度（不包含滚动条）。
+- document.documentElement.clientHeight：获取html根元素的高度（不包含滚动条）。
+
+```javascript
+console.log(document.documentElement.clientWidth); //623
+console.log(document.documentElement.clientHeight); //861
+```
+
+
+
+## window.screen
+
+- window.screen.height：获取屏幕高度。
+- window.screen.availHeight：获取屏幕可用高度。
+
+```javascript
+console.log(window.screen.availHeight); //1040
+console.log(window.screen.height); //1080
+```
 

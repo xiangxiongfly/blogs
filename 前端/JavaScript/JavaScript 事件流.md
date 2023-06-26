@@ -1,10 +1,20 @@
-[toc]
+[TOC]
 
 # JavaScript 事件流
 
 ## 概述
 
-事件流描述的是从页面中接受事件的顺序。IE和Netscape开发团队提出了两个截然相反的事件流概念，IE的事件流是事件冒泡（event bubbling），Netscape的事件流是事件捕获（event capturing）。
+JavaScript事件流指一个事件在HTML文档中传播和被处理的全过程。
+
+事件流有三个阶段：
+
+- 捕获阶段（Capturing Phase）：从最外层的祖先元素开始，逐级往下，直到事件触发元素（目标元素）所在的元素。
+- 目标阶段（Target Phase）：事件到达目标元素。
+- 冒泡阶段（Bubbling Phase）：从目标元素开始往上冒泡，逐级往上，直到最外层的祖先元素。
+
+js中只可以执行捕获或冒泡阶段。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/52ae6b3290f6432ba47155c13b3c51d0.png)
 
 
 
@@ -12,7 +22,7 @@
 
 ### 简介
 
-事件冒泡：当一个元素接收到事件时，会把它接收到的事件逐级向上传播给它的祖先元素，一直传到顶层的window对象。
+事件冒泡指当一个元素触发事件时，事件会从触发事件的元素开始，沿着DOM树向上传播，直到根元素。在这个过程中，可以通过 Event 对象的 `stopPropagation()` 方法来阻止事件继续向上传播。
 
 顶层对象不同浏览器有可能不同，如IE9及以上版本、FireFox、Chrome、Safari等浏览器，事件冒泡的顶层对象为window对象，而IE7/8顶层对象则为document对象。
 
@@ -84,8 +94,6 @@
 
 说明：onclick单击事件会实现事件冒泡，因此div3元素会首先触发单击事件，所触发的事件仍然会逐级向上传递。
 
-
-
 ### addEventListener() 事件冒泡
 
 `addEventListener()`方法的第三个参数为false事，为事件冒泡；为true时，为事件捕获。
@@ -145,9 +153,11 @@
 
 说明：div1、div2和div3元素均使用第三个参数为false的addEventListener()绑定事件函数，因而这3个元素将实现事件冒泡。在Chrome浏览器中运行后，当单击div3时，div3作为事件冒泡的最低层元素，会首先触发单击事件，然后div3逐级向上传递单击事件给div2和div1。
 
-
-
 ### stopPropagation() 阻止事件冒泡
+
+在 HTML DOM 中，事件会向上冒泡到父元素，如果不希望事件继续向上传播，则可以使用 Event 对象的 stopPropagation() 方法来阻止事件冒泡。
+
+例如：
 
 ```html
 <!DOCTYPE html>
@@ -170,8 +180,8 @@
 			window.onload = function() {
 				var oBtn = document.getElementById("btn");
 				var oDiv = document.getElementById("div1");
-				oBtn.onclick = function(e) {
-					e.stopPropagation(); //阻止事件冒泡
+				oBtn.onclick = function(event) {
+					event.stopPropagation(); //阻止事件冒泡
 					oDiv.style.display = "block";
 				};
 				document.onclick = function(e) {
@@ -191,13 +201,11 @@
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f31704bb9446429185f3519d895c6e8c.gif)
 
-
-
 ## 事件捕获
 
 ### 简介
 
-事件捕获是由Netscape Communicator团队提出来的，从最顶层的window对象开始逐渐往下传播事件，即最顶层的window对象最早接收事件，最低层的具体被操作的元素最后接收事件。
+事件捕获指挡一个元素触发事件时，该事件会从根元素开始，沿着DOM树向下传播，直到传播到触发事件的元素。在这个过程中，可以通过 Event 对象的 stopPropagation() 方法来阻止事件继续向上传播。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/a8718564b2e74ebbb0c42f21b7c60005.png)
 
@@ -267,97 +275,14 @@
 
 
 
-### W3C标准事件流
+## 阻止事件默认行为
 
-W3C标准事件流包含3个阶段，捕获阶段、目标阶段、冒泡阶段。
+在 HTML DOM 中，某些事件具有默认行为，例如链接的点击会跳转到链接的地址。不希望事件触发默认行为，可以使用一下两种方式阻止：
 
-在捕获阶段，事件对象通过目标的祖先从窗口传播到目标的父级。
+*   在事件处理函数中 `return false` 阻止默认行为。
+*   使用 Event 对象的 `preventDefault()` 方法来阻止默认行为。
 
-在目标阶段，事件对象到达事件对象的事件目标。
-
-在冒泡阶段，事件对象以相反的顺序通过目标的祖先传播，从目标的父级开始，到窗口结束。
-
-W3C事件模型中发生的任何事件，先从顶层对象window开始一路向下捕获，直到达到目标元素，其后进入目标阶段。目标元素div接收到事件后开始冒泡到顶层对象window。例如，当用户单击了`<div>`元素，则首先会进行事件捕获，此时事件按`window→document→<html>→<body>`的顺序进行传播，当事件对象传到`<div>`时进入目标阶段，接着事件对象又从目标对象传到`body`，从而进入事件的冒泡阶段，此时事件对象按`<body>→<html>→document→window`的顺序传播事件。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/52ae6b3290f6432ba47155c13b3c51d0.png)
-
-```html
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<title></title>
-		<style>
-			div {
-				padding: 40px;
-			}
-
-			#div1 {
-				background: red;
-			}
-
-			#div2 {
-				background: green;
-			}
-
-			#div3 {
-				background: blue;
-			}
-		</style>
-		<script>
-			window.onload = function() {
-				var oDiv1 = document.getElementById('div1');
-				var oDiv2 = document.getElementById('div2');
-				var oDiv3 = document.getElementById('div3');
-				//标准事件流处理事件
-				oDiv1.addEventListener('click', function() {
-					console.log('事件冒泡1');
-				}, false);
-				oDiv1.addEventListener('click', function() {
-					console.log('事件捕获1');
-				}, true);
-				oDiv2.addEventListener('click', function() {
-					console.log('事件冒泡2');
-				}, false);
-				oDiv2.addEventListener('click', function() {
-					console.log('事件捕获2');
-				}, true);
-				oDiv3.addEventListener('click', function() {
-					console.log('事件捕获3');
-				}, true);
-				oDiv3.addEventListener('click', function() {
-					console.log('事件冒泡3');
-				}, false);
-			};
-		</script>
-	</head>
-	<body>
-		<div id="div1">
-			<div id="div2">
-				<div id="div3"></div>
-			</div>
-		</div>
-	</body>
-</html>
-```
-
-点击div3元素，打印信息如下：
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/a3259c3df74342938dcca717723f84cc.png)
-
-
-
-
-
-## 取消事件默认行为
-
-事件的默认行为指的是：当一个事件发生时，浏览器自己会默认做的事情。这些事件的默认行为，在某些情况下，可能并不是我们所期望的，此时就需要取消它。事件默认行为的取消方法跟事件的绑定方式有关。
-
-一、使用对象的事件属性绑定事件（即使用“obj.on事件名称=事件处理函数”的绑定格式）的事件默认行为的取消方法是：在当前事件的处理函数中`return false`即可阻止当前事件的默认行为。
-
-二、使用addEventListenter()绑定事件函数的事件默认行为的取消方法是：在当前事件的处理函数中使用`event.preventDefault()`即可阻止当前事件的默认行为。
-
-### 取消使用对象属性绑定的事件的默认行为
+### 处理函数return false
 
 ```html
 <!doctype html>
@@ -387,9 +312,7 @@ W3C事件模型中发生的任何事件，先从顶层对象window开始一路�
 </html>
 ```
 
-
-
-### 取消使用addEventListener()绑定的事件的默认行为
+### 使用preventDefault()方法
 
 ```html
 <!doctype html>
@@ -422,11 +345,11 @@ W3C事件模型中发生的任何事件，先从顶层对象window开始一路�
 </html>
 ```
 
-
-
 ## 案例
 
-### 利用事件冒泡实现分享功能
+### 分享功能
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/9f9ba067b530411388269d3eb23c8309.gif)
 
 ```html
 <!doctype html>
@@ -465,17 +388,6 @@ W3C事件模型中发生的任何事件，先从顶层对象window开始一路�
 				height: 39px;
 			}
 		</style>
-		<script>
-			window.onload = function() {
-				var oDiv = document.getElementById('div1');
-				oDiv.onmouseover = function() { //鼠标光标移入，使div1显示
-					this.style.left = '0px';
-				}
-				oDiv.onmouseout = function() { //鼠标光标移出，使div1隐藏
-					this.style.left = '-82px';
-				}
-			};
-		</script>
 	</head>
 	<body>
 		<div id="div1">
@@ -492,15 +404,47 @@ W3C事件模型中发生的任何事件，先从顶层对象window开始一路�
 			</ul>
 			<div id="div2">分享到</div>
 		</div>
+		<script>
+			var oDiv = document.getElementById('div1');
+			oDiv.onmouseover = function() { //鼠标光标移入，使div1显示
+				this.style.left = '0px';
+			}
+			oDiv.onmouseout = function() { //鼠标光标移出，使div1隐藏
+				this.style.left = '-82px';
+			}
+		</script>
 	</body>
 </html>
 ```
 
-![a](https://img-blog.csdnimg.cn/1a15ff8bb1de466c96edaf9e34510053.png) ![b](https://img-blog.csdnimg.cn/dd8c9310b32a462280a5b470d40286e7.png)
+### 事件委托
 
-
-
-
-
-
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>事件冒泡</title>
+  </head>
+  <body>
+    <ul id="list">
+      <li>西游记</li>
+      <li>水浒传</li>
+      <li>三国演义</li>
+      <li>红楼梦</li>
+    </ul>
+    <script>
+      let list = document.getElementById("list");
+      list.addEventListener("click", (e) => {
+        let el = e.target;
+        if (el.nodeName.toLowerCase() === "li") {
+          alert(el.innerText);
+        }
+      });
+    </script>
+  </body>
+</html>
+```
 

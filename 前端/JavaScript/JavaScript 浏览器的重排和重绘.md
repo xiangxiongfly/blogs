@@ -19,7 +19,7 @@
 3. 节点信息的计算，即根据渲染树计算每个节点的几何信息。
 4. 渲染绘制，即根据计算完成的节点信息绘制整个页面。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/b0c9c659dadb4eabb395236e0cc44102.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/b404d96767164253adfd331700e32239.png)
 
 
 
