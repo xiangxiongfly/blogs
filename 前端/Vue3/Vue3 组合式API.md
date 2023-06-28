@@ -4,7 +4,11 @@
 
 ## 选项式API和组合式API
 
-使用选项式 API，我们可以用包含多个选项的对象来描述组件的逻辑，例如 `data`、`methods` 和 `mounted`。选项所定义的属性都会暴露在函数内部的 `this` 上，它会指向当前的组件实例。
+选项式 API（Options API）：每个功能的：数据、方法、计算属性等，是分散在：data、methods、computed配置中的，若想新增或者修改一个需求，就需要分别修改：data、methods、computed，不便于代码的维护和复用。
+
+组合式API（Composition API）：可以用函数的方式，更加优雅的组织代码，让相关功能的代码更加有序的组织在一起。
+
+**选项式API案例：**
 
 ```vue
 <script>
@@ -38,9 +42,7 @@ export default {
 </template>
 ```
 
-通过组合式 API，我们可以使用导入的 API 函数来描述组件逻辑。在单文件组件中，组合式 API 通常会与 [``](https://cn.vuejs.org/api/sfc-script-setup.html) 搭配使用。这个 `setup` attribute 是一个标识，告诉 Vue 需要在编译时进行一些处理，让我们可以更简洁地使用组合式 API。比如，`<script setup>` 中的导入和顶层变量/函数都能够在模板中直接使用。
-
-下面是使用了组合式 API 与 `<script setup>` 改造后和上面的模板完全一样的组件：
+**组合式API案例：**
 
 ```vue
 <script setup>
@@ -67,28 +69,48 @@ onMounted(() => {
 
 
 
-## 响应式
+## setup
 
-- `ref()`函数，返回值是`Ref`类型，当数据发生变化时，值也会自动更新：
+- setup是组合式API的配置项，值是一个函数，组件中所用到的：数据、方法、计算属性、监视......等等，都配置在setup中。
+- setup函数返回的对象中的内容，可以直接在模板中使用。
+- setup中访问this是undefined，setup函数会在beforeCreate之前调用。
+- setup函数的参数：
+  - props：组件的属性，接收父组件传递来的数据。
+  - context：组件的上下文。
+    - attrs：包含所有未被props接收的数据。
+    - slots：用于访问组件的插槽内容
+    - emit：用于触发父组件的事件。
+    - refs：包含组件内声明的所有ref对象的属性对象。
+- setup函数的返回值：
+  - 对象：对象中的属性、方法等，可以在模板中直接使用。
+  - 函数：返回一个模板，可以自定义渲染内容。
+
+
+
+## ref&reactive 响应式
+
+- ref函数：
+  - 当数据发生变化时，值也会自动更新。
   - 支持数据类型：
-    - 基本数据类型：数字、字符串、布尔值；
-    - 对象类型：对象、数组、函数；
+    - 基本数据类型：数字、字符串、布尔值。
+    - 对象类型：对象、数组、函数。内部会自动通过reactive实现响应式。
     - null、undefined。
-  - 需要通过`.value`属性获取和修改值。
-- `reactive()`函数，将普通对象或数组转换为响应式对象，主要用于复杂数据结构：
+  - 在js中操作需要通过`.value`属性获取和修改值，在模板中可以直接读取。
+  - 返回值是`Ref`类型。
+- reactive函数：
+  - 将普通对象或数组转换为响应式对象，主要用于复杂数据结构。
   - 支持数据类型：对象、数组。
   - 可以使用`toRefs()`函数和`toRef()`函数解构数据，解构出的值是`Ref`类型。
+- 使用原则：
+  - 若需要一个基本类型的响应式数据，必须使用`ref()`。
+  - 若需要一个响应式对象，层级不深，那么使用`ref()`也可以。
+  - 若需要一个响应式对象，且层级较深，要深度跟踪，那么使用`reactive()`。
 
 ```vue
 <script >
 import { ref, reactive, toRefs, toRef } from 'vue'
 export default {
-    // 组合式API，将同一逻辑关联在一起
-    // setup在created之前调用，也就是实例被完全初始化之前
     setup() {
-        console.log("setup");
-        console.log(this); //undefined，this不会指向应用实例
-
         //不是响应式
         let message1 = "hello";
         function changeMessage1() {
@@ -155,9 +177,9 @@ export default {
 
 
 
-## 侦听器
+## watch&watchEffect 侦听器
 
-- watch: 只会侦听所监听的数据源。
+- watch：只会侦听所监听的数据源。
 - watchEffect：会自动侦听所有响应式属性。组件初始化时会自动执行一次。
 
 
@@ -201,7 +223,7 @@ export default {
 
 
 
-## 计算属性
+## computed 计算属性
 
 ```vue
 <script >
@@ -267,7 +289,7 @@ export default {
 
 
 
-## props
+## props 属性
 
 **定义组件：Content.vue**
 
@@ -281,7 +303,7 @@ export default {
         }
     },
     setup(props) {
-        //可以在这里获取message属性值
+        //接收参数
         console.log(props.message);
     }
 }

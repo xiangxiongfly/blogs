@@ -113,9 +113,9 @@ export default {
 
 **子组件：Child.vue**
 
-需要通过props接收来自父组件的数据。
+需要通过`props`属性接收来自父组件的数据，子组件不能直接修改接收到值——单项数据流。
 
-**方式一：通过数组形式**
+**方式一：只接收**
 
 ```vue
 <script>
@@ -134,7 +134,9 @@ export default {
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/3503f6e07c0e4774a8f1eb070aedda88.png)
 
-**方式二：通过对象形式**
+**方式二：限制类型**
+
+支持的类型：
 
 - `String`
 - `Number`
@@ -164,7 +166,11 @@ export default {
 </template>
 ```
 
-**方式三：设置默认值**
+**方式三：限制类型、限制必填、指定默认值**
+
+- type
+- required
+- default
 
 ```vue
 <script>
@@ -474,10 +480,10 @@ export default {
 
     </template>
     <template v-slot:b>
-<button>按钮二</button>
+		<button>按钮二</button>
     </template>
     <template v-slot:c>
-<button>按钮三</button>
+		<button>按钮三</button>
     </template>
 </MyMultiSlot>
 ```
@@ -486,7 +492,7 @@ export default {
 
 ### 作用域插槽
 
-然而在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据。要做到这一点，我们需要一种方法来让子组件在渲染时将一部分数据提供给插槽。
+在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据。要做到这一点，我们需要一种方法来让子组件在渲染时将一部分数据提供给插槽。
 
 - 插槽提供数据。
 - 父组件接收数据。
@@ -513,6 +519,8 @@ export default {
 ```
 
 **使用作用域插槽**
+
+需要使用`v-slot`指令接收props对象。
 
 ```vue
 <script>
