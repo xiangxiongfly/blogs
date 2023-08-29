@@ -20,4 +20,5 @@ System.out.println(str1 == str3); //true
 
 - 这三个字符串的hashCode都是相同的，这是因为String类重写hashCode方法，通过String的值生成hashCode值，所以只要值相同，hashCode就相同。
 - str1与str2的identityHashCode不一样，是因为identityHashCode永远返回对象的内存地址，所以不相同；而str1与str3的identityHashCode相同，是因为intern方法会先从字符串常量池里获取字符串，所以二者的地址值相同。
-- `==`比较的是两个对象的引用地址，所以`str1 == str2`返回false，`(str1 == str3`返回true。
+- `==`比较的是两个对象的引用地址，所以`str1 == str2`返回false，`str1 == str3`返回true。
+

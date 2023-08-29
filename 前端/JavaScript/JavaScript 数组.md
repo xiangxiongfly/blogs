@@ -44,6 +44,23 @@ console.log(arr); //["HTML","abc","JavaScript","jQuery"]
 | 数组.includes(元素)                | 数组是否包含指定元素          |
 | 数组A.concat(数组B)                | 合并2个数组，并返回一个新数组 |
 
+#### slice() 截取新数组
+
+```js
+let arr = ["a", "b", "c", "d", "e"];
+
+let arr2 = arr.slice();
+console.log(arr2); //[ 'a', 'b', 'c', 'd', 'e' ]
+
+let arr3 = arr.slice(3);
+console.log(arr3); //[ 'd', 'e' ]
+
+let arr4 = arr.slice(2, 4);
+console.log(arr4); //[ 'c', 'd' ]
+
+let arr5 = arr.slice(-3, -1);
+console.log(arr5); //[ 'c', 'd' ]
+```
 
 #### sort() 排序
 

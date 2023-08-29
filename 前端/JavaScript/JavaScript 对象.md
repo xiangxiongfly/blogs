@@ -147,7 +147,7 @@ user.sayHello();
 
 ## 使用
 
-### 访问对象属性和方法
+### 访问属性方法
 
 **方式一**
 
@@ -160,7 +160,7 @@ user.sayHello();
 
 ```
 对象["属性名"]
-对象["方法名"]
+对象["方法名"]()
 ```
 
 **使用**
@@ -170,39 +170,41 @@ var user = {
     name: "小明",
     age: 18,
     address: "beijing",
-    sayHello: function() {
+    sayHello: function () {
         console.log("hello");
-    }
-}
+    },
+};
 
-//方式一
+// 方式一：
 console.log(user.name);
 console.log(user.age);
-console.log(user.address);
 user.sayHello();
 
-//方式二
+// 方式二：
 console.log(user["name"]);
 console.log(user["age"]);
-console.log(user["address"]);
 user["sayHello"]();
 ```
 
 
 
-### 删除属性
+### 添加属性和方法
+
+```js
+user.sex = "男";
+user["nickname"] = "Tom";
+user.running = function () {
+    console.log("running");
+};
+```
+
+
+
+### 删除属性和方法
 
 ```javascript
-var user = {
-    name: "小明",
-    age: 18,
-    address: "beijing",
-    sayHello: function() {
-        console.log("hello");
-    }
-}
-delete user.name //删除属性
-console.log(user); //{age: 18, address: "beijing", sayHello: ƒ}
+delete user.sex; //删除属性
+delete user.running; //删除方法
 ```
 
 

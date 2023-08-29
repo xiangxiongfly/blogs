@@ -4,11 +4,17 @@
 
 ## 概述
 
-在特定时刻自动执行的函数，(又称周期函数、钩子函数)。
+每个 Vue 组件实例在创建时都需要经历一系列的初始化步骤，比如设置好数据侦听，编译模板，挂载实例到 DOM，以及在数据改变时更新 DOM。
 
 
 
-## 说明
+## 生命周期图
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/1128e58d12c6414bba19448d9f5e8ad0.png)
+
+
+
+## 生命周期说明
 
 1. beforeCreate：在实例创建之前被调用，此时组件的data和methods等属性都还未初始化。
 2. created：在实例创建之后被调用，此时组件的data和methods等属性已经被初始化。
@@ -24,5 +30,84 @@
 1. beforeRender：在组件渲染之前被调用，它需要返回一个vnode或false。如果返回false，则该组件不会被渲染。
 2. renderTracked：在组件渲染时被调用，每个组件均会调用该函数，它用于跟踪组件中的哪些响应式数据被使用了。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/1128e58d12c6414bba19448d9f5e8ad0.png)
+
+
+## 选项式对比组合式
+
+| 选项式API            | 组合式API       |
+| -------------------- | --------------- |
+| beforeCreate/created | setup           |
+| beforeMount          | onBeforeMount   |
+| mounted              | onMounted       |
+| beforeUpdate         | onBeforeUpdate  |
+| updated              | onUpdated       |
+| beforeUnmount        | onBeforeUnmount |
+| unmounted            | onUnmounted     |
+
+- setup在beforeCreate钩子之前自动执行，因此setup中的this是undefined。
+
+```js
+<script>
+export default {
+    beforeCreate() {
+        console.log("生命周期选项", "beforeCreate");
+    },
+    created() {
+        console.log("生命周期选项", "created");
+    },
+    beforeMount() {
+        console.log("生命周期选项", "beforeMount");
+    },
+    mounted() {
+        console.log("生命周期选项", "mounted");
+    },
+    updated() {
+        console.log("生命周期选项", "updated");
+    },
+    beforeUnmount() {
+        console.log("生命周期选项", "beforeUnmount");
+    },
+    unmounted() {
+        console.log("生命周期选项", "unmounted");
+    }
+}
+</script> 
+```
+
+```js
+
+<script setup>
+import { onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onBeforeUnmount, onUnmounted } from "vue";
+
+console.log("生命周期钩子", "setup");
+
+onBeforeMount(() => {
+    console.log("生命周期钩子", "onBeforeMount");
+})
+
+onMounted(() => {
+    console.log("生命周期钩子", "onMounted");
+})
+
+onMounted(() => {
+    console.log("生命周期钩子", "onMounted执行多次");
+})
+
+onBeforeUpdate(() => {
+    console.log("生命周期钩子", "onBeforeUpdate");
+})
+
+onUpdated(() => {
+    console.log("生命周期钩子", "onUpdated");
+})
+
+onBeforeUnmount(() => {
+    console.log("生命周期钩子", "onBeforeUnmount");
+})
+
+onUnmounted(() => {
+    console.log("生命周期钩子", "onUnmounted");
+})
+</script>
+```
 
