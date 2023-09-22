@@ -301,6 +301,8 @@ try (OutputStream outputStream = new FileOutputStream("text.txt");
 
 缓冲流，BufferedInputStream / BufferedOutputStream /  BufferedReader / BufferedReader：减少调用本地API的次数优化流的输入和输出。
 
+**文件复制：**
+
 ```java
 try (
     InputStream inputStream = new BufferedInputStream(new FileInputStream("text.txt"));
@@ -387,6 +389,106 @@ Person p = (Person) ois.readObject();
 System.out.println(p.toString());
 ois.close();
 fis.close();
+```
+
+
+
+## RandomAccessFile
+
+RandomAccessFile是一个可以随机读写文件的类，它允许我们在任何位置读取或写入数据。
+
+**写入操作：**
+
+```java
+public class Test {
+    public static void main(String[] args) {
+        File file = new File("./test.txt");
+        RandomAccessFile randomAccessFile = null;
+        try {
+            randomAccessFile = new RandomAccessFile(file, "rw");
+            randomAccessFile.seek(10000);
+            printFileLength(randomAccessFile); //文件大小: 0  指针偏移量: 10000
+
+            //设置文件大小
+            randomAccessFile.setLength(10000);
+            printFileLength(randomAccessFile); //文件大小: 10000  指针偏移量: 10000
+
+            //会先写入2个字节，用于记录字符串长度
+            // 在UTF-8中，一个英文占1个字节，一个汉字占3个字节
+            randomAccessFile.writeUTF("哈喽哈喽");
+            printFileLength(randomAccessFile); //文件大小: 10014  指针偏移量: 10014
+
+            //在UTF-8中，每个字符占2个字节
+            randomAccessFile.writeChar('a');
+            randomAccessFile.writeChars("ABCD");
+            printFileLength(randomAccessFile); //文件大小: 10024  指针偏移量: 10024
+
+            //移动指针到5000的位置
+            randomAccessFile.seek(5000);
+            //插入100个字符，会覆盖后面的200个字节
+            char[] chars = new char[100];
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = 'a';
+                randomAccessFile.writeChar(chars[i]);
+            }
+            printFileLength(randomAccessFile); //文件大小: 10024  指针偏移量: 5200
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (randomAccessFile != null) {
+                try {
+                    randomAccessFile.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * 打印文件大小和指针偏移量
+     */
+    private static void printFileLength(RandomAccessFile randomAccessFile) throws IOException {
+        System.out.println("文件大小: " + randomAccessFile.length() + "  指针偏移量: " + randomAccessFile.getFilePointer());
+    }
+}
+```
+
+**读取操作：**
+
+```java
+File file = new File("./test.txt");
+RandomAccessFile randomAccessFile = null;
+try {
+    randomAccessFile = new RandomAccessFile(file, "r");
+
+    //移动指针，读取字符串”哈喽哈喽“
+    randomAccessFile.seek(10000);
+    System.out.println(randomAccessFile.readUTF()); //哈喽哈喽
+
+    //移动指针，读取100个字符"a"
+    randomAccessFile.seek(5000);
+    byte[] bytes = new byte[200];
+    randomAccessFile.read(bytes);
+    System.out.println(new String(bytes));
+
+    //移动指针，读取字符"aABCD"
+    byte[] bytes2 = new byte[10];
+    randomAccessFile.seek(1014);
+    randomAccessFile.read(bytes2);
+    System.out.println(new String(bytes2)); // a A B C D
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    if (randomAccessFile != null) {
+        try {
+            randomAccessFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 

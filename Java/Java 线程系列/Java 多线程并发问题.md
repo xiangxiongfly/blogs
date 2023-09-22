@@ -319,5 +319,5 @@ public class Singleton {
 - JVM在运行时会强制检查wait和notify/notifyAll有没有在synchronized代码块中，如果没有就会报` IllegalMonitorStateException`异常。
 - 通常情况下，一个线程调用了`wait()`之后， 必然需要由另外一个线程调用`notify()`来唤醒该线程， 因此， `wait()`与`notify()`是成对使用的。
 - 当一个线程执行到wait()时，该线程就会释放锁，并对执行点进行标记，当该线程被重新唤醒时，就会从标记点继续执行。
-- synchronized保障线程安全，防止了多线程执行混乱问题，确保调用wait()释放锁之前先获取锁，避免wait在notify之后调用。
+- synchronized保障线程安全，防止了多线程执行混乱问题，先执行wait再执行notify。
 

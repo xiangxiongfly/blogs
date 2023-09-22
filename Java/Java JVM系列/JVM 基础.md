@@ -1,6 +1,6 @@
 [TOC]
 
-# JVM基础
+# JVM 基础
 
 ## 什么是JVM
 
@@ -12,7 +12,7 @@ Java虚拟机（Java Virtual Machine，简称JVM），是一种能运行Java字�
 
 
 
-## JDK JRE JVM关系
+## JDK & JRE & JVM的关系
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/b55accf013b0441daa84b4508902dd5e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_13,color_FFFFFF,t_70,g_se,x_16)
 
@@ -22,12 +22,11 @@ Java虚拟机（Java Virtual Machine，简称JVM），是一种能运行Java字�
 
 
 
-## Java从编码到执行过程
+## JVM运行过程
 
-![请添加图片描述](https://img-blog.csdnimg.cn/ea6a0017ee84460b9dc97e56f24d227d.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_20,color_FFFFFF,t_70,g_se,x_16)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/6d5b6cb9251248739e57e76fe45db222.png)
 
+1. 类加载器：负责加载class文件信息加载到运行时数据区。
+2. 运行时数据区：包含堆、方法区、虚拟机栈、本地方法区、程序计数器。
+3. 执行引擎：负责解释字节码指令执行操作系统的指令。
 
-
-## JVM体系
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/05bfe11c06d44e40a43ae575bba6de16.png)

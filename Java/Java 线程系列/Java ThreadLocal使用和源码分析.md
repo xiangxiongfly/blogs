@@ -4,17 +4,11 @@
 
 ## 概述
 
-- ThreadLocal即线程局部变量。
-- ThreadLocal提供线程的局部变量，每个线程可以通过了get/set方法对局部变量进行操作。
-- 局部变量不会和其他线程的局部变量有冲突，实现了线程的数据隔离。
-- Thread和ThreadLocal关系：
-  - Thread内部持有ThreadLocalMap类型的成员变量threadLocals。
-  - ThreadLocal是负责操作线程局部变量的管理类，有`get()、set()、remove()`方法负责获取、设置、清除数据。
-  - ThreadLocalMap是ThreadLocal的内部类，用于存储线程的局部变量，内部维护一个Entry数组，键值对结构，键为ThreadLocal类型，值为Object类型。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/7fe91e1bdbe743cb97989f83ef87a04e.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_9,color_FFFFFF,t_70,g_se,x_16)
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/f977a10d4ca04890bd2be5c7b8c4351a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_11,color_FFFFFF,t_70,g_se,x_16)
+- ThreadLocal即线程本地变量。
+- 每个线程拥有一个属于自己的变量副本，不会和其他线程的变量副本冲突，实现了线程的数据隔离。
+- ThreadLocal和Synchonized都用于解决多线程并发访问。但是是ThreadLocal与synchronized有本质的区别：
+  - synchronized是利用锁的机制，使变量或代码块在某一时该仅仅能被一个线程访问。
+  - ThreadLocal为每个线程都提供了变量的副本，使得每个线程在某一时间访问到的并非同一个对象，这样就隔离了多个线程对数据的数据共享。
 
 
 
@@ -64,7 +58,32 @@ public static void main(String[] args) {
 
 
 
-## 源码分析
+## 源码简写
+
+```java
+public class Thread implements Runnable {
+    ThreadLocalMap threadLocals;
+}
+```
+
+```java
+class ThreadLocalMap {
+    Entry[] table;
+}
+```
+
+```java
+class Entry {
+    ThreadLocal<?> k;
+    Object v;
+}
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/8e5df65be48a4ace8a1cbb7a1e9bf1af.png)
+
+
+
+## 源码详细分析
 
 ### Thread
 

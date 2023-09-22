@@ -113,9 +113,9 @@ Class<? extends Person> clazz = person.getClass();
 Class<?> clazz = Class.forName("com.example.myapplication.Person");
 ```
 
-### instandeof & isInstance() & isAssignableFrom()区别
+### instanceof & isInstance() & isAssignableFrom()区别
 
-- instandeof ：是一个关键字，用于判断对象是否为类的实例。
+- instanceof：是一个关键字，用于判断对象是否为类的实例。
 - isInstance()：是Class类中的方法，判断是否为类的实例。
 - isAssignableFrom()：是Clas类s中的方法，判断继承关系。
 

@@ -600,7 +600,10 @@ iv1.setImageDrawable(shapeDrawable)
 ```
 <shape>：根元素
 <gradient>：子元素，表示渐变
-	- startColor、centerColor、endColor：开始、中间、结束颜色
+	- startColor：开始颜色
+	- centerColor：中间颜色
+	- endColor：结束颜色
+	- angle：角度，默认为0，从左向右
 	- centerX、centerY：渐变中心点
 	- type：渐变类型
 		- radial：径向渐变

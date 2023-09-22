@@ -6,16 +6,16 @@
 
 关于线程生命周期的不同状态，在 Java 5 以后，线程状态被明确定义在其内部枚举类型`java.lang.Thread.State`中，分别是：
 
-- 新建（NEW）：刚创建的线程处于此状态。
-- 就绪（RUNNABLE）：可执行或正在执行的线程处于此状态。表示线程已经在JVM中运行，由于执行需要计算资源，它可能正在运行，也可能在等待系统分配给它CPU资源，在就绪队列里排队。
-- 阻塞（BLOCKED）：被阻塞等待锁的线程处于此状态。如：线程试图通过synchronized获取某个锁，但是其他线程已经占用了，那么当前线程就处于阻塞状态。
-- 等待（WAITING）：无限期等待的线程处于此状态。如：让当前线程进入等待（wait），然后在通过notify唤醒，通知当前线程继续工作。
-- 计时等待（TIMED_WAITING）：与等待状态类似，但是调用的是存在超时条件的方法，如：`wait`或`join`等方法。
-- 终止（TERMINATED）：无论是意外退出还是正常执行结束，已结束的线程处于此状态。
+- 新建（NEW）：线程对象被创建，但尚未启动，此时线程状态为NEW。
+- 就绪（RUNNABLE）：可执行或正在执行的线程处于此状态。表示线程已经在JVM中运行，由于JVM需要计算资源，因此它可能正在运行或在等待系统分配给它CPU资源，在就绪队列里排队。
+- 阻塞（BLOCKED）：线程可能会由于某些原因而阻塞，比如等待I/O操作活等待获取某个锁，此时线程状态为BLOCKED。
+- 等待（WAITING）：线程调用wait()方法或join()方法等，使线程进入等待状态，此时线程状态为WAITING。
+- 计时等待（TIMED_WAITING）：线程调用sleep()方法或wait()方法，使线程进入具有超时事件的等待状态，此时线程状态为TIMED_WAITING。
+- 终止（TERMINATED）：线程执行完run()方法活因异常提前结束，线程的状态变为TERMINATED。
 
 
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/cc2739398d71401d824f8432648d03a1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_20,color_FFFFFF,t_70,g_se,x_16)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/25b48251cbee4e6bb141feadcafb6e9f.png)
 
 
 
