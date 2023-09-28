@@ -39,25 +39,25 @@ View的内部提供`post()`系列方法，一定程度上可以替代Handler
 
 **format属性详解**
 
-| 类型      | 说明                                  |
-| --------- | ------------------------------------- |
-| color     | 颜色值，如：#000000                   |
-| string    | 字符串类型，如："abc123"              |
-| dimension | 尺寸值，如：16dp、18sp                |
-| boolean   | 布尔值，true或false判断               |
-| integer   | 整数类型                              |
-| float     | 浮点类型                              |
-| fraction  | 百分比，如：10%、50%p                 |
-| reference | 资源类型id                            |
-| enum      | 枚举类型，单选值，子项value为整数值   |
-| flags     | 位或运算，可以多选，子项value为整数值 |
+| 类型      | 说明                                |
+| --------- | ----------------------------------- |
+| color     | 颜色值，如：#000000                 |
+| string    | 字符串类型，如："abc123"            |
+| dimension | 尺寸值，如：16dp、18sp              |
+| boolean   | 布尔值，true或false判断             |
+| integer   | 整数类型                            |
+| float     | 浮点类型                            |
+| fraction  | 百分比，如：10%、50%p               |
+| reference | 资源类型id                          |
+| enum      | 枚举类型，单选值，子项value为整数值 |
+| flags     | 位运算，可以多选，子项value为整数值 |
 
-说明：format同时设置多个属性值，通过`|`连接。
+**在 `res/values/attrs.xml` 文件中写入：**
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="CustomView">
+    <declare-styleable name="MyAttrsView">
         <attr name="custom_color" format="color" />
         <attr name="custom_string" format="string" />
         <attr name="custom_dimension" format="dimension" />
@@ -65,125 +65,189 @@ View的内部提供`post()`系列方法，一定程度上可以替代Handler
         <attr name="custom_integer" format="integer" />
         <attr name="custom_float" format="float" />
         <attr name="custom_fraction" format="fraction" />
-        <attr name="custom_resid" format="reference" />
+        <attr name="custom_fraction2" format="fraction" />
         <attr name="custom_enum" format="enum">
+            <enum name="none" value="-1" />
             <enum name="left" value="0" />
             <enum name="right" value="1" />
+            <enum name="top" value="2" />
+            <enum name="bottom" value="3" />
         </attr>
         <attr name="custom_flags" format="flags">
-            <flag name="none" value="0" />
-            <flag name="english" value="2" />
-            <flag name="chinese" value="4" />
+            <flag name="english" value="1" />
+            <flag name="chinese" value="2" />
+            <flag name="french" value="4" />
+            <flag name="japanese" value="8" />
         </attr>
+        <attr name="custom_resid" format="reference" />
     </declare-styleable>
 </resources>
 ```
 
-
-
-**使用：**
+**在XML布局中使用：**
 
 ```xml
-<com.example.attr_demo.AttrView 
-                                xmlns:app="http://schemas.android.com/apk/res-auto"
-                                android:id="@+id/customView"
-                                android:layout_width="100dp"
-                                android:layout_height="100dp"
-                                android:layout_margin="30dp"
-                                android:background="#123123"
-                                app:custom_boolean="true"
-                                app:custom_color="#ff0000"
-                                app:custom_dimension="100dp"
-                                app:custom_enum="right"
-                                app:custom_flags="english|chinese"
-                                app:custom_float="1.66"
-                                app:custom_fraction="6%"
-                                app:custom_integer="666"
-                                app:custom_resid="@drawable/ic_right"
-                                app:custom_string="@string/app_name" />
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".attrs.MyAttrsActivity">
+
+    <com.example.app.attrs.MyAttrsView
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:background="#ff0000"
+        app:custom_boolean="true"
+        app:custom_color="#ff0000"
+        app:custom_dimension="80.3dp"
+        app:custom_enum="top"
+        app:custom_flags="english|french"
+        app:custom_float="1.5"
+        app:custom_fraction="60%"
+        app:custom_fraction2="60%p"
+        app:custom_integer="65"
+        app:custom_resid="@drawable/ic_right"
+        app:custom_string="小明" />
+
+</FrameLayout>
 ```
 
+**在Java代码中解析：**
+
 ```java
-public class AttrView extends View {
+public class MyAttrsView extends View {
+    public static final int ENUM_NONE = -1;
+    public static final int ENUM_LEFT = 0;
+    public static final int ENUM_RIGHT = 1;
+    public static final int ENUM_TOP = 2;
+    public static final int ENUM_BOTTOM = 3;
 
-    //在代码中实例化会调用
-    public AttrView(Context context) {      
-        super(context);
+    public static final int FLAG_ENGLISH = 1;
+    public static final int FLAG_CHINESE = 2;
+    public static final int FLAG_FRENCH = 4;
+    public static final int FLAG_JAPANESE = 5;
+
+    // View在代码中new时，会调用第一个构造函数
+    public MyAttrsView(Context context) {
+        this(context, null);
     }
 
-    //在XML布局中定义时会调用
-    public AttrView(Context context, @Nullable AttributeSet attrs) {     
-        super(context, attrs);
-        init(context, attrs);
+    // View在XML布局中使用时，会调用第二个构造函数
+    public MyAttrsView(Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    //添加Theme时调用
-    public AttrView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    // 不会自动调用
+    // View有style属性时，在第二个构造函数中主动调用
+    public MyAttrsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
         if (attrs != null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomView);
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MyAttrsView);
+            ColorDrawable colorDrawable = (ColorDrawable) getBackground();
+            int bgColor = colorDrawable.getColor();
+            Log.e("TAG", "bgColor: " + bgColor); //bgColor: -65536
 
-            //获取color
-            int color = a.getColor(R.styleable.CustomView_custom_color, Color.WHITE);
-            Log.e("TAG", "color: " + color);
+            // 获取color属性
+            int color = a.getColor(R.styleable.MyAttrsView_custom_color, Color.WHITE);
+            Log.e("TAG", "color: " + color); //color: -65536
 
-            //获取string
-            String str = a.getString(R.styleable.CustomView_custom_string);
-            Log.e("TAG", "string: " + str);
+            // 获取boolean属性
+            boolean aBoolean = a.getBoolean(R.styleable.MyAttrsView_custom_boolean, false);
+            Log.e("TAG", "boolean: " + aBoolean); //boolean: true
 
-            //获取dimension
-            float dimension = a.getDimension(R.styleable.CustomView_custom_dimension, 0);
-            Log.e("TAG", "dimension: " + dimension);
-            //取整
-            int dimensionPixelOffset = a.getDimensionPixelOffset(R.styleable.CustomView_custom_dimension, 0);
-            Log.e("TAG", "dimensionPixelOffset: " + dimensionPixelOffset);
-            //四舍五入
-            int dimensionPixelSize = a.getDimensionPixelSize(R.styleable.CustomView_custom_dimension, 0);
-            Log.e("TAG", "dimensionPixelSize: " + dimensionPixelSize);
+            // 获取String属性
+            String str = a.getString(R.styleable.MyAttrsView_custom_string);
+            Log.e("TAG", "string: " + str); //string: 小明
 
-            //获取boolean
-            boolean aBoolean = a.getBoolean(R.styleable.CustomView_custom_boolean, false);
-            Log.e("TAG", "aBoolean: " + aBoolean);
+            // 获取dimension属性，dp转px
+            // 获取px值
+            float dimension = a.getDimension(R.styleable.MyAttrsView_custom_dimension, 0);
+            // 获得px取整值
+            int dimensionPixelOffset = a.getDimensionPixelOffset(R.styleable.MyAttrsView_custom_dimension, 0);
+            // 获得px四舍五入值
+            int dimensionPixelSize = a.getDimensionPixelSize(R.styleable.MyAttrsView_custom_dimension, 0);
+            Log.e("TAG", "dimension: " + dimension); //dimension: 160.59998
+            Log.e("TAG", "dimensionPixelOffset: " + dimensionPixelOffset); //dimensionPixelOffset: 160
+            Log.e("TAG", "dimensionPixelSize: " + dimensionPixelSize); //dimensionPixelSize: 161
 
-            //获取integer
-            int anInt = a.getInt(R.styleable.CustomView_custom_integer, 0);
-            Log.e("TAG", "anInt: " + anInt);
-            int integer = a.getInteger(R.styleable.CustomView_custom_integer, 0);
-            Log.e("TAG", "integer: " + integer);
+            // 获取integer属性
+            int integer = a.getInteger(R.styleable.MyAttrsView_custom_integer, 0);
+            Log.e("TAG", "integer: " + integer); //integer: 65
 
-            //获取float
-            float aFloat = a.getFloat(R.styleable.CustomView_custom_float, 1.1f);
-            Log.e("TAG", "aFloat: " + aFloat);
+            // 获取float属性
+            float aFloat = a.getFloat(R.styleable.MyAttrsView_custom_float, 0);
+            Log.e("TAG", "float: " + aFloat); //float: 1.5
 
+            // 获取fraction属性
+            // 如果属性值为%，则乘以base；如果属性值为%p，则乘以pbase
+            float fraction = a.getFraction(R.styleable.MyAttrsView_custom_fraction, 10, 100, 0);
+            float fraction2 = a.getFraction(R.styleable.MyAttrsView_custom_fraction2, 10, 100, 0);
+            Log.e("TAG", "fraction: " + fraction); //fraction: 6.0
+            Log.e("TAG", "fraction2: " + fraction2); //fraction2: 60.000004
 
-            //获取fraction，属性值为% 则乘以base，属性值为%p 则乘以pbase
-            float fraction = a.getFraction(R.styleable.CustomView_custom_fraction, 10, 100, 0);
-            Log.e("TAG", "fraction: " + fraction);
+            // 获取reference属性
+            int resourceId = a.getResourceId(R.styleable.MyAttrsView_custom_resid, -1);
+            Drawable drawable = a.getDrawable(R.styleable.MyAttrsView_custom_resid);
+            Log.e("TAG", "resourceId: " + resourceId); //resourceId: 2131165298
+            Log.e("TAG", "drawable: " + drawable); //drawable: android.graphics.drawable.BitmapDrawable@58e483c
 
-            //获取reference
-            int resourceId = a.getResourceId(R.styleable.CustomView_custom_resid, 0);
-            Log.e("TAG", "resourceId: " + resourceId);
-            //属性值为drawalbe类型
-            Drawable drawable = a.getDrawable(R.styleable.CustomView_custom_resid);
-            Log.e("TAG", "ddd: " + drawable);
+            // 获取enum属性
+            int anEnum = a.getInt(R.styleable.MyAttrsView_custom_enum, -1);
+            Log.e("TAG", "enum: " + anEnum); //enum: 2
+            switch (anEnum) {
+                case ENUM_NONE:
+                    Log.e("TAG", "无");
+                    break;
+                case ENUM_LEFT:
+                    Log.e("TAG", "左边");
+                    break;
+                case ENUM_RIGHT:
+                    Log.e("TAG", "右边");
+                    break;
+                case ENUM_TOP:
+                    Log.e("TAG", "上边");
+                    break;
+                case ENUM_BOTTOM:
+                    Log.e("TAG", "下边");
+                    break;
+            }
+            //上边
 
-            //获取enum
-            int anEnum = a.getInt(R.styleable.CustomView_custom_enum, 0);
-            Log.e("TAG", "anEnum: " + anEnum);
-
-            //获取falgs
-            int falgs = a.getInteger(R.styleable.CustomView_custom_flags, 0);
-            Log.e("TAG", "falgs: " + falgs);
+            // 获取flags属性
+            int flags = a.getInt(R.styleable.MyAttrsView_custom_flags, -1);
+            Log.e("TAG", "flags: " + flags); //flags: 3
+            if ((flags & FLAG_ENGLISH) != 0) {
+                Log.e("TAG", "英语");
+                flags &= ~FLAG_ENGLISH;
+            }
+            if ((flags & FLAG_CHINESE) != 0) {
+                Log.e("TAG", "中文");
+                flags &= ~FLAG_CHINESE;
+            }
+            if ((flags & FLAG_FRENCH) != 0) {
+                Log.e("TAG", "法语");
+                flags &= ~FLAG_FRENCH;
+            }
+            if ((flags & FLAG_JAPANESE) != 0) {
+                Log.e("TAG", "日语");
+                flags &= ~FLAG_JAPANESE;
+            }
+            //英语
+            //法语
 
             a.recycle();
         }
     }
 }
 ```
+
+
 
 
 

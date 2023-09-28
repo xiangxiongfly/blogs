@@ -1,11 +1,12 @@
 [TOC]
 
-# Java字节码文件结构
+# JVM 字节码文件结构
 
 ## 查看字节码的方法
 
-- 使用javap命令。如`javap -v Person.class`输出字节码信息，`javap -v -p Person.class`输出完整字节码信息。
-- 使用`jclasslib`插件。
+- Java源代码通过 `javac` 命令编译生产 `.class` 字节码文件。
+- 使用javap命令查看字节码文件。如：`javap -v Person.class` 输出字节码信息，或 `javap -v -p Person.class` 输出完整字节码信息。
+- 可以安装 `jclasslib` 插件查看。
 
 
 
@@ -76,9 +77,7 @@
 
 ## 字节码文件结构说明
 
-
-
-### 编译生产字节码
+**Java源代码：**
 
 ```java
 public class Person {
@@ -96,21 +95,46 @@ public class Person {
 }
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/549356e7374042bfa1d55d9f2cbb7c08.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_7,color_FFFFFF,t_70,g_se,x_16)
+**字节码文件：**
 
-说明：将Person类进行编译，生成`Person.class`文件，打开文件可以看到里面的内容。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/632107b37e2c491dae48bb672beb539c.png)
 
-- 开头是`CAFE BABE`，这4个字节称为默数，是字节码文件的身份标识，只有以`CA FE BA BE`开头的class文件才能被JVM接受。
-- 再往后是`00 00`表示Java的次版本号，`00  34`表示主版本号。
+说明：`Person.java` 通过 `javac` 命令编译生成`Person.class`文件，打开文件可以看到里面的内容。
+
+### 魔数
+
+- 魔数用于标识文件类型。
+- 在class字节码文件中，通过前4个字节作为身份标识：`CA` `FE` `BA` `BE`，咖啡北鼻（谐音）。
+
+其他常见文件类型的头4个字节：
+
+- JPEG: `FF` `D8` `FF`
+- PNG: `89` `50` `4E` `47`
+- GIF: `47` `49` `46` `38`
+- TIFF: `49` `49` `2A` `00`
+
+### 文件版本
+
+- 字节码文件中的第5~6表示次要版本号，如：`00` `00`
+- 第7~8表示主要版本号，如： `34` `00`
+
+常见版本号对应关系：
+
+| JDK版本 | 版本号（十六进制） | 版本号（十进制） |
+| ------- | ------------------ | ---------------- |
+| 1.6     | 32                 | 50               |
+| 1.7     | 33                 | 51               |
+| 1.8     | 34                 | 52               |
+
 - 再往后就是字符串常量池。
 
 
 
 ### 反编译字节码文件
 
-Java内置`javap`命令可以反编译查看字节码文件，或者通过`jclasslib`插件也可以查看。
+Java内置 `javap` 命令可以反编译查看字节码文件，或者通过 `jclasslib` 插件也可以查看。
 
-通过`javap -v Person.class`命令查看输出信息：
+通过 `javap -v Person.class` 命令查看输出信息：
 
 ```
 Classfile /D:/TestWorkspace/AndroidDemo/lib_java/build/classes/java/main/com/example/lib_java/Person.class
@@ -264,7 +288,7 @@ public class com.example.lib_java.Person
 第3部分是常量池，是字节码文件的重要部分，主要存放两类信息：
 
 - 字面量：字符串、final常量等；
-- 符合引用：类和接口的全限定名、字段的名称和描述符、方法的名称和描述符。
+- 符号引用：类和接口的全限定名、字段的名称和描述符、方法的名称和描述符。
 
 注：
 
@@ -394,6 +418,4 @@ Constant pool:
 3. args_size：形参数量。默认传入this变量。
 3. LineNumberTable：描述源码行号与字节码行号之间的对应关系。
 3. LocalVariableTable：描述栈帧中的局部变量与源码中定义的变量之间的关系，其中的this。
-
-
 
