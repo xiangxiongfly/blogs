@@ -4,32 +4,30 @@
 
 ## 概述
 
-当使用`launch`和`async`开启一个协程后，同时也会返回一个Job对象，Job对象其实就是协程的句柄。
+使用 launch 和 async 开启一个协程后，同时也会返回一个Job对象，Job对象就是协程的句柄。
 
-Job对象主要做两件事：
+Job对象可以做两件事：
 
--   监测协程的生命周期状态；
--   操控协程。
-
-Job与协程的关系非常类似空调遥控器与空调的关系：
-
--   遥控器可以监测空调的运行状态，Job可以监测协程的运行状态；
--   遥控器可以操控空调的运行状态，Job可以简单操控协程的运行状态。
+-   通过 Job 监测协程的生命周期状态，如 isActive、isCancelled、isCompleted。
+-   通过 Job 操控协程，如 start()、cancel()。
 
 
 
 ## Job
 
-**日志打印**
+**日志打印工具：**
 
-定义了一个`Job.log()`扩展函数，用打印Job的生命周期状态。
+定义了一个 `Job.log()` 扩展函数，用于打印 Job 的生命周期状态。
 
 ```kotlin
 fun Job.log() {
-    log("isActive=$isActive isCancelled=$isCancelled isCompleted=$isCompleted")
+    logX("""
+    isActive = ${isActive}        
+    isCancelled = ${isCancelled}    
+    isCompleted = ${isCompleted}""".trimIndent())
 }
 
-fun log(any: Any?) {
+fun logX(any: Any?) {
     println(
         """
 ┌──────────────────────────────────────────────────
@@ -42,7 +40,7 @@ Thread:${Thread.currentThread().name}
 
 
 
-### 生命周期状态
+### Job 生命周期图
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/726dcacf4dde4d0f87dc55450d848051.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_17,color_FFFFFF,t_70,g_se,x_16)
 
@@ -54,7 +52,7 @@ Thread:${Thread.currentThread().name}
 
 
 
-### 先启动协程再取消时的状态
+### Job#cancel() 取消协程时的生命周期变化
 
 
 ```kotlin
@@ -62,38 +60,42 @@ fun main() = runBlocking {
     val job = launch {
         delay(1000L)
     }
-    job.log()
-    job.cancel()
-    job.log()
-    delay(1500L)
-    job.log()
+    job.log()       // 第一处
+    job.cancel()    // 第二处
+    job.log()       // 第三处
 }
-
-/*
-┌──────────────────────────────────────────────────
-isActive=true isCancelled=false isCompleted=false
-Thread:main @coroutine#1
-└──────────────────────────────────────────────────
-┌──────────────────────────────────────────────────
-isActive=false isCancelled=true isCompleted=false
-Thread:main @coroutine#1
-└──────────────────────────────────────────────────
-┌──────────────────────────────────────────────────
-isActive=false isCancelled=true isCompleted=true
-Thread:main @coroutine#1
-└──────────────────────────────────────────────────
- */
 ```
 
+输出信息：
+
+```
+┌──────────────────────────────────────────────────
+isActive = true        
+isCancelled = false    
+isCompleted = false
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+isActive = false        
+isCancelled = true    
+isCompleted = false
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+```
+
+说明：第一处的打印日志 `isActive = true ` 表示协程处于活跃状态。第二处调用 `job.cancel()` 后，协程任务就会被取消。因此，第三处的打印日志 `isCancelled = true` 表示协程处于取消状态。
 
 
-### 懒加载模式下先启动再取消时的状态
+
+### Job#start() 生命周期变化
+
+可以使用 `Job#start()`  启动协程任务，需要配合 `CoroutineStart.LAZY` 使用。
 
 
 ```kotlin
 fun main() = runBlocking {
     val job = launch(start = CoroutineStart.LAZY) {
-        log("协程开启")
+        logX("协程启动了")
         delay(1000L)
     }
     delay(500L)
@@ -105,118 +107,231 @@ fun main() = runBlocking {
     delay(500L)
     job.log()
     delay(2000L)
-    log("完毕")
+    logX("结束")
 }
+```
 
-/*
+输出信息：
+
+```
 ┌──────────────────────────────────────────────────
-isActive=false isCancelled=false isCompleted=false
+isActive = false        
+isCancelled = false    
+isCompleted = false
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-isActive=true isCancelled=false isCompleted=false
+isActive = true        
+isCancelled = false    
+isCompleted = false
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-协程开启
+协程启动了
 Thread:main @coroutine#2
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-isActive=false isCancelled=true isCompleted=true
+isActive = false        
+isCancelled = true    
+isCompleted = true
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-完毕
+结束
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
- */
 ```
 
+说明：使用了懒加载模式所以创建协程后，不会立即执行。在调用 `job.start()` 后，协程开始执行，job的状态变为活跃状态。
 
 
-### 协程正常执行完毕的状态
+
+### Job#start() 懒加载时的生命周期变化
+
+在懒加载模式下需要使用 `Job#start()`  启动协程任务。
 
 ```kotlin
 fun main() = runBlocking {
     val job = launch(start = CoroutineStart.LAZY) {
-        log("协程开启")
+        logX("协程启动了")
         delay(1000L)
     }
     delay(500L)
     job.log()
     job.start()
     job.log()
-    delay(1100L)
+    delay(1100L)  
     job.log()
-    delay(2000L)
-    log("完毕")
+    delay(2000L)  
+    logX("结束")
 }
+```
 
-/*
+输出信息：
+
+```
 ┌──────────────────────────────────────────────────
-isActive=false isCancelled=false isCompleted=false
+isActive = false        
+isCancelled = false    
+isCompleted = false
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-isActive=true isCancelled=false isCompleted=false
+isActive = true        
+isCancelled = false    
+isCompleted = false
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-协程开启
+协程启动了
 Thread:main @coroutine#2
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-isActive=false isCancelled=false isCompleted=true
+isActive = false        
+isCancelled = false    
+isCompleted = true
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
 ┌──────────────────────────────────────────────────
-完毕
+结束
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
- */
 ```
 
 
 
-### 监听结束事件
+### Job#invokeOnCompletion() 监听结束事件
 
-将上面的案例launch中的delay改为5000L时，就会发现输出”完毕“后，程序没有立即结束，而是过了一段时间才真正退出。
+ `invokeOnCompletion()` 函数可以监听结束事件，如果 job 被取消，这个函数依然会被调用。
 
-可以使用`invokeOnCompletion()`函数监听结束事件，`join()`函数挂起后续代码。
+`join() ` 是一个挂起函数，挂起当前的程序执行流程，等待 job 中的协程任务执行完毕后，然后恢复当前程序执行流程。
 
 ```kotlin
+
 fun main() = runBlocking {
-    val job = launch(start = CoroutineStart.LAZY) {
-        log("协程开启")
-        delay(5000L)
+    suspend fun download() {
+        // 模拟下载任务
+        val time = (Random.nextDouble() * 1000).toLong()
+        logX("Delay time: = $time")
+        delay(time)
     }
+    val job = launch(start = CoroutineStart.LAZY) {
+        logX("协程开始")
+        download()
+        logX("协程结束")
+    }
+    delay(500L)
+    job.log()
     job.start()
+    job.log()
     job.invokeOnCompletion {
-        job.log()
+        job.log() // 协程结束以后就会调用这里的代码
     }
-    job.join() //等待协程执行完后
-    log("完毕")
+    job.join()      // 等待协程执行完毕
+    logX("结束")
 }
+```
 
-/*
+输出信息：
+
+```
 ┌──────────────────────────────────────────────────
-协程开启
-Thread:main @coroutine#2
-└──────────────────────────────────────────────────
-┌──────────────────────────────────────────────────
-isActive=false isCancelled=false isCompleted=true
-Thread:main @coroutine#2
-└──────────────────────────────────────────────────
-┌──────────────────────────────────────────────────
-完毕
+isActive = false        
+isCancelled = false    
+isCompleted = false
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
- */
+┌──────────────────────────────────────────────────
+isActive = true        
+isCancelled = false    
+isCompleted = false
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+协程开始
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+Delay time: = 112
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+协程结束
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+isActive = false        
+isCancelled = false    
+isCompleted = true
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+结束
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+```
+
+
+
+### Job源码
+
+```kotlin
+// 代码段7
+
+public interface Job : CoroutineContext.Element {
+
+    // 省略部分代码
+
+    // ------------ 状态查询API ------------
+
+    public val isActive: Boolean
+
+    public val isCompleted: Boolean
+
+    public val isCancelled: Boolean
+
+    public fun getCancellationException(): CancellationException
+
+    // ------------ 操控状态API ------------
+
+    public fun start(): Boolean
+
+    public fun cancel(cause: CancellationException? = null)
+
+    public fun cancel(): Unit = cancel(null)
+
+    public fun cancel(cause: Throwable? = null): Boolean
+
+    // ------------ 等待状态API ------------
+
+    public suspend fun join()
+
+    public val onJoin: SelectClause0
+
+    // ------------ 完成状态回调API ------------
+
+    public fun invokeOnCompletion(handler: CompletionHandler): DisposableHandle
+
+    public fun invokeOnCompletion(
+        onCancelling: Boolean = false,
+        invokeImmediately: Boolean = true,
+        handler: CompletionHandler): DisposableHandle
+
+    // ------------ parent-child ------------ 
+    public val children: Sequence 
+
+    @InternalCoroutinesApi 
+    public fun attachChild(child: ChildJob): ChildHandle
+}
 ```
 
 
 
 ## Deferred
+
+Deferred 其实也是继承自Job 。
+
+**Deffered源码：**
 
 ```kotlin
 public interface Deferred<out T> : Job {
@@ -224,7 +339,7 @@ public interface Deferred<out T> : Job {
 }
 ```
 
-Deferred其实也是继承自Job。
+**使用async-await：**
 
 ```kotlin
 fun main() = runBlocking {
@@ -238,8 +353,11 @@ fun main() = runBlocking {
     println("result=$result")
     log("完毕")
 }
+```
 
-/*
+输出信息：
+
+```
 ┌──────────────────────────────────────────────────
 协程开始
 Thread:main @coroutine#2
@@ -253,21 +371,19 @@ result=hello world
 完毕
 Thread:main @coroutine#1
 └──────────────────────────────────────────────────
- */
 ```
 
 
 
 ## 结构化并发
 
--   结构化并发指带有结构和层级的并发。线程之间不存在父子关系，但是协程之间存在父子关系，一个协程可以拥有多个子协程。
+-   结构化并发指带有结构和层级的并发。
+-   线程之间不存在父子关系，但是协程之间存在父子关系，一个协程可以拥有多个子协程。
 -   可以实现只控制父协程，从而控制一堆子协程。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2357bb41bd8e4978aef459c0c3bdcbc1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_7,color_FFFFFF,t_70,g_se,x_16)
+### 子协程全部执行完后，父协程才会执行完
 
-### 场景一
-
-只有子协程全部执行完后，父协程才会执行完。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/aa0e7570b239470e969cb302450bf28c.png)
 
 ```kotlin
 fun main() = runBlocking {
@@ -311,9 +427,26 @@ Thread:main @coroutine#1
 
 说明：` parentJob.join()`这里会被挂起大概5秒钟，会等待内部的job1、job2、job3全部执行完后，parentJob才是执行完毕，然后会继续往下执行。
 
-### 场景二
+**Job源码：**
 
-父协程取消了，子协程也会被取消。
+```kotlin
+public interface Job : CoroutineContext.Element { 
+    // 省略部分代码 
+    // ------------ parent-child ------------ 
+    public val children: Sequence 
+    
+    @InternalCoroutinesApi 
+    public fun attachChild(child: ChildJob): ChildHandle
+}
+```
+
+每个 Job 对象都一个children属性，类型是 Sequence，是一个惰性的集合，可以对它进行遍历。
+
+
+
+### 父协程取消了，子协程也会被取消
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/4f3f42a14be5458aa9aa2a28b8915b2d.png)
 
 ```kotlin
 fun main() = runBlocking {
@@ -375,6 +508,8 @@ Thread:main @coroutine#1
 
 说明：`parentJob.cancel()`执行后，job1、job2、job3也被取消了。
 
+
+
 ### 场景三
 
 ```kotlin
@@ -420,5 +555,5 @@ Thread:main @coroutine#1
  */
 ```
 
-说明：因为协程具有结构化并发的特性，当job执行完后处于complete状态，job2与job存在依赖关系，不会被激活，所以job2不会执行。
+说明：因为协程具有结构化并发的特性，当job执行完后处于complete状态，job 与 job2 存在依赖关系，不会被激活，因此job2不会执行。
 

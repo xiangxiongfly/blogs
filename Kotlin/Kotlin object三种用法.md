@@ -4,17 +4,17 @@
 
 ## 概述
 
-在Kotlin中，object关键字主要有三种用法：
+在Kotlin中，fun关键字表示定义函数，class关键字表示定义类，interface关键字表示定义接口，但是object关键字却可以定义三种类型：
 
 - 匿名内部类
 - 单例模式
 - 伴生对象
 
-其实这三种用法本质都是定义一个类的时候同时创建对象。
+其实这三种用法本质都是定义一个类的同时还创建对象。
 
 
 
-## object 匿名内部类
+## 匿名内部类
 
 - 在Kotlin中定义匿名内部类需要使用object关键字。
 - Kotlin中可以在继承一个抽象类时，同时可以实现多个接口i。
@@ -86,16 +86,19 @@ val obj = object : Base(), A, B {
 
 
 
-## object 单例模式
+## 单例模式
 
 - 在Kotlin中，可以直接用object关键字实现一个单例模式。
 - 等价于Java中的静态代码块的单例模式，在JVM成功加载类的时候就创建对象实例。
+- 缺点：不支持懒加载，不支持传参。
 
 ```kotlin
 object DBManager {
     fun getData() {}
 }
+```
 
+```kotlin
 //在Kotlin中调用
 DBManager.getData()
 
@@ -160,7 +163,11 @@ public final class DBManager {
 
 
 
-## companion object 伴生对象
+## 伴生对象
+
+- 在Kotlin中没有 `static` 关键字，因此没法直接定义静态方法和静态变量。
+- Kotlin提供了伴生对象，可以帮助实现静态方法和静态变量。
+- 伴生对象中的方法可以使用 `@JvmStatic` 注解。
 
 ```kotlin
 class UserManager {
@@ -199,11 +206,12 @@ public final class DBManager {
 
 
 
-## 工厂模式
+### 工厂模式
 
 统一管理类的创建过程。
 
 ```kotlin
+// 主构造函数定义为private，防止外部调用
 data class Goods private constructor(val name: String) {
     companion object {
         @JvmStatic

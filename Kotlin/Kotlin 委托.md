@@ -5,11 +5,11 @@
 ## 概述
 
 - 委托模式是一种抽象的设计模式，将我的工作委托给别人处理，委托模式也是一种替代继承的方式。
-- 在Kotlin里，委托分两种：分别是类委托和属性委托。
+- 在Kotlin里，委托分两种：分别是委托类和委托属性。
 
 
 
-## 类委托
+## 委托类
 
 ### 普通实现
 
@@ -37,6 +37,7 @@ class OperaDB(var db: DB) : DB {
     }
 }
 
+//使用
 fun main() {
     OperaDB(FileDB()).save()
     OperaDB(SqlDB()).save()
@@ -54,8 +55,11 @@ fun main() {
 
 ```kotlin
 //委托类
+//           参数         通过by将接口实现委托给db
+//            ↓             ↓
 class OperaDB(db: DB) : DB by db
 
+//使用
 fun main() {
     OperaDB(FileDB()).save()
     OperaDB(SqlDB()).save()
@@ -77,8 +81,9 @@ fun main() {
 
 
 
-## 属性委托
+## 委托属性
 
+- Kotlin 中的“委托类”委托单是接口方法，而“委托属性”委托单是属性的getter、setter。
 - 属性委托是将属性的`get`/`set`方法的逻辑委托给一个类进行实现。
 - `val属性`必须有`getValue`方法，`var属性`必须有`setValue`和`getValue`方法，通过`operator`关键字修饰。
 
@@ -107,32 +112,49 @@ class Delegate {
 
 
 ```kotlin
-
-class MyDelegate {
-    operator fun getValue(thisRef: Any, property: KProperty<*>): String {
-        println("getValue(), $thisRef, ${property.name}")
-        return "hello 属性委托"
+class MyDelegate(private var s: String = "hello") {
+//     ㈠                           ㈡                               ㈢   
+//     ↓                            ↓                               ↓
+    operator fun getValue(thisRef: Test, property: KProperty<*>): String {
+        println("调用getValue()方法")
+        return s
     }
 
-    operator fun setValue(thisRef: Any, property: KProperty<*>, value: String) {
-        println("setValue(), $thisRef, ${property.name}, $value")
+//      ㈠                          ㈡                                      ㈢  
+//      ↓                           ↓                                      ↓
+    operator fun setValue(thisRef: Test, property: KProperty<*>, value: String) {
+        println("调用setValue()方法")
+        s = value
     }
 }
 
+//      ㈡   
+//      ↓
 class Test {
-    var p: String by MyDelegate()
+//               ㈢ 
+//               ↓
+    var text: String by MyDelegate()
 }
 
 fun main() {
-    val test = Test()
-    println(test.p) //会调用getValue函数
-    test.p = "abcd" //会调用setValue()函数
+    val owner = Test();
+    println(owner.text)
+    owner.text = "world"
+    println(owner.text)
 }
 
-//getValue(), com.example.lib_kt.Test@1f17ae12, p
-//hello 属性委托
-//setValue(), com.example.lib_kt.Test@1f17ae12, p, abcd
+//调用getValue()方法
+//hello
+//调用setValue()方法
+//调用getValue()方法
+//world
 ```
+
+说明：
+
+- var 修饰的属性，必须有 `getValue`、`setValue()` 这2个方法，必须是 `operator` 关键字修饰。
+- 第`㈡ `处表示text属性必须是Test类中。
+- 第`㈢`处表示text属性必须是String类型。
 
 
 
@@ -192,7 +214,8 @@ Kotlin提供了好几种标准委托，其中包括了：
 
 ### 直接委托
 
-有利于处理软件版本之间的兼容问题。
+- 指将属性A委托给属性B。
+- 有利于处理软件版本之间的兼容问题。
 
 ```kotlin
 class Test {
@@ -212,7 +235,7 @@ fun main() {
 说明：
 
 - 这里指将newName的getter、setter属性都委托给oldName的getter、setter，`::oldName`表示属性引用。
-- 当调用newName的`get()`方法时，会返回oldName的值；当调用newName的`set()`方法时，会将值传递给oldName，也就是调用oldName的`set()`方法。
+- 当调用newName的`get()`方法时，会返回oldName的值，也就是调用oldName的`get()`方法；当调用newName的`set()`方法时，会将值传递给oldName，也就是调用oldName的`set()`方法。
 
 等价于以下代码：
 
@@ -231,13 +254,15 @@ class Test {
 
 ### 懒加载
 
+懒加载，顾名思义，就是对于一些需要消耗计算机资源的操作，我们希望它在被访问的时候才去触发，从而避免不必要的资源开销。
+
 ```kotlin
 val data: String by lazy {
     request()
 }
 
 fun request(): String {
-    println("获取数据")
+    println("执行请求")
     return "hello world"
 }
 
@@ -246,7 +271,7 @@ fun main() {
     println(data)
 }
 
-//获取数据
+//执行请求
 //hello world
 //hello world
 ```
@@ -254,6 +279,8 @@ fun main() {
 
 
 ### 可观察属性 
+
+每次赋值时(在执行赋值之后)都会调用处理程序。它有三个参数：初始值、旧值和新值:
 
 ```kotlin
 class User {
@@ -286,7 +313,7 @@ class User(val map: Map<String, Any?>) {
 }
 
 fun main() {
-    var user = User(
+    val user = User(
         mapOf(
             "age" to 18,
             "name" to "abc"
@@ -305,7 +332,7 @@ fun main() {
 
 ## 提供委托
 
-可以使用`provideDelegate`在属性委托之前做一些额外的判断，这样可以实现根据不同的委托属性的名称，使用不同委托类。
+如果在属性委托之前再做一些额外的判断工作，我们可以使用 provideDelegate 来实现。
 
 ```kotlin
 class StringDelegate(private var s: String = "hello") : ReadWriteProperty<Any, String> {
@@ -348,9 +375,9 @@ fun main() {
 
 
 
-## 其他
+## 案例
 
-### 增加可见性封装
+### 属性可见性封装
 
 ```kotlin
 class Model {
@@ -380,7 +407,7 @@ fun main() {
 
 
 
-### View和数据绑定
+### 数据与View绑定
 
 ```kotlin
 operator fun TextView.provideDelegate(value: Any?, prop: KProperty<*>) =
@@ -409,7 +436,7 @@ println(textView.text)
 
 
 
-### 借助委托创建ViewModel
+### ViewModel委托
 
 ```kotlin
 private val mainViewModel: MainViewModel by viewModels()

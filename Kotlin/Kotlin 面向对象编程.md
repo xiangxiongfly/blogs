@@ -158,8 +158,10 @@ println("姓名：$username 年龄：$age 地址：$address") //姓名：小明 
 
 ## 继承
 
-- 在继承的行为上，Kotlin与Java完全相反，Java的继承是默认开放的，Kotlin的继承是默认封闭的。
+- 在Java中使用 `extends` 表示继承，在Kotlin中使用 `:` 表示继承。
+- Java中使用 `@Overrid` 注解表示重写，在Kotlin中使用 `overrid` 关键字。
 - 使用`open`关键字的类，表示可以被继承；使用`open`关键字的方法，表示可以被重写。
+- Java的继承是默认开放的，Kotlin的继承是默认封闭的。
 
 ```kotlin
 open class Animal {
@@ -179,8 +181,8 @@ class Dog : Animal() {
 
 ## 接口
 
-- Kotlin中的接口与Java的接口基本类似。
-- Java中的接口在Java 1.8中才引入方法实现这个特性，，而Kotlin是完全兼容Java 1.6的，本质是通过内部类实现这个特性。
+- Kotlin中的接口与Java类似，都是使用 `interface` 关键字。
+- 虽然在 Java 1.8 版本当中，接口引入了方法默认实现，但由于 Kotlin 是完全兼容 Java 1.6 版本的。因此为了实现这个特性，Kotlin 编译器在背后做了一些转换。
 
 ```kotlin
 interface IAnimal {
@@ -216,8 +218,6 @@ dog.run()
 dog.sleep()
 ```
 
-
-
 **IAnimal接口翻译为Java代码**
 
 ```java
@@ -242,8 +242,6 @@ public interface IAnimal {
     }
 }
 ```
-
-
 
 
 
@@ -345,75 +343,16 @@ public final class Config {
 
 
 
-## 匿名内部类
-
-**Java写法**
-
-```java
-List<String> list = Arrays.asList("hello", "world", "C", "Java", null);
-Collections.sort(list, new Comparator<String>() {
-    @Override
-    public int compare(String o1, String o2) {
-        if (o1 == null) {
-            return -1;
-        }
-        if (o2 == null) {
-            return 1;
-        }
-        return o1.compareTo(o2);
-    }
-});
-System.out.println(list); //[null, C, Java, hello, world]
-```
-
-**object表达式**
-
-```kotlin
-val list = listOf("hello", "world", "C", "Java", null)
-Collections.sort(list, object : Comparator<String?> {
-    override fun compare(o1: String?, o2: String?): Int {
-        if (o1 == null) {
-            return -1;
-        }
-        if (o2 == null) {
-            return 1;
-        }
-        return o1.compareTo(o2)
-    }
-})
-println(list) //[null, C, Java, hello, world]
-```
-
-**Lambda表达式**
-
-```kotlin
-val list = listOf("hello", "world", "C", "Java", null)
-val comparator = Comparator<String?> { 
-    o1, o2 ->
-    if (o1 == null) {
-        return@Comparator -1
-    }
-    if (o2 == null) {
-        return@Comparator 1
-    }
-    o1.compareTo(o2)
-}
-Collections.sort(list, comparator)
-println(list) //[null, C, Java, hello, world]
-```
-
-
-
 ## 数据类
 
-- 数据类用于保存数据，使用`data`关键字
-- 数据类会自动生成`getter`/`setter`/`equals`/`hashCode`/`toString`/`copy`方法
+- 数据类指用于保存数据的类，在类的前面加 `data` 关键字。
+- 数据类会自动生成`getter`/`setter`/`equals`/`hashCode`/`toString`/`copy`方法。
 
 ```kotlin
 data class Person(var name: String, var age: Int)
 ```
 
-等价于Java代码
+**等价于Java代码：**
 
 ```java
 public final class Person {
@@ -503,8 +442,39 @@ public final class Person {
 
 
 
+## 嵌套类
+
+- Java中的嵌套类分2种：非静态内部类、静态内部类。
+- Kotlin中的嵌套类相当于Java中静态内部类。
+- 嵌套类不能访问外部类的属性和方法。
+
+```kotlin
+class Outer {
+    fun eat() {
+        println("在外面吃饭")
+    }
+
+    class Inner {
+        fun eat() {
+            println("在里面吃饭")
+        }
+
+        fun test() {
+            this.eat()
+        }
+    }
+}
+
+val i = Outer.Inner()
+i.test()
+```
+
+
+
 ## 内部类和this
 
+- 在嵌套类前面加上 `inner` 关键字就是内部类。
+- Kotlin中的内部类相当于Java中非静态内部类。
 - 内部类持有外部类的引用，所以内部类是可以访问外部类的属性和方法。
 
 ```kotlin
@@ -532,30 +502,61 @@ i.test()
 
 
 
-## 嵌套类
+## 匿名内部类
 
-- 嵌套类不会包含对外部类的引用，所以不能访问外部类的属性和方法。
-- 相当于Java中静态内部类。
+**Java写法**
+
+```java
+List<String> list = Arrays.asList("hello", "world", "C", "Java", null);
+Collections.sort(list, new Comparator<String>() {
+    @Override
+    public int compare(String o1, String o2) {
+        if (o1 == null) {
+            return -1;
+        }
+        if (o2 == null) {
+            return 1;
+        }
+        return o1.compareTo(o2);
+    }
+});
+System.out.println(list); //[null, C, Java, hello, world]
+```
+
+**object表达式**
 
 ```kotlin
-class Outer {
-    fun eat() {
-        println("在外面吃饭")
-    }
-
-    class Inner {
-        fun eat() {
-            println("在里面吃饭")
+val list = listOf("hello", "world", "C", "Java", null)
+Collections.sort(list, object : Comparator<String?> {
+    override fun compare(o1: String?, o2: String?): Int {
+        if (o1 == null) {
+            return -1;
         }
-
-        fun test() {
-            this.eat()
+        if (o2 == null) {
+            return 1;
         }
+        return o1.compareTo(o2)
     }
+})
+println(list) //[null, C, Java, hello, world]
+```
+
+**Lambda表达式**
+
+```kotlin
+val list = listOf("hello", "world", "C", "Java", null)
+val comparator = Comparator<String?> { 
+    o1, o2 ->
+    if (o1 == null) {
+        return@Comparator -1
+    }
+    if (o2 == null) {
+        return@Comparator 1
+    }
+    o1.compareTo(o2)
 }
-
-val i = Outer.Inner()
-i.test()
+Collections.sort(list, comparator)
+println(list) //[null, C, Java, hello, world]
 ```
 
 
@@ -572,7 +573,6 @@ enum class Color {
     BLUE;
 }
 ```
-
 ```kotlin
 //复杂枚举
 enum class Color(val value: String) {
@@ -580,8 +580,12 @@ enum class Color(val value: String) {
     GREEN("绿色"),
     BLUE("蓝色");
 }
+```
 
+
+```kotlin
 val color = Color.GREEN
+
 //获取枚举对象
 println(color) //GREEN
 //获取枚举对象的值
@@ -603,38 +607,19 @@ Color.values().forEach {
 
 ## 密封类
 
-密封类是对枚举类的一种补充，使用枚举或密封类时慎用else分支。
+密封类是对枚举类的一种补充，使用枚举类或密封类时慎用else分支。
 
 ```kotlin
 sealed class Result<out R> {
     data class Success<out T>(val data: T, val message: String = "") : Result<T>()
-
     data class Error(val exception: Exception) : Result<Nothing>()
-
     object Loading : Result<Nothing>()
 }
-```
 
-```kotlin
-fun display(data: Result<String>) = when (data) {
-    is Result.Success -> {
-        println("加载成功：${data.message}")
-    }
-    is Result.Error -> {
-        println("加载失败：${data.exception}")
-    }
-    is Result.Loading -> {
-        println("加载中")
-    }
+fun displayUI(result: Result<String>) = when (result) {
+    is Result.Success -> showSuccess(result)
+    is Result.Error -> showError(result)
+    is Result.Loading -> showLoading()
 }
 ```
 
-```kotlin
-display(Result.Success("hello world", "ok"))
-display(Result.Error(IllegalArgumentException("fail")))
-display(Result.Loading)
-
-//    加载成功：ok
-//    加载失败：java.lang.IllegalArgumentException: fail
-//    加载中
-```

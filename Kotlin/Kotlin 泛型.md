@@ -10,6 +10,12 @@
 
 - 还可以在定义泛型时，设置边界限制。
 
+- 从型变的位置来分类的话，分为使用处型变和声明处型变。
+
+- 从型变的父子关系来分类的话，分为逆变和协变。逆变表示父子关系颠倒了，而协变表示父子关系和原来一致。
+
+- 型变的口诀：泛型作为参数，用 in；泛型作为返回值，用 out。在特殊场景下，同时作为参数和返回值的泛型参数，我们可以用 @UnsafeVariance 来解决型变冲突。
+
   
 
 ## 基本使用
@@ -100,13 +106,12 @@ fun main() {
 
 
 
-### Kotlin泛型函数
+## 泛型函数
 
-在Kotlin中函数式一等公民。
+在 Kotlin 中函数是一等公民。
 
 ```kotlin
 fun <T> eat(t: T) {
-
 }
 
 fun main() {
@@ -121,10 +126,10 @@ fun main() {
 
 
 
-### Kotlin泛型边界
+## 泛型边界
 
-- 在Java中可以通过`? extends Base`指定上界是`Base`类型，表示前者是后者的子类。
-- 在Kotlin中可以通过`T : Base`指定上界是`Base`类型。
+- 在 Java 中可以通过`? extends Base`指定上界是`Base`类型，表示前者是后者的子类。
+- 在 Kotlin 中可以通过`T : Base`指定上界是`Base`类型。
 
 ```kotlin
 class Controller<T : Animal> {
@@ -144,17 +149,15 @@ fun main() {
 
 
 
-### Kotlin限制多个类型
+## 限制多个类型
 
-可以通过`where`关键字实现
+可以通过 `where` 关键字实现
 
 ```kotlin
 class Dog : Animal() {
-
 }
 
 class Cat : Animal(), IPet {
-
 }
 
 class Controller<T> where T : Animal, T : IPet {
@@ -190,144 +193,133 @@ fun main() {
   - 逆变：负责关系颠倒
   - 协变：父子关系不变
 
-### 泛型不变性
+### 不变性问题
 
 虽然`Cat`是`Animal`的子类，但是`MutableList<Cat>`与`Mutable<Animal>`不存在任何继承关系，无法互相替代，没有任何联系，这就是泛型的不变性。
 
-虽然Java也有型变的概念，但是Java是没有声明处型变的，只有使用处型变。
+虽然 Java 也有型变的概念，但是 Java 是没有声明处型变的，只有使用处型变。
 
 ```kotlin
 fun foo(animalList: MutableList<Animal>) {
-    animalList.add(Cat())
+    animalList.add(Dog()) //Cat集合不能存Dog对象
     val animal: Animal = animalList[0]
 }
 
 fun main() {
     val catList = mutableListOf<Cat>(Cat())
-    //foo(catList) //编译器报错
+    foo(catList) //编译器报错
 }
 ```
 
 ```kotlin
 fun foo(catList: MutableList<Cat>) {
     catList.add(Cat())
-    val cat = catList[0]
+    val cat: Cat = catList[0] //实际取出来的是Animal对象
 }
 
 fun main() {
     val animalList = mutableListOf<Animal>(Animal())
-    //foo(animalList) //编译器报错
+    foo(animalList) //编译器报错
 }
 ```
+
+说明：
+
+- 当程序需要 Animal 集合时，如果传入 Cat 集合，这时往 list 中添加 Dog，就会出问题。
+- 当程序需要 Cat 集合时，如果传入 Animal 集合，这时从 list 中取对象是 Animal 而不是 Cat 时，就会出问题。
+- 因此 `MutableList<Cat>`与`MutabelList<Animal>` 没有任何继承关系，这就是泛型的不变性。
 
 
 
 ### 协变
 
-- 协变表示父子关系和原来一致，是一种读取行为。
-- `Cat`类和`Dog`类是`Animal`的子类，但是`List<Cat>`和`List<Dog>`不是`List<Animal>`的子类，需要使用`? extends Animal`将`List<Cat>`和`List<Dog>`变成`List<Animal>`的子类。这种泛型类型是父子关系的被称为协变。
-- 说明：泛型`<? extends Animal>`表示上界是Animal类型，表示传入的泛型具体类型只能是Animal及其子类类型。
-  - 泛型具体类型可以是Animal类型，也可以是Cat类型或Dog类型，所以取出的元素一定是`Animal`类型；
-  - 但是写入时无法确定元素具体类型是什么，可能是Cat也有可能是Dog，可能将Cat元素写入Dog集合中，所以不能取出元素。
+#### 协变问题
 
-- 协变只能读取元素，不能写入元素。
+```kotlin
+open class Fruit
+
+class Apple : Fruit()
+
+class FruitShop<T>(private val fruit: T) {
+    fun getFruit(): T {
+        return fruit
+    }
+}
+
+fun fetchFruit(shop: FruitShop<Fruit>) {
+    val fruit = shop.getFruit()
+}
+
+fun main() {
+    val apple = Apple()
+    val shop = FruitShop<Apple>(apple)
+    fetchFruit(shop) //编译器报错
+}
+```
+
+报错原因：类型不匹配，fetchFruit函数要求传入 `FruitShop<Fruit>` 类型，而实际传入 `FruitShop<Apple>` 类型，导致类型不匹配。
 
 #### 在Java中处理协变
 
+虽然 Java 当中也有型变的概念，但是呢，Java 当中是没有声明处型变的。Java 里面只有使用处型变。
+
 ```java
-public class Demo {
+class Fruit {}
+class Apple extends Fruit {}
+
+class FruitShop<T> {
+
+    private T fruit;
+
+    public FruitShop(T fruit) {
+        this.fruit = fruit;
+    }
+
+    T getFruit() {
+        return fruit;
+    }
+}
+
+public class Test {
     public static void main(String[] args) {
-        List<Animal> animalList = new ArrayList<Animal>() {
-            {
-                add(new Animal());
-                add(new Cat());
-                add(new Dog());
-            }
-        };
-        foo(animalList);
-
-        List<Cat> catList = new ArrayList<Cat>() {
-            {
-                add(new Cat());
-            }
-        };
-        foo(catList);
-
-        List<Dog> dogList = new ArrayList<Dog>() {
-            {
-                add(new Dog());
-            }
-        };
-        foo(dogList);
+        Apple apple = new Apple();
+        FruitShop<Apple> shop = new FruitShop<Apple>(apple);
+        fetchFruit(shop);
     }
 
-    public static void foo(List<? extends Animal> animalList) {
-        /*
-        协变只能获取，不能写入
-        所以编译器会报错：
-        animalList.add(new Animal());
-        animalList.add(new Object());
-        animalList.add(new Dog());
-        animalList.add(new Cat());
-         */
-        for (Animal o : animalList) {
-            o.eat();
-        }
+    static void fetchFruit(FruitShop<? extends Fruit> shop) {
+        Fruit fruit = shop.getFruit();
     }
 }
 ```
 
+#### 第一种做法：使用处协变
 
+在 fetchFruit() 函数中的泛型参数前面添加 out 关键字。
 
-#### 使用处协变
+这样代码就可以通过编译了，可以将 ``FruitShop<Apple>`` 看作为 `FruitShop<Fruit>` 的子类。
 
-修改`foo()`函数的泛型参数，在Animal的前面添加`out`关键字，其原理与Java基本一致。
+水果商店和水果的父子关系一致了，这称为”泛型的协变“。
 
 ```kotlin
-//                      使用处协变
-//                         ↓
-fun foo(list: MutableList<out Animal>) {
-    for (o in list) {
-        o.eat()
-    }
-}
-
-fun main() {
-    val animalLIst = mutableListOf<Animal>(Animal(), Cat(), Dog())
-    foo(animalLIst)
-
-    val catList = mutableListOf<Cat>(Cat())
-    foo(catList)
-
-    val dogList = mutableListOf<Dog>(Dog())
-    foo(dogList)
+//                          使用处协变
+//                             ↓
+fun fetchFruit(shop: FruitShop<out Fruit>) {
+    val fruit = shop.getFruit()
 }
 ```
 
+#### 第二种做法：声明处协变
 
-
-#### 声明处协变
-
-在Controller类的泛型T的前面添加`out`关键字。
+在 FruitShop 类的泛型参数前面添加 out 关键字
 
 ```kotlin
-//			声明处协变
-//				↓
-class Controller<out T : Animal>(private var animal: T) {
-    fun getAnimal(): T {
-        return animal
+//             声明处协变
+//                ↓
+class FruitShop<out T>(private val fruit: T) {
+    fun getFruit(): T {
+        return fruit
     }
-}
-
-fun foo(controller: Controller<Animal>) {
-    val animal = controller.getAnimal()
-    animal.eat()
-}
-
-fun main() {
-    val cat = Cat()
-    val controller = Controller<Cat>(cat)
-    foo(controller)
 }
 ```
 
@@ -335,140 +327,160 @@ fun main() {
 
 ### 逆变
 
-- 逆变表示父子关系颠倒了，是一种写入行为。
-- `Cat`类是`Animal`类的子类，`List<Animal>`也不是`List<Cat>`的子类，在Java中可以使用`? super Cat`将`List<Animal>`变成`List<Cat>`的子类，这种泛型类型的颠倒关系就是逆变。
-- 说明：`<? super Cat>`表示下界是Cat类型，表示传入的泛型具体类型只能是Cat及其父类。
-  - 传入的泛型具体类型可以是Cat类型，也可以是Animal的类型，只能往里存数据，但不能存Animal类型的元素；
-  - 取出来的元素都是Object类型，无法确定它的上界类型，所以无法取出元素确定类型。
+#### 逆变问题
 
-- 逆变只能写入元素，不能读取元素。
+```kotlin
+open class Fruit
+
+class Apple : Fruit()
+
+class Controller<T> {
+    fun cutFruit(fruit: T) {}
+}
+
+fun cutFruit(controller: Controller<Apple>) {
+    val apple = Apple()
+    controller.cutFruit(apple)
+}
+
+fun main() {
+    val controller = Controller<Fruit>()
+    cutFruit(controller) //编译器报错
+}
+```
+
+报错原因：类型不匹配，cutFruit函数要求传入 `Controller<Apple>` 类型，而实际传入 `Controller<Fruit>` 类型，导致类型不匹配。
 
 #### 在Java中处理逆变
 
 ```java
-public class Demo {
+class Fruit {}
+
+class Apple extends Fruit {}
+
+class Controller<T> {
+    void cutFruit(T fruit) {
+    }
+}
+
+public class Test {
     public static void main(String[] args) {
-        List<Animal> animalList = new ArrayList<Animal>() {
-            {
-                add(new Animal());
-                add(new Cat());
-                add(new Dog());
-            }
-        };
-        foo(animalList);
-
-        List<Cat> catList = new ArrayList<Cat>() {
-            {
-                add(new Cat());
-            }
-        };
-        foo(catList);
+        Controller<Fruit> controller = new Controller<Fruit>();
+        cutFruit(controller);
     }
 
-    public static void foo(List<? super Cat> catList) {
-        /*
-        逆变变只能写入Cat及其子类类型，不能读取
-        所以编译器会报错
-        Animal cat = animalList.get(0);
-        catList.add(new Animal());
-         */
-        catList.add(new Cat());
-        catList.add(new Tiger());
-        for (Object o : catList) {
-            System.out.println(o.toString());
-        }
+    static void cutFruit(Controller<? super Apple> controller) {
+        Apple apple = new Apple();
+        controller.cutFruit(apple);
     }
+}
+```
+
+#### 第一种做法：使用处逆变
+
+在 cutFruit() 函数的泛型参数前面添加 in 关键字。
+
+这样代码就可以通过编译了，可以将 `Controller<Fruit>` 看作为 `Controller<Apple>` 的子类。
+
+切水果师傅和水果的父子关系不一致了，这称为”泛型的逆变“。
+
+```kotlin
+//                                使用处逆变
+//                                  ↓
+fun cutFruit(controller: Controller<in Apple>) {
+    val apple = Apple()
+    controller.cutFruit(apple)
+}
+```
+
+#### 第二种做法：声明处逆变
+
+在 Controller 类的泛型参数前面添加 in关键字
+
+```kotlin
+//              声明处逆变
+//                ↓
+class Controller<in T> {
+    fun cutFruit(fruit: T) {}
 }
 ```
 
 
 
-#### 使用处逆变
+### 星投影
 
-修改`foo()`函数的泛型参数，在Cat的前面添加`in`关键字。
+星投影指用“星号”作为泛型的实参，表示接收任意类型。
 
 ```kotlin
-//						使用处逆变
-//						   ↓
-fun foo(catList: MutableList<in Cat>) {
-    for (o in catList) {
-        println(o.toString())
-    }
+fun findShop(): FruitShop<*> {
+    return FruitShop<Cat>(Cat())
 }
 
 fun main() {
-    val animalList = mutableListOf<Animal>(Animal(), Cat(), Dog())
-    foo(animalList)
-
-    val catList = mutableListOf<Cat>(Cat())
-    foo(catList)
+    val shop = findShop()
+    val fruit: Any? = shop.getFruit()
 }
 ```
 
 
 
-#### 声明处逆变
+## 型变总结
 
-在`Controller类`的泛型T的前面添加`in`关键字。
+Consumer in, Producer out ！大概意思：消费者 in，生产者 out。
 
-```kotlin
-//			 声明处逆变
-//				↓
-class Controller<in T : Animal>() {
-    fun eat(t: T) {
-        t.eat()
-    }
-}
-
-fun foo(controller: Controller<Cat>) {
-    val cat = Cat()
-    controller.eat(cat)
-}
-
-fun main() {
-    val controller = Controller<Animal>()
-    foo(controller)
-}
-```
-
-
-
-### 特殊情况
-
-**同时存在out in，官方案例**
-
-```kotlin
-//                   协变    
-//                    ↓      
-public interface List<out E> : Collection<E> {
-//                                泛型作为返回值
-//                                       ↓    
-    public operator fun get(index: Int): E
-//                                           泛型作为参数
-//                                                 ↓    
-    override fun contains(element: @UnsafeVariance E): Boolean
-//                                        泛型作为参数
-//                                              ↓   
-    public fun indexOf(element: @UnsafeVariance E): Int
-}
-```
-
-
-
-### 协变逆变总结
-
-- Consumer in, Producer out ！消费者 in，生产者 out。
-- **写入in，读取out**
-  - 逆变情况：是一种写入行为。泛型作为参数时，使用`in`关键字。
-  - 协变情况：是一种读取行为。泛型作为返回值时，使用`out`关键字。
+- 协变情况：使用 out 关键字，是一种读取行为。泛型作为返回值时。
+- 逆变情况：使用 in 关键字，是一种写入行为。泛型作为参数时。
 - 特殊场景：同时作为参数和返回值的泛型参数，可以用`@UnsafeVariance`解决冲突。
+
+**案例：**
+
+```kotlin
+//             声明处协变
+//                ↓
+class FruitShop<out T>(private val fruit: T) {
+    fun getFruit(): T {
+        return fruit
+    }
+}
+
+//              声明处逆变
+//                ↓
+class Controller<in T> {
+    fun cutFruit(fruit: T) {}
+}
+```
+
+**Kotlin源码：**
+
+```kotlin
+//                          逆变
+//                           ↓
+public interface Comparable<in T> {
+//                                   泛型作为参数
+//                                       ↓
+    public operator fun compareTo(other: T): Int
+}
+```
+由于泛型是作为了 compareTo 方法的参数传入的，因此，对于 Comparable 的泛型 T，我们应该使用 in 来修饰，这就是逆变的实际应用。
+```kotlin
+//                        协变
+//                         ↓
+public interface Iterator<out T> {
+//                         泛型作为返回值
+//                              ↓    
+    public operator fun next(): T
+    
+    public operator fun hasNext(): Boolean
+}
+```
+
+由于泛型是作为 next 方法的返回值的，因此，对于 Iterator 的泛型 T，我们应该使用 out 来修饰，这就是协变的应用。
+
 
 |      | Kotlin               | Java                     |      |
 | ---- | -------------------- | ------------------------ | ---- |
 | 协变 | `List<out TextView>` | List<? extends TextView> | 上限 |
 | 逆变 | `List<in TextView>`  | List<? super TextView>   | 下限 |
-
-
 
 ### 数组拷贝
 
@@ -496,29 +508,23 @@ fun <T> copyOut(src: Array<out T>, dest: Array<T>) {
 
 
 
-## 星号泛型
+## 特殊情况
 
-星号泛型表示任意类型。
+**同时存在out in，官方案例**
 
 ```kotlin
-class Controller<out T : Animal>(private var animal: T) {
-    fun getAnimal(): T {
-        return animal
-    }
-}
-
-fun findAnimal(type: Int): Controller<*> {
-    return if (type == 1) {
-        Controller<Cat>(Cat())
-    } else {
-        Controller<Dog>(Dog())
-    }
-}
-
-fun main() {
-    val controller = findAnimal(1)
-    val animal: Animal = controller.getAnimal()
-    println(animal)
+//                   协变    
+//                    ↓      
+public interface List<out E> : Collection<E> {
+//                                泛型作为返回值
+//                                       ↓    
+    public operator fun get(index: Int): E
+//                                           泛型作为参数
+//                                                 ↓    
+    override fun contains(element: @UnsafeVariance E): Boolean
+//                                        泛型作为参数
+//                                              ↓   
+    public fun indexOf(element: @UnsafeVariance E): Int
 }
 ```
 

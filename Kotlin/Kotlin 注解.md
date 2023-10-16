@@ -12,9 +12,14 @@ Kotln的注解继承自Java，因此Kotlin完全兼容Java的注解，注解就�
 
 ## 元注解
 
-### @Target元注解
+Kotlin 常见的元注解有四个：
 
-指定注解用在什么地方，也就是目标。
+- @Target，这个注解是指定了被修饰的注解都可以用在什么地方，也就是目标；
+- @Retention，这个注解是指定了被修饰的注解是不是编译后可见、是不是运行时可见，也就是保留位置；
+- @Repeatable，这个注解是允许我们在同一个地方，多次使用相同的被修饰的注解，使用场景比较少；
+- @MustBeDocumented，指定被修饰的注解应该包含在生成的 API 文档中显示，这个注解一般用于 SDK 当中。
+
+### @Target元注解
 
 ```kotlin
 public enum class AnnotationTarget {
@@ -51,8 +56,6 @@ public enum class AnnotationTarget {
 
 ### @Retention元注解
 
-指定注解是不是编译后可见，是不是运行时可见，也就是保留位置。
-
 ```kotlin
 public enum class AnnotationRetention {
     //只保留在源码，编译后不可见
@@ -66,19 +69,36 @@ public enum class AnnotationRetention {
 
 
 
-### @MustBeDocumented
+### @Deprecated废弃
 
-注解是否保留在生成的API文档中。
-
-
-
-### @Repeatable
-
-是否可以多次注解同一目标。
+- @Deprecated 只能作用于这些地方：类、 函数、 属性、注解类、构造器、属性 getter、属性 setter、类型别名。
+- @Deprecated 这个类当中还包含了几个成员：
+  - message 代表了废弃的提示信息；
+  - replaceWith 代表了应该用什么来替代废弃的部分；
+  - level 代表警告的程度，分别是 WARNING、ERROR、HIDDEN。
 
 
 
-## 注解声明
+## 注解的使用
+
+**方式一：**
+
+```kotlin
+@Deprecated(
+    message = "请使用CalculatorV2类",
+    replaceWith = ReplaceWith("CalculatorV2"),
+    level = DeprecationLevel.ERROR
+)
+class Calculator {
+    fun add(a: Int, b: Int) = a - b
+}
+
+class CalculatorV2 {
+    fun add(a: Int, b: Int) = a + b
+}
+```
+
+**方式二：**
 
 ```kotlin
 @Target(
@@ -104,8 +124,6 @@ class User {
     }
 }
 ```
-
-
 
 
 
@@ -198,6 +216,4 @@ fun main() {
 //姓名: 小明 
 //今日: 2021-12-20 07:56:51
 ```
-
-
 

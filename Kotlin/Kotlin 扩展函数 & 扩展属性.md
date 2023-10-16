@@ -4,11 +4,13 @@
 
 ## 概述
 
-- Kotlin的扩展是给类增加新的功能。
+- Kotlin的扩展指给类增加新的功能。
 - 从语法角度可分为两种：扩展函数、扩展属性。
 - 从作用域角度可分为：顶层扩展和类内扩张。
 
-**扩展的作用：**在Kotlin中，几乎所有的类都可以被扩展，包括：普通类、单例类、密封类、枚举类、伴生对象以及第三方提供的Java类。但匿名内部类不存在名称所以不能被扩展。扩展主要用途之一是替代Java中的各种工具类。
+在 Kotlin 中，几乎所有的类都可以被扩展，包括普通类、单例类、密封类、枚举类、伴生对象，甚至还包括第三方提供的 Java 类。除了匿名内部类，由于它本身不存在名称，我们无法指定“接收者类型”，所以不能被扩展。
+
+扩展的主要用途，就是用来取代 Java 当中的各种工具类，比如 StringUtils、DateUtils 等等。
 
 
 
@@ -25,41 +27,43 @@
 - 扩展函数中的方法体是可以省略`this`。
 
 ```kotlin
+// 扩展函数
 fun String.lastElement(): Char? {
-    if (this.isEmpty()) {
+    if (isEmpty()) {
         return null
     }
-    return this[length - 1]
+    return get(length - 1)
 }
-```
 
-```kotlin
 fun main() {
     val msg = "hello world"
     val last = msg.lastElement()
-    println(last)
+    println(last) //d
 }
-
-//d
 ```
 
 **转换为Java代码**
 
 ```java
-public final class ExtKt {
-    @Nullable
-    public static final Character lastElement(@NotNull String $this$lastElement) {
-        CharSequence var1 = (CharSequence)$this$lastElement;
-        return var1.length() == 0 ? null : $this$lastElement.charAt($this$lastElement.length() - 1);
-    }
-}
-```
+public final class DemoKt {
+   @Nullable
+   public static final Character lastElement(@NotNull String $this$lastElement) {
+      Intrinsics.checkNotNullParameter($this$lastElement, "$this$lastElement");
+      CharSequence var1 = (CharSequence)$this$lastElement;
+      boolean var2 = false;
+      return var1.length() == 0 ? null : $this$lastElement.charAt($this$lastElement.length() - 1);
+   }
 
-```java
-public static final void main() {
-    String msg = "hello world";
-    Character last = ExtKt.lastElement(msg);
-    System.out.println(last);
+   public static final void main() {
+      String msg = "hello world";
+      Character last = lastElement(msg);
+      boolean var2 = false;
+      System.out.println(last);
+   }
+
+   public static void main(String[] var0) {
+      main();
+   }
 }
 ```
 
@@ -75,49 +79,53 @@ public static final void main() {
 扩展属性指在类的外部定义一个新的成员属性。
 
 ```kotlin
+//扩展属性
 val String.lastElement
-    get():Char? {
-        if (isEmpty()) {
-            return null
-        } else {
-            return get(length - 1)
-        }
+    get() = if (isEmpty()) {
+        null
+    } else {
+        get(length - 1)
     }
-```
 
-```kotlin
+
 fun main() {
     val msg = "hello world"
     val last = msg.lastElement
-    println(last)
+    println(last) //d
 }
-
-//d
 ```
 
 **转换为Java代码**
 
 ```kotlin
-public final class ExtKt {
-    @Nullable
-    public static final Character getLastElement(@NotNull String $this$lastElement) {
-        CharSequence var1 = (CharSequence)$this$lastElement;
-        return var1.length() == 0 ? null : $this$lastElement.charAt($this$lastElement.length() - 1);
-    }
-}
-```
+public final class DemoKt {
+   @Nullable
+   public static final Character getLastElement(@NotNull String $this$lastElement) {
+      Intrinsics.checkNotNullParameter($this$lastElement, "$this$lastElement");
+      CharSequence var1 = (CharSequence)$this$lastElement;
+      boolean var2 = false;
+      return var1.length() == 0 ? null : $this$lastElement.charAt($this$lastElement.length() - 1);
+   }
 
-```java
-public static final void main() {
-    String msg = "hello world";
-    Character last = ExtKt.getLastElement(msg);
-    System.out.println(last);
+   public static final void main() {
+      String msg = "hello world";
+      Character last = getLastElement(msg);
+      boolean var2 = false;
+      System.out.println(last);
+   }
+
+   // $FF: synthetic method
+   public static void main(String[] var0) {
+      main();
+   }
 }
 ```
 
 说明：
 
 - 扩展属性被编译器转换为静态方法。
+
+由于 JVM 不理解 Kotlin 的扩展语法，所以 Kotlin 编译器会将扩展函数转换成对应的静态方法，而扩展函数调用处的代码也会被转换成静态方法的调用。
 
 
 
@@ -245,6 +253,7 @@ fun SharedPreferences.edit(commit: Boolean = false, action: SharedPreferences.Ed
 ```
 
 ```kotlin
+//懒加载初始化
 private val preference: SharedPreferences by lazy {
     getSharedPreferences("APP", Context.MODE_PRIVATE)
 }

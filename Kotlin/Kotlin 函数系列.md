@@ -18,7 +18,7 @@ fun add(a: Int, b: Int): Int {
     return a + b
 }
 
-//表达式函数体，支持类型推导可以省略return关键字
+//表达式函数
 fun add(a: Int, b: Int) = a + b
 
 //可以将lambda表达式存储在一个变量中
@@ -98,36 +98,19 @@ c
 
 ## 函数类型
 
-- 函数类型（Function Type）就是函数的类型。变量可以有类型，函数也是可以有的，在Kotlin中，函数是一等公民。
-- 函数类型指将函数的“参数类型”和“返回值类型”抽象出来。
+- 函数类型（Function Type）就是函数的类型。
+- 在Kotlin中，函数是一等公民，变量可以有类型，函数也是可以有的。
+- 将函数的“参数类型”和“返回值类型”抽象出来就得到了函数类型。
 
 ```kotlin
-fun add(a: Int, b: Int): Float { return (a + b).toFloat() }
-//函数类型为：(Int, Int) -> Float
-```
-
-说明：这个函数的参数类型是两个`Int`类型，返回值类型是`Float`类型，所以函数类型是 `(Int, Int) -> Float`
-
-
-
-## 高阶函数
-
-- 高阶函数是将函数用作参数或返回值的函数
-
-```kotlin
-fun sum(x: Int): (Int) -> Int {
-    return { y: Int -> x + y }
+//  	  (Int,    Int) -> Float   这就是add函数的类型
+//			↑ 	    ↑	    ↑
+fun add(a: Int, b: Int): Float { 
+    return (a + b).toFloat() 
 }
-
-//等价于
-fun sum(x: Int) = { y: Int -> x + y }
 ```
 
-```kotlin
-val result = sum(1)(2)
-```
-
-
+说明：这个函数的参数类型是两个`Int`类型，返回值类型是`Float`类型，所以函数类型是 `(Int, Int) -> Float`。
 
 
 
@@ -230,43 +213,60 @@ val ret = { a: Int, b: Int -> a + b }(1, 2)
 
 
 
+## 高阶函数
+
+如果一个函数的“参数”或者“返回值”的类型是函数类型，那这个函数就是高阶函数。
+
+```kotlin
+fun sum(x: Int): (Int) -> Int {
+    return { y: Int -> x + y }
+}
+
+//等价于
+fun sum(x: Int) = { y: Int -> x + y }
+```
+
+```kotlin
+//调用
+val result = sum(1)(2)
+```
+
+
+
 ## 带接收者的函数类型
 
 ```kotlin
-//			                    带接收者的函数类型
-//									 ↓
-fun User.operate(hello: String, block: User.(String) -> Unit): User {
-    this.block(hello)
+data class User(val name: String, val age: Int)
+
+//                                       带接收者的函数类型
+//                                   ├        ↓          ┤
+fun User.operate(msg: String, block: User.(String) -> Unit): User {
+    //                                ↑
+    //                             接收者类型
+    block(msg)
     return this
 }
-```
 
-```kotlin
 fun main() {
     val user = User("小明", 18)
     user.operate("hello world") {
-        println("姓名：${this.name}，年龄：${this.age}")
         println(it)
+        println(this)
+        println("姓名：${name}，年龄：${age}")
     }
 }
 
-//姓名：小明，年龄：18
 //hello world
+//User(name=小明, age=18)
+//姓名：小明，年龄：18
 ```
 
-这个带接收者的函数类型，其中类型`User`被称为接收者类型，`this`被称为接收者对象；`this`指接收者类型的对象，通过编译器注入的，是可以被省略的。
+说明：
 
-```kotlin
-val sum: Int.(Int) -> Int = { other ->
-    this.plus(other)
-}
-```
-
-```kotlin
-3.sum(2)
-sum(3, 2)
-sum.invoke(3, 2)
-```
+- `block` 是函数类型的变量。
+- block中的 `User` 是接收者类型。
+- `this`指接收者类型的对象，通过编译器注入的，是可以被省略的。
+- `it` 是函数中的唯一参数。
 
 
 
@@ -306,6 +306,7 @@ fun test(): () -> Int {
 ### Java思想实现
 
 ```kotlin
+//定义接口
 interface ICallback {
     fun onSuccess(msg: String)
     fun onError(err: String)
@@ -313,6 +314,7 @@ interface ICallback {
 ```
 
 ```kotlin
+//监听事件
 class TestCallback {
     private var mCallback: ICallback? = null
 
@@ -355,7 +357,7 @@ class TestCallback {
     private var success: ((String) -> Unit)? = null
     private var error: ((String) -> Unit)? = null
 
-    fun setCallback(success: ((String) -> Unit)?, error: ((String) -> Unit)?) {
+    fun setCallback(success: ((String) -> Unit), error: ((String) -> Unit)) {
         this.success = success
         this.error = error
     }

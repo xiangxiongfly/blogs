@@ -16,7 +16,7 @@ Kotlin反射具备这三个特性：
 
 ## 添加依赖库
 
-在Kotlin中，反射库并没有直接集成到标准库中。必须引入这个依赖：
+在 Kotlin 中，反射库并没有直接集成到标准库中。必须引入这个依赖：
 
 ```
 implementation "org.jetbrains.kotlin:kotlin-reflect"
@@ -30,16 +30,20 @@ implementation "org.jetbrains.kotlin:kotlin-reflect"
 
 ## KClass
 
+KClass 代表了一个 Kotlin 的类。
+
 ### 获取KClass
+
+`obj::class`  这是 Kotlin 反射的语法，我们叫做类引用，通过这样的语法，我们就可以读取一个变量的“类型信息”，并且就能拿到这个变量的类型，它的类型是 KClass。
 
 在Kotln中，字节码对应的是KClass类，如果想要使用Java中的反射，需要首先获取Java的Class的实例，并且可以通过`.java`和`.kotlin`方法在KClass和Class之间互相转换。
 
 ```kotlin
-//获取Kotlin字节码对象KClass
+//获取Kotlin的Class对象
 Student::class
 student::class
 
-//获取Java字节码对象
+//获取Java的Class对象
 student.javaClass
 
 //Java Class -> Kotlin Class
@@ -49,15 +53,11 @@ student.javaClass.kotlin
 Student::class.java
 ```
 
-
-
 ### 创建对象
 
 ```kotlin
 val stu: Student = kClass1.createInstance()
 ```
-
-
 
 ### 遍历构造函数
 
@@ -69,9 +69,7 @@ Student::class.constructors.forEach {
 //fun <init>(kotlin.String, kotlin.Double, kotlin.Char): com.example.lib_kt.Student
 ```
 
-
-
-### 其他特性
+### 主要成员
 
 ```kotlin
 kClass.simpleName //类名，匿名内部类则为null
@@ -113,7 +111,9 @@ kClass.isValue //是否Value Class
 
 ## KCallable
 
-KCallable代表了Kotlin当中的所有可调用的元素，如函数、属性、构造函数。
+KCallable 代表了 Kotlin 当中的所有可调用的元素，如函数、属性、构造函数。
+
+### 主要成员
 
 ```kotlin
 kCallable.name //属性和函数的名称
@@ -135,7 +135,9 @@ kCallable.call(student, "123") //函数调用
 
 ## KParameter
 
-KParameter代表了KCallable的参数。
+KParameter 代表了 KCallable 的参数。
+
+### 主要成员
 
 ```kotlin
 kParameter.index //参数的下标，从0开始
@@ -151,7 +153,9 @@ kParameter.kind //参数种类，INSTANCE指对象实例，EXTENSION_RECEIVER指
 
 ## KType 
 
-KType函数的返回值类型或属性的类型。
+KType 代表了 Kotlin 当中的类型。
+
+### 主要成员
 
 ```kotlin
 kParameter.type.classifier //类型，Kotlin的类型即KClass
@@ -159,6 +163,71 @@ kParameter.type.classifier //类型，Kotlin的类型即KClass
 kParameter.type.isMarkedNullable //是否可空
 
 kParameter.type.arguments //类型的泛型参数
+```
+
+
+
+## 获取对象属性
+
+```kotlin
+
+data class Student(
+    val name: String,
+    val age: Int,
+    val sex: Boolean
+)
+
+data class School(
+    val name: String,
+    var address: String
+)
+
+fun readMembers(obj: Any) {
+    obj::class.memberProperties.forEach {
+        println("${obj::class.simpleName}.${it.name}=${it.getter.call(obj)}")
+    }
+}
+
+fun main() {
+    val student = Student("小明", 5, true)
+    val school = School("光明小学", "广州市")
+    readMembers(student)
+    println("-------")
+    readMembers(school)
+}
+
+//Student.age=5
+//Student.name=小明
+//Student.sex=true
+//-------
+//School.address=广州市
+//School.name=光明小学
+```
+
+
+
+## 修改对象属性值
+
+```kotlin
+fun modifyAddressMember(obj: Any, address: String) {
+    obj::class.memberProperties.forEach {
+        if (it.name == "address" &&
+            it is KMutableProperty1 &&
+            it.setter.parameters.size == 2 &&
+            it.getter.returnType.classifier == String::class
+        ) {
+            it.setter.call(obj, address)
+        }
+    }
+}
+
+fun main() {
+    val school = School("光明小学", "广州市")
+    modifyAddressMember(school, "上海市")
+    println(school)
+}
+
+//School(name=光明小学, address=上海市)
 ```
 
 
@@ -210,8 +279,6 @@ public static void main(String[] args) {
 //{address=北京市, school=中学, name=小红, age=18}
 ```
 
-
-
 ### Kotlin对象转Map
 
 ```kotlin
@@ -238,6 +305,4 @@ fun main() {
 
 //{address=北京市, age=18, name=小明, school=大学}
 ```
-
-
 

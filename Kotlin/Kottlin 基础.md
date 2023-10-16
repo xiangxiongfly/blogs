@@ -44,18 +44,22 @@ fun main(args: Array<String>) {
 
 
 
-## 变量声明
+## 变量
 
 Kotlin声明变量需要两个关键字`var`和`val`:
 
-- var：表示可变变量，相当于Java中的普通变量。
-- val：表示不可变变量，值在初始化后不能再次修改，相当于Java中的final变了，尽可能多的使用val。
+- var：可变变量，相当于Java中的普通变量。
+- val：不可变变量，值在初始化后不能再次修改，相当于Java中的final变量。
+
+尽可能多的使用val。
 
 
 
-## 数据类型
+## 基础类型
 
-在Kotlin里，一切都是对象，Kotlin完全抛弃Java的基本数据类型，全部使用对象类型，且类型名放在变量名的后面。
+在 Java 里面，基础类型分为原始类型（Primitive Types）和包装类型（Wrapper Type）。
+
+但在 Kotlin 中，一切都是对象，没有原始类型。
 
 | Java基本数据类型 | Kotlin对象数据类型 |
 | ---------------- | ------------------ |
@@ -78,6 +82,13 @@ Kotlin支持类型推导，大部分情况下，变量类型可以省略不写�
 var a = 1 //自动推导为Int类型
 var b = "123" //自动推导为String类型
 ```
+
+- 整数类型默认推导为Int类型。
+- Long类型，需要使用“L”后缀。
+- 小数类型默认推导为Double类型。
+- Float类型，需要使用“F”后缀。
+- 十六进制需要使用“0x”。
+- 二进制需要使用“0b”。
 
 
 
@@ -111,7 +122,9 @@ when (data) {
 
 ### 类型转换
 
-Kotlin抛弃了隐式转换，更推崇显式转换，类型转换可以借助toByte()、toShort()、toInt()、toLong()、toFloat()、toDouble()、toChar() 等函数。
+Java 可以隐式转换数值类型，但是 Kotlin 更推崇显式转换。
+
+类型转换可以借助toByte()、toShort()、toInt()、toLong()、toFloat()、toDouble()、toChar() 等函数。
 
 ```kotlin
 val a: Int = 100
@@ -127,9 +140,7 @@ val b: Long = a.toLong() // 编译通过
 
 ## 逻辑控制
 
-### 条件语句
-
-**if**
+### if
 
 ```kotlin
 fun maxNumber(a: Int, b: Int): Int {
@@ -148,7 +159,7 @@ fun maxNumber(a: Int, b: Int): Int {
 }
 ```
 
-**when**
+### when
 
 ```kotlin
 fun getScore(score: Int): String {
@@ -175,11 +186,7 @@ fun getScore(score: Int) = when {
 }
 ```
 
-
-
-### 循环语句
-
-### 区间
+### for
 
 ```kotlin
 //[1-10]
@@ -304,7 +311,7 @@ when (animal) {
 | ?.     | 空安全操作符，当前对象不为null时正常调用，否则返回null       |
 | ?:     | Elvis运算符，当前对象不为null时返回左边表达式结果，否则返回右侧表达式结果 |
 | as?    | 安全转换运算符，将值转换为指定类型，若值不是指定类型返回null |
-| !!     | 非空断言，将值转换为非空类型，值为null抛出KotlinNullPointerException异常 |
+| !!     | 非空断言，将值转换为非空类型，如果值为null则抛出KotlinNullPointerException异常 |
 
 **?**
 
@@ -321,38 +328,46 @@ name = null //编译成功
 **?.**
 
 ```kotlin
-//?. 运算符
 var name: String? = "hello"
-println(name?.length)//5
+println(name?.length) //5
+
+name = null
+println(name?.length) //null
 ```
 
 **?:**
 
+可以不用再写 `if (xxx != null) xxx else xxx` 这样的赋值代码了。
+
 ```kotlin
-//?: elvis运算符，对三元运算符的升级
-val a: String? = "abc"
-val b = a ?: "default"
+var a: String? = "hello"
+var result = a ?: "default"
+println(result) //hello
+
+a = null
+result = a ?: "default"
+println(result) //default
 ```
 
 **as?**
 
 ```kotlin
-//as? 运算符
-var data: String = "Tom"
-var name = data as? String
-println(name)//Tom
-var age = data as? Int
-println(age)//null
+val str = "Tom"
+val name = str as? String
+println(name) //Tom
+
+val age = str as? Int
+println(age) //null
 ```
 
 **!!**
 
 ```kotlin
-//!! 运算符
-val data: String = "kotlin"
-println(data!!.length)//6
-val data: String? = null
-println(data!!.length)//KotlinNullPointerException
+val str: String? = "hello"
+println(str!!.length) //5
+
+val str2: String? = null
+println(str2!!.length) //NullPointerException
 ```
 
 
