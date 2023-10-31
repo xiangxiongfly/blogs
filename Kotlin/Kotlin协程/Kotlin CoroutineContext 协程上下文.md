@@ -4,11 +4,11 @@
 
 ## 概述
 
--   CoroutineContext即协程上下文，是Kotlin协程中的重要概念，可以用来切换线程池、指定协程名、捕获异常等。
--   CoroutineContext是一个接口，如Job、Deferred、Dispatcher、CoroutineName、CoroutineExceptionHandler都间接继承自CoroutineContext接口。
--   CoroutineScope协程作用域，用于批量控制协程，本质也是对CoroutineContext的一层简单封装。
+-   CoroutineContext 即协程上下文，是Kotlin协程中的重要概念，可以用来切换线程池、指定协程名、捕获异常等。
+-   CoroutineContext 是一个接口，如 Job、Deferred、Dispatcher、CoroutineName、CoroutineExceptionHandler、挂起函数都与 CoroutineContext 密切联系。
+-   CoroutineScope 协程作用域，用于批量控制协程，本质是对 CoroutineContext 的一层简单封装。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/c72e9456d99243b3bcaed0c0cdde9df1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_15,color_FFFFFF,t_70,g_se,x_16)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/7f42d581373b46278237cca6a3e3358e.png)
 
 
 
@@ -21,7 +21,23 @@
 -   Dispatchers.Default：CPU密集型任务的线程池。
 -   Dispatchers.IO：IO密集型任务的线程池。
 
-**情况一**
+**相关源码：**
+
+```kotlin
+public actual object Dispatchers {
+    public actual val Default: CoroutineDispatcher = DefaultScheduler   
+    public actual val Main: MainCoroutineDispatcher get() = MainDispatcherLoader.dispatcher
+    public actual val Unconfined: CoroutineDispatcher = kotlinx.coroutines.Unconfined
+    public val IO: CoroutineDispatcher = DefaultIoScheduler
+    public fun shutdown() { }
+}
+
+public abstract class CoroutineDispatcher :  AbstractCoroutineContextElement(ContinuationInterceptor), ContinuationInterceptor { }
+
+public interface ContinuationInterceptor : CoroutineContext.Element { }
+```
+
+### 场景一：线程切换
 
 ```kotlin
 fun main() = runBlocking {
@@ -60,9 +76,9 @@ Thread:main @coroutine#1
 */
 ```
 
-说明：使用`withContext(Dispatchers.IO)`后，withContext中的代码会被分发到DefaultDispatcher线程池中执行，而它外部的代码依然在main线程中执行。
+说明：使用 `withContext(Dispatchers.IO)` 后，withContext 中的代码会被分发到 DefaultDispatcher 线程池中执行，而它外部的代码依然在main线程中执行。DefaultDispatcher.IO 底层可能会复用 Dispatchers.Default 线程池的。
 
-**情况二**
+### 场景二：IO线程池复用Default线程池
 
 ```kotlin
 //						   变化
@@ -103,9 +119,9 @@ Thread:DefaultDispatcher-worker-2 @coroutine#1
 */
 ```
 
-说明：当Default线程池有富余线程时，它是可以被IO线程池复用的。
+说明：当 Dispatchers.Default 线程池有富余线程时，它是可以被 IO 线程池复用的。
 
-**情况三**
+### 场景三：自定义线程调度器
 
 ```kotlin
 val mySingleDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor {
@@ -150,23 +166,99 @@ Thread:我的单线程 @coroutine#1
 */
 ```
 
-说明：创建一个单线程的线程池，为runBlocking传入自定义的mySingleDispatcher后，程序运行在mySingleDispatcher线程池中，而withContext中的代码仍然运行在DefaultDispatcher线程池中。
+说明：创建一个单线程的线程池，为 runBlocking 传入自定义的 mySingleDispatcher 后，withContext 中的代码运行在 DefaultDispatcher.IO 线程池中，而其他代码运行在 mySingleDispatcher 线程池中。
+
+### 场景四：Dispatchers.Unconfined不可靠
+
+```kotlin
+fun main() {
+    runBlocking {
+        log("before")         //1
+        launch {
+            log("子协程开始")   //2
+            delay(1000L)
+            log("子协程结束")   //3
+        }
+        log("after")          //4
+    }
+}
+/*
+输出信息：
+┌──────────────────────────────────────────────────
+before
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+after
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+子协程开始
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+子协程结束
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+ */
+```
+
+说明：打印顺序：1 -> 4 -> 2 -> 3。
+
+```kotlin
+
+fun main() {
+    runBlocking {
+        log("before")         //1
+        launch(Dispatchers.Unconfined) {
+            log("子协程开始")   //2
+            delay(1000L)
+            log("子协程结束")   //3
+        }
+        log("after")          //4
+    }
+}
+/*
+输出信息：
+┌──────────────────────────────────────────────────
+before
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+子协程开始
+Thread:main @coroutine#2
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+after
+Thread:main @coroutine#1
+└──────────────────────────────────────────────────
+┌──────────────────────────────────────────────────
+子协程结束
+Thread:kotlinx.coroutines.DefaultExecutor @coroutine#2
+└──────────────────────────────────────────────────
+ */
+```
+
+说明：打印顺序：1 -> 2 -> 4 -> 3。使用 `Dispatchers.Unconfined` 后协程的执行顺序发生了变化。虽然Unconfined 代表的意思就是，当前协程可能运行在任何线程之上，不作强制要求。 但是不应该随意使用 Dispatchers.Unconfined。 
 
 
 
 ## CoroutineScope 协程作用域
 
-CoroutineScope是一个接口，内部有个CoroutineContext类型的成员变量。CoroutineScope有个扩展函数launch，用于开启一个协程。
+CoroutineScope 是一个接口，内部有个 CoroutineContext 类型的成员变量。CoroutineScope 只是对 CoroutineContext 做了一层封装而已，它的核心能力其实都来自于 CoroutineContext。 
 
-CoroutineScope最大的作用是方便我们批量控制协程。
+CoroutineScope 有个扩展函数launch，用于开启一个协程。
+
+CoroutineScope 最大的作用是方便我们批量控制协程。
+
+**相关源码：**
 
 ```kotlin
-//CoroutineScope相关源码
-
 public interface CoroutineScope {
     public val coroutineContext: CoroutineContext
 }
 
+//扩展函数
 public fun CoroutineScope.launch(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
@@ -176,7 +268,7 @@ public fun CoroutineScope.launch(
 }
 ```
 
-**情况一**
+### 批量控制协程
 
 ```kotlin
 fun main() = runBlocking {
@@ -217,19 +309,19 @@ Thread:DefaultDispatcher-worker-3 @coroutine#4
  */
 ```
 
-说明：创建一个CoroutineScope对象，使用这个scope开启三个协程，500毫秒后，调用`cancel()`方法，这三个协程被取消了。这也体现了Kotlin协程结构化并发的特性。
+说明：创建一个 CoroutineScope 对象，使用这个scope开启三个协程，500毫秒后，调用 `cancel()` 方法，这三个协程被取消了。这也体现了Kotlin协程的结构化并发。
 
 
 
 ## Job与CoroutineContext关系
 
-Job继承自CoroutineContext.Element，而CoroutineContext.Element继承自CoroutineContext，所以Job间接继承自CoroutineContext。
+如果说 CoroutineScope 封装了 CoroutineContext，那么 Job 就是一个真正的 CoroutineContext。
 
-Job也是一个CoroutineContext类型。
+Job 继承自 CoroutineContext.Element ，而 CoroutineContext.Element 继承自 CoroutineContext ，因此说 Job 是一个真正的 CoroutineContext。
+
+**相关源码：**
 
 ```kotlin
-//Job相关源码：
-
 public interface Job : CoroutineContext.Element { }
 
 public interface CoroutineContext {   
@@ -241,6 +333,9 @@ public interface CoroutineContext {
     public interface Element : CoroutineContext { }
 }
 ```
+
+### 指定线程池
+
 
 ```kotlin
 @OptIn(ExperimentalStdlibApi::class)
@@ -273,42 +368,22 @@ Thread:我的单线程 @coroutine#2
 
 
 
-## Dispatcher与CoroutineContext关系
+## CoroutineName 协程名
 
-Dispatchers是一个object单例，内部成员是CoroutineDispatcher类型，而它继承自ContinuationInterceptor接口，这个接口继承自 CoroutineContext.Element，所以Dispatchers间接继承自CoroutineContext。
+CoroutineName 是一个数据类，继承自 AbstractCoroutineContextElement 类，而它继承自 Element，所以 CoroutineName 间接继承自 CoroutineContext。
 
-Dispatcher也是一个CoroutineContext类型。
+CoroutineName 也是一个 CoroutineContext 类型。
 
-```kotlin
-//Dispatcher相关源码：
-
-public actual object Dispatchers {
-    public actual val Default: CoroutineDispatcher = DefaultScheduler   
-    public actual val Main: MainCoroutineDispatcher get() = MainDispatcherLoader.dispatcher
-    public actual val Unconfined: CoroutineDispatcher = kotlinx.coroutines.Unconfined
-    public val IO: CoroutineDispatcher = DefaultIoScheduler
-    public fun shutdown() { }
-}
-
-public abstract class CoroutineDispatcher : AbstractCoroutineContextElement(ContinuationInterceptor), ContinuationInterceptor { }
-
-public interface ContinuationInterceptor : CoroutineContext.Element { }
-```
-
-
-
-## CoroutineName 指定协程名
-
-CoroutineName是一个数据类，继承自AbstractCoroutineContextElement类，而它继承自Element，所以CoroutineName间接继承自CoroutineContext。
-
-CoroutineName也是一个CoroutineContext类型。
+**相关源码：**
 
 ```kotlin
-//CoroutineName相关源码：
-public data class CoroutineName(val name: String) : AbstractCoroutineContextElement(CoroutineName) { }
-
 public abstract class AbstractCoroutineContextElement(public override val key: Key<*>) : Element
+
+public data class CoroutineName(val name: String) : AbstractCoroutineContextElement(CoroutineName) { }
 ```
+
+### 指定协程名
+
 
 ```kotlin
 @OptIn(ExperimentalStdlibApi::class)
@@ -339,26 +414,22 @@ Thread:我的单线程 @我的协程#2
 
 
 
-## CoroutineExceptionHandler 协程的异常处理
+## CoroutineExceptionHandler 异常处理
 
-CoroutineExceptionHandler间接继承自CoroutineContext。
+CoroutineExceptionHandler 间接继承自 CoroutineContext。它主要负责处理协程当中的异常。 
 
-CoroutineExceptionHandler也是一个CoroutineContext类型。
+CoroutineExceptionHandler 真正重要的，其实只有 handleException() 这个方法，如果我们要自定义异常处理器，我们就只需要实现该方法即可。 
+
+**相关源码：**
 
 ```kotlin
-//CoroutineExceptionHandler相关源码：
-
-public inline fun CoroutineExceptionHandler(crossinline handler: (CoroutineContext, Throwable) -> Unit): CoroutineExceptionHandler =
-object : AbstractCoroutineContextElement(CoroutineExceptionHandler), CoroutineExceptionHandler {
-    override fun handleException(context: CoroutineContext, exception: Throwable) =
-    handler.invoke(context, exception)
-}
-
 public interface CoroutineExceptionHandler : CoroutineContext.Element {
     public companion object Key : CoroutineContext.Key<CoroutineExceptionHandler>
     public fun handleException(context: CoroutineContext, exception: Throwable)
 }
 ```
+
+### 捕获异常
 
 ```kotlin
 fun main() = runBlocking {

@@ -1,6 +1,6 @@
 [TOC]
 
-# Kotlin 挂起函数
+# Kotlin suspend 挂起函数
 
 ## 地狱回调问题
 
@@ -154,5 +154,8 @@ fun getUserInfo(ct: Continuation): Any? {
 
 ## 挂起函数总结
 
-协程之所以是非阻塞，是因为它支持挂起和恢复；而挂起和恢复的能力来源自挂起函数；挂起函数式由CPS实现的，其中Continuation本质是Callback。
+- 定义挂起函数只需要在普通函数的基础上加上 suspend 关键字。
+- 协程之所以是非阻塞式，是因为支持挂起函数，具有挂起和恢复的能力，对于同一行代码来说，“=”左右两边的代码可以分别执行在不同的线程之上。 
+- 挂起函数的本质是 Callback，也就是 Kotlin 中的 Continuation。CPS 转换也就是 Kotlin 编译器将 suspend 翻译成 Continuation 的过程。这里的 Continuation 是代表了，“程序继续运行下去需要执行的代码”，“接下来要执行的代码”，或者是 “剩下的代码”。
+- 协程与挂起函数之间的关系：挂起函数只能在协程中或其他挂起函数中调用。 
 

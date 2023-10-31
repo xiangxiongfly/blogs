@@ -1,4 +1,4 @@
-[toc]
+[TOC]
 
 # Android BLE开发总结
 
@@ -19,23 +19,25 @@
 
 二、检查BLE是否可用。
 
-三、扫描设备。
+三、开启蓝牙。
 
-四、建立连接。
+四、扫描设备。
 
-五、发现服务。
+五、建立连接。
 
-六、监听特征。
+六、发现服务。
 
-七、发送指令接收数据。
+七、监听特征。
 
-八、断开连接，或关闭释放资源。
+八、发送指令接收数据。
+
+九、断开连接和关闭释放资源。
 
 
 
 ## 详细操作
 
-### 权限申请
+### 一、权限申请
 
 **AndroidManifest.xml注册**
 
@@ -68,7 +70,7 @@
 
 **运行时权限**
 
-这里用的XXPermissions权限框架。
+这里用到了 XXPermissions 权限框架。
 
 ```java
 XXPermissions.with(this)
@@ -84,78 +86,82 @@ XXPermissions.with(this)
     });
 ```
 
-
-
-### 是否支持蓝牙BLE
+### 二、检查BLE是否可用
 
 ```java
+/**
+     * 获取蓝牙适配器
+     */
 private BluetoothAdapter getBluetoothAdapter() {
     //        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
     //        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
     //        return bluetoothAdapter;
+
     // 等价于如下
     return BluetoothAdapter.getDefaultAdapter();
 }
 ```
 
 ```java
-// 检查设备是否支持蓝牙
-private void checkBLE() {
-    if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+/**
+     * 检查设备是否支持蓝牙
+     */
+private boolean supporBLE() {
+    if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE) || getBluetoothAdapter() == null) {
         Toast.makeText(this, "当前设备不支持蓝牙", Toast.LENGTH_SHORT).show();
+        return false;
     } else {
         Toast.makeText(this, "当前设备支持蓝牙", Toast.LENGTH_SHORT).show();
-    }
-    if (getBluetoothAdapter() == null) {
-        Toast.makeText(this, "当前设备不支持蓝牙", Toast.LENGTH_SHORT).show();
+        return true;
     }
 }
 ```
 
-
-
-### 蓝牙是否开启
+### 三、蓝牙是否开启
 
 ```java
-// 蓝牙是否开启
+/**
+     * 检查蓝牙是否开启
+     */
 private boolean checkEnabled() {
     boolean isEnabled = getBluetoothAdapter().isEnabled();
-    Toast.makeText(this, isEnabled ? "蓝牙开启" : "蓝牙未开启", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, isEnabled ? "已开启" : "未开启", Toast.LENGTH_SHORT).show();
     return isEnabled;
 }
 ```
 
-
-
-### 开启蓝牙
-
 ```java
-if (!checkEnabled()) {
+/**
+     * 打开蓝牙，方式一
+     */
+private void openBLE1() {
     BluetoothAdapter bluetoothAdapter = getBluetoothAdapter();
-    // 直接开启蓝牙
-    bluetoothAdapter.enable();
+    // 直接开启蓝牙，Android13不支持了
+    boolean enable = bluetoothAdapter.enable();
+    if (enable) {
+        Toast.makeText(this, "开启蓝牙了", Toast.LENGTH_SHORT).show();
+    }
 }
-```
 
-```java
-if (!checkEnabled()) {
-    // 优雅开启蓝牙
+/**
+     * 打开蓝牙，方式二
+     */
+private void openBLE2() {
     Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
     startActivityForResult(intent, REQUEST_ENABLE_BT);
 }
 ```
 
-
-
-### 搜索BLE设备
+### 四、扫描设备
 
 ```java
 private boolean isScanning = false;
 private Handler handler = new Handler();
 private static final long SCAN_PERIOD = 30_000; //扫描时间
-private BluetoothDevice mDevice;
 
-// 搜索周围BLE设备
+/**
+     * 开始扫描蓝牙设备
+     */
 private void startScan() {
     if (!isScanning) {
         Log.e("TAG", "开始扫描");
@@ -172,49 +178,53 @@ private void startScan() {
     }
 }
 
-// 停止搜索
+/**
+     * 停止扫描蓝牙设备
+     */
 public void stopScan() {
     if (isScanning) {
         Log.e("TAG", "停止扫描");
         isScanning = false;
+        handler.removeCallbacksAndMessages(null);
         BluetoothLeScanner bluetoothLeScanner = getBluetoothAdapter().getBluetoothLeScanner();
         bluetoothLeScanner.stopScan(leScanCallback);
     }
 }
 
-// 搜索回调
-private final ScanCallback leScanCallback =
-    new ScanCallback() {
+/**
+     * 扫描结果回调
+     */
+private final ScanCallback leScanCallback = new ScanCallback() {
     @Override
     public void onScanResult(int callbackType, ScanResult result) {
         super.onScanResult(callbackType, result);
         BluetoothDevice device = result.getDevice();
         if (device != null) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("设备名：" + device.getName()).append("\n");
-            builder.append("地址：" + device.getAddress()).append("\n");
-            builder.append("uuids：" + device.getUuids());
-            String deviceStr = builder.toString();
-            Log.e("TAG", "BLE : " + deviceStr);
-            if (filterDevice(device)) {
+            String deviceInfoStr = "\n" +
+                "设备名：" + device.getName() + "\n" +
+                "地址：" + device.getAddress() + "\n" +
+                "uuids：" + Arrays.toString(device.getUuids());
+            Log.e("TAG", "BLE : " + deviceInfoStr);
+            if (filterDevice(device.getName())) {
                 Log.e("TAG", "找到指定设备，停止扫描");
                 stopScan();
-                mDevice = device;
-                tv_device.setText(deviceStr);
+                deviceType = getDeviceType(device.getName());
+                deviceAddress = device.getAddress();
+                viewBinding.tvDevice.setText(deviceInfoStr);
             }
         }
     }
 };
 
-// 过滤设备
-private boolean filterDevice(BluetoothDevice device) {
-    return "BLE-EMP-Ui".equals(device.getName());
+/**
+     * 过滤指定设备
+     */
+private boolean filterDevice(String deviceName) {
+    return "BLE-EMP-Ui".equals(deviceName) || "Bluetooth BP".equals(deviceName);
 }
 ```
 
-
-
-### 连接BLE设备
+### 五、连接设备
 
 ```java
 /**
@@ -233,16 +243,6 @@ public boolean connect(final String address) {
     }
 }
 ```
-
-
-
-### 断开连接
-
-```java
-mBluetoothGatt.disconnect();
-```
-
-
 
 ### 监听连接状态
 
@@ -272,8 +272,6 @@ private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() 
     }
 }
 ```
-
-
 
 ### 监听蓝牙广播
 
@@ -343,9 +341,7 @@ private final BroadcastReceiver mBluetoothStateReceiver = new BroadcastReceiver(
 };
 ```
 
-
-
-### 发现BLE服务
+### 六、发现蓝牙服务
 
 ```java
 private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -369,9 +365,7 @@ private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() 
 }
 ```
 
-
-
-### 订阅通知、读、写
+### 七、订阅通知、读指令、写指令
 
 ```java
 /**
@@ -394,7 +388,7 @@ public void writeCharacteristic(BluetoothGattCharacteristic characteristic, byte
 }
 
 /**
-     * 订阅通知，监听 BLE 设备特征值变化
+     * 订阅通知
      */
 public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
     if (mBluetoothGatt == null) {
@@ -407,27 +401,25 @@ public void setCharacteristicNotification(BluetoothGattCharacteristic characteri
 }
 ```
 
-
-
-### 监听读特征、写特征、特征变化
+### 八、监听数据变化
 
 ```java
 /**
-         * 读特征回调
+         * 发送读指令监听
          */
 @Override
-public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-    super.onCharacteristicRead(gatt, characteristic, status);
+public void onCharacteristicRead(@NonNull BluetoothGatt gatt, @NonNull BluetoothGattCharacteristic characteristic, @NonNull byte[] value, int status) {
+    super.onCharacteristicRead(gatt, characteristic, value, status);
     Log.e("TAG", "onCharacteristicRead");
     if (status == BluetoothGatt.GATT_SUCCESS) {
-        byte[] data = characteristic.getValue();
+        byte[] data = value;
         // 处理读取到的数据
         Log.e("TAG", "获取特征数据：" + BytesUtils.bytesToHexString(data));
     }
 }
 
 /**
-         * 写特征回调
+         * 发送写指令监听
          */
 @Override
 public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
@@ -436,25 +428,41 @@ public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristi
     Log.e("TAG", "获取写指令：" + BytesUtils.bytesToHexString(characteristic.getValue()));
     if (status == BluetoothGatt.GATT_SUCCESS) {
         Log.e("TAG", "写入成功");
+        broadcastUpdate(ACTION_GATT_SERVICES_WRITE, BytesUtils.bytesToHexString(characteristic.getValue()));
     } else {
         Log.e("TAG", "写入失败");
     }
 }
 
 /**
-         * 监听特征变化，从设备接收数据
+         * 数据变化监听
+         * 获取从BLE设备的数据
          */
 @Override
-public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-    super.onCharacteristicChanged(gatt, characteristic);
+public void onCharacteristicChanged(@NonNull BluetoothGatt gatt, @NonNull BluetoothGattCharacteristic characteristic, @NonNull byte[] value) {
+    super.onCharacteristicChanged(gatt, characteristic, value);
     Log.e("TAG", "onCharacteristicChanged");
-    Log.e("TAG", "从设备接收数据：" + BytesUtils.bytesToHexString(characteristic.getValue()));
+    Log.e("TAG", "从设备接收数据：" + BytesUtils.bytesToHexString(value));
+    broadcastUpdate(ACTION_GATT_SERVICES_CHANGED, BytesUtils.bytesToHexString(value));
+}
+
+/**
+         * 订阅成功监听
+         */
+@Override
+public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+    super.onDescriptorWrite(gatt, descriptor, status);
+    Log.e("TAG", "onDescriptorWrite");
 }
 ```
 
+### 九、断开连接和关闭资源
 
-
-### 关闭Gatt连接释放资源
+```java
+mBluetoothGatt.disconnect(); //断开连接
+mBluetoothGatt.close(); //关闭资源
+mBluetoothGatt = null;
+```
 
 一、disconnect()
 
@@ -484,10 +492,6 @@ private void close() {
 ## 重启手机蓝牙连不上问题
 
 当重启手机蓝牙后，连不上Gatt服务，BluetoothAdapter是系统变量，重启手机的时候可能会把扫描的设备信息清理掉，这就会导致connectGatt()连接失败。因此最好的方法是重启APP后先手动扫描一次，在进行重连。
-
-
-
-## [CSDN源码](https://download.csdn.net/download/qq_14876133/87617557)
 
 
 
