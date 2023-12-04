@@ -50,8 +50,9 @@ Kotlin声明变量需要两个关键字`var`和`val`:
 
 - var：可变变量，相当于Java中的普通变量。
 - val：不可变变量，值在初始化后不能再次修改，相当于Java中的final变量。
+- const val：编译器常量，只能是基础类型和字符串，只能修饰全局常量、object的成员、companion 对象的成员。在java代码中引用kotlin的变量时，不能直接使用`val`的变量，但可以直接使用`const val`的变量.。
 
-尽可能多的使用val。
+**尽可能多的使用val。**
 
 
 
