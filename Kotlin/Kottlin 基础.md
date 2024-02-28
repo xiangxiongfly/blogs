@@ -190,25 +190,41 @@ fun getScore(score: Int) = when {
 ### for
 
 ```kotlin
-//[1-10]
 for (i in 1..10) {
     print(i)
 }
+//[1-10]
 
-//[1-9]
 for (i in 1 until 10) {
     print(i)
 }
+//[1-9]
 
-//输出：13579
 for (i in 1 until 10 step 2) {
     print(i)
 }
+//输出：13579
 
-//降序：[10-1]
 for (i in 10 downTo 1) {
     print(i)
 }
+//降序：[10-1]
+
+val list = listOf(10, 20, 30)
+for ((index, value) in list.withIndex()) {
+    println("${index} - ${value}")
+}
+//0 - 10
+//1 - 20
+//2 - 30
+
+val list = listOf(10, 20, 30)
+for (index in list.indices) {
+    println("${index} - ${list[index]}")
+}
+//0 - 10
+//1 - 20
+//2 - 30
 ```
 
 ### while
@@ -235,7 +251,7 @@ do {
 1 in 0..3 
 ```
 
-### if-else代替传统三元运算符
+### if-else代替三元运算符
 
 ```kotlin
 //三元运算符

@@ -386,9 +386,9 @@ fun main() = runBlocking {
 
 ```kotlin
 fun main() = runBlocking {
-    val f1 = (1..5).asFlow()
-    val f2 = flowOf("A", "B", "c")
-    f1.zip(f2) { a, b -> "$a - $b" }
+    val flow = flowOf(1, 2, 3).onEach { delay(10) }
+    val flow2 = flowOf("a", "b", "c", "d").onEach { delay(20) }
+    flow.zip(flow2) { i, s -> i.toString() + s }
         .collect {
             println(it)
         }
@@ -396,9 +396,9 @@ fun main() = runBlocking {
 
 /*
 输出信息：
-1 - A
-2 - B
-3 - c
+1a
+2b
+3c
 */
 ```
 
@@ -411,23 +411,18 @@ fun main() = runBlocking {
 
 ```kotlin
 fun main() = runBlocking {
-    val f1 = (1..5).asFlow().onEach { delay(1000L) }
-    val f2 = flowOf("A", "B", "C").onEach { delay(2000L) }
-    f1.combine(f2) { a, b -> "$a - $b" }
-        .collect {
-            println(it)
-        }
+    val flow = flowOf(1, 2).onEach { delay(10) }
+    val flow2 = flowOf("a", "b", "c").onEach { delay(20) }
+    flow.combine(flow2) { i, s -> i.toString() + s }.collect {
+        println(it)
+    }
 }
 
 /*
 输出信息：
-1 - A
-2 - A
-3 - A
-3 - B
-4 - B
-5 - B
-5 - C
+2a
+2b
+2c
 */
 ```
 
@@ -487,37 +482,6 @@ start 3 耗时：1376
 end 3 耗时：1886
 */
 ```
-**模拟网络串行请求：**
-
-```kotlin
-fun main() = runBlocking {
-    val f1 = flow {
-        delay(1000L)
-        emit("缓存")
-    }
-    val f2 = flow {
-        delay(5000L)
-        emit("网络")
-    }
-
-    val startTime = System.currentTimeMillis()
-    flowOf(f1, f2)
-        .flatMapConcat { it }
-        .collect {
-            println(it)
-            println("耗时：${System.currentTimeMillis() - startTime}")
-        }
-}
-
-/*
-输出信息：
-缓存
-耗时：1024
-网络
-耗时：6033
-*/
-```
-
 #### flatMapMerge
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/14e9c8bffb56464da811fdab097742fd.png)
@@ -550,37 +514,6 @@ end 2
 end 3
 */
 ```
-**模拟网络并行请求：**
-
-```kotlin
-fun main() = runBlocking {
-    val f1 = flow {
-        delay(1000L)
-        emit("缓存")
-    }
-    val f2 = flow {
-        delay(5000L)
-        emit("网络")
-    }
-
-    val startTime = System.currentTimeMillis()
-    flowOf(f1, f2)
-        .flatMapMerge { it }
-        .collect {
-            println(it)
-            println("耗时：${System.currentTimeMillis() - startTime}")
-        }
-}
-
-/*
-输出信息：
-缓存
-耗时：1041
-网络
-耗时：5053
-*/
-```
-
 #### flatMapLatest
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/062bf23f8dff4fd9806b8a24c3e306f0.png)
@@ -923,34 +856,46 @@ send: 1
 
 
 
-## 模拟网络请求
+## 案例
+
+### 模拟网络请求
 
 ```kotlin
+val mySingleDispatcher: ExecutorCoroutineDispatcher = Executors.newSingleThreadExecutor {
+    Thread(it, "我的单线程").apply { isDaemon = true }
+}.asCoroutineDispatcher()
+
+//模拟UI线程
+val uiScope = CoroutineScope(mySingleDispatcher)
+
+// 更新UI
+fun updateUI(it: Int) {
+    println("更新UI：$it")
+}
+
+// 显示Loading
+fun showLoading() {
+    println("showLoading")
+}
+
+// 隐藏Loading
+fun hideLoading() {
+    println("hideLoading")
+}
+
 fun main() = runBlocking {
-    fun loadData() = flow {
-        repeat(3) {
-            delay(100L)
-            emit(it)
-            log("send: $it")
-        }
+    fun getScore() = flow {
+        delay(500L)
+        println("获取数据")
+        emit(10)
     }
 
-    fun updateUI(it: Int) {}
-
-    fun showLoading() {
-        println("showLoading")
-    }
-
-    fun hideLoading() {
-        println("hideLoading")
-    }
-
-    //模拟UI线程
-    val uiScope = CoroutineScope(mySingleDispatcher)
-
-    loadData()
+    getScore()
         .onStart { showLoading() }
-        .map { it * 100 }
+        .map {
+            println("处理数据")
+            it * 100
+        }
         .flowOn(Dispatchers.IO)
         .catch { throwable ->
             println("catch: $throwable")
@@ -964,4 +909,226 @@ fun main() = runBlocking {
 }
 ```
 
+输出信息：
+
+```
+showLoading
+获取数据
+处理数据
+更新UI：1000
+hideLoading
+```
+
+### 串行执行
+
+```kotlin
+fun main() = runBlocking {
+    fun getDataFromCache() = flow {
+        delay(100L)
+        emit("这是一些缓存数据")
+    }
+
+    fun getDataFromNet() = flow {
+        delay(500L)
+        emit("这是一些网络数据")
+    }
+
+    flowOf(getDataFromCache(), getDataFromNet())
+        .onStart { showLoading() }
+        .flatMapConcat { it }
+        .flowOn(Dispatchers.IO)
+        .catch { throwable ->
+            println("catch: $throwable")
+            emit("异常")
+        }
+        .onEach { updateUI(it) }
+        .onCompletion { hideLoading() }
+        .launchIn(uiScope)
+
+    delay(1000L)
+}
+```
+
+输出信息：
+
+```
+showLoading
+更新UI：这是一些缓存数据
+更新UI：这是一些网络数据
+hideLoading
+耗时：634
+```
+
+### 并行执行
+
+```kotlin
+fun main() = runBlocking {
+    fun getDataFromCache() = flow {
+        delay(100L)
+        emit("这是一些缓存数据")
+    }
+
+    fun getDataFromNet() = flow {
+        delay(500L)
+        emit("这是一些网络数据")
+    }
+
+    flowOf(getDataFromCache(), getDataFromNet())
+        .onStart { showLoading() }
+        .flatMapMerge { it }
+        .flowOn(Dispatchers.IO)
+        .catch { throwable ->
+            println("catch: $throwable")
+            emit("异常")
+        }
+        .onEach { updateUI(it) }
+        .onCompletion { hideLoading() }
+        .launchIn(uiScope)
+
+    delay(1000L)
+}
+```
+
+输出信息：
+
+```
+showLoading
+更新UI：这是一些缓存数据
+更新UI：这是一些网络数据
+hideLoading
+耗时：522
+```
+
+### 串行执行存在依赖关系
+
+```kotlin
+// 更新UI
+fun updateUI(msg: String) {
+    println("更新UI：$msg")
+}
+
+var startTime = 0L
+
+// 显示Loading
+fun showLoading() {
+    println("showLoading")
+    startTime = System.currentTimeMillis()
+}
+
+// 隐藏Loading
+fun hideLoading() {
+    println("hideLoading")
+    println("耗时：${System.currentTimeMillis() - startTime}")
+}
+
+fun main() = runBlocking {
+
+    fun first() = flow {
+        delay(200L)
+        println("执行第一个请求")
+        emit("hello")
+    }
+
+    fun second(msg: String) = flow {
+        delay(200L)
+        println("执行第二个请求")
+        emit("$msg world")
+    }
+
+    fun third(msg: String) = flow {
+        delay(200L)
+        println("执行第三个请求")
+        emit("$msg flow")
+    }
+
+    first()
+        .onStart { showLoading() }
+        .flatMapConcat {
+            second(it)
+        }
+        .flatMapConcat {
+            third(it)
+        }
+        .flowOn(Dispatchers.IO)
+        .catch { throwable ->
+            println("catch: $throwable")
+            emit("异常")
+        }
+        .onCompletion { hideLoading() }
+        .collect {
+            updateUI(it)
+        }
+
+    delay(1000L)
+}
+```
+
+输出信息：
+
+```
+showLoading
+执行第一个请求
+执行第二个请求
+执行第三个请求
+更新UI：hello world flow
+hideLoading
+耗时：624
+```
+
+### 并行请求存在依赖关系
+
+```kotlin
+fun main() = runBlocking {
+
+    fun first() = flow {
+        delay(200L)
+        println("执行第一个请求")
+        emit("hello")
+    }
+
+    fun second() = flow {
+        delay(200L)
+        println("执行第二个请求")
+        emit("world")
+    }
+
+    fun third() = flow {
+        delay(200L)
+        println("执行第三个请求")
+        emit("flow")
+    }
+
+    first()
+        .onStart { showLoading() }
+        .zip(second()) { a, b ->
+            "$a $b"
+        }
+        .zip(third()) { b, c ->
+            "$b $c"
+        }
+        .flowOn(Dispatchers.IO)
+        .catch { throwable ->
+            println("catch: $throwable")
+            emit("异常")
+        }
+        .onCompletion { hideLoading() }
+        .collect {
+            updateUI(it)
+        }
+
+    delay(1000L)
+}
+```
+
+输出信息：
+
+```
+showLoading
+执行第一个请求
+执行第三个请求
+执行第二个请求
+更新UI：hello world flow
+hideLoading
+耗时：227
+```
 
