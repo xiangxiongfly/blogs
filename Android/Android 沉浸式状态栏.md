@@ -4,18 +4,10 @@
 
 ## 前提
 
-给Activity或Application设置NoActionBar的主题
+给 Activity 或 Application 设置 NoActionBar 的主题并设置透明导航栏。
 
 ```xml
 <style name="NoActionBarTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-    <!-- Primary brand color. -->
-    <item name="colorPrimary">@color/purple_500</item>
-    <item name="colorPrimaryVariant">@color/purple_700</item>
-    <item name="colorOnPrimary">@color/white</item>
-    <!-- Secondary brand color. -->
-    <item name="colorSecondary">@color/teal_200</item>
-    <item name="colorSecondaryVariant">@color/teal_700</item>
-    <item name="colorOnSecondary">@color/black</item>
     <!-- 设置状态栏颜色： -->
     <item name="android:statusBarColor">@android:color/transparent</item>
 </style>
@@ -23,7 +15,7 @@
 
 
 
-## 情况一：使用FrameLayout
+## 情况一：只使用fitsSystemWindows属性
 
 **代码如下：**
 
@@ -57,13 +49,13 @@ class ImmersionActivity1 : BaseActivity() {
 
 **说明：**
 
-状态栏部分没有被颜色，说明沉浸式效果没有达到。
+状态栏部分没有颜色，说明只使用 fitsSystemWindows 属性无法达到沉浸式效果。
 
 
 
-## 情况二：使用CoordinatorLayout
+## 情况二：使用CoordinatorLayout+fitsSystemWindows 
 
-将FrameLayout替换为CoordinatorLayout布局。
+将 FrameLayout 替换为 CoordinatorLayout 布局。
 
 **代码如下：**
 
@@ -87,7 +79,7 @@ class ImmersionActivity1 : BaseActivity() {
 
 **说明：**
 
-状态栏有被颜色，说明沉浸式效果已经达到了。
+状态栏有颜色，说明沉浸式效果已经达到了。
 
 
 
@@ -132,7 +124,7 @@ private void setupForInsets() {
 
 ### 问题：
 
-根布局为CoordinatorLayout，子控件Button和ImageView没有延伸到状态栏区域。
+根布局为 CoordinatorLayout，子控件 Button 和 ImageView 没有延伸到状态栏区域。
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -166,7 +158,7 @@ private void setupForInsets() {
 
 ### 解决：
 
-可以使用CollapsingToolbarLayout控件解决。
+可以借助 CollapsingToolbarLayout 控件解决。
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -262,7 +254,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 
 
-## 颜色相近时，修改状态栏图标颜色
+## 区分背景图颜色和状态栏图标颜色
 
 当状态栏图标的颜色和背景图颜色非常接近时，会导致部分内容看不清的情况。
 
@@ -409,7 +401,7 @@ class ImmersionActivity5 : BaseActivity() {
 
 
 
-## [代码下载](https://github.com/xiangxiongfly/MyAndroid/tree/main/home/src/main/java/com/example/home/immersion)
+## [代码下载](https://github.com/xiangxiongfly/MyAndroidProject/tree/main/status_bar_demo)
 
 
 

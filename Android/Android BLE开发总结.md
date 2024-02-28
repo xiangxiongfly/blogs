@@ -4,11 +4,16 @@
 
 ## 基本知识
 
+[官方文档](https://developer.android.google.cn/develop/connectivity/bluetooth/ble/ble-overview?hl=zh_cn)
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/aedd2f5e74254831a9420f7e37e0468b.png)
+
 在Android BLE开发中，设备、服务、特征和描述它们之间的关系如下：
 
-- 设备（Device）：指BLE设备，如蓝牙耳机、传感器等。
-- 服务（Service）：指BLE设备所提供的服务，一个BLE设备可以提供多个服务，每个服务有一个唯一的UUID，服务中包含多个特征值。
-- 特征（Characteristic）：指BLE设备服务中的特征值，每个特征值有一个唯一的UUID，可以读取、写入和监听特征值数据。
+- 设备（Device）：一个设置包含多个 Profile。指BLE设备，如蓝牙耳机、传感器等。
+- 配置文件（Profile）：一个 Profile 包含多个 Service。
+- 服务（Service）：一个 Service 包含多个 Charactoeristic。每个 Service 都有一个 UUID 唯一标识。
+- 特征（Characteristic）：一个 Characteristic 包含多个 Descriptor。指BLE设备服务中的特征值，每个特征值有一个唯一的UUID，可以读取、写入和监听特征值数据。
 - 描述（Descriptor）：指BLE设备服务中特征值的描述信息，描述信息通常包含对特征值的详细描述和配置信息。
 
 
@@ -42,22 +47,23 @@
 **AndroidManifest.xml注册**
 
 ```xml
-<!-- Android11权限 -->
+<!-- Android11及以下 -->
 <uses-permission
                  android:name="android.permission.BLUETOOTH"
                  android:maxSdkVersion="30" />
 <uses-permission
                  android:name="android.permission.BLUETOOTH_ADMIN"
                  android:maxSdkVersion="30" />
-<!-- BLUETOOTH_SCAN 查找权限 -->
-<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-<!-- 仅当您的应用程序使设备可被蓝牙设备发现时才需要。 -->
-<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-<!-- BLUETOOTH_CONNECT 通信权限 -->
-<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-<!-- ACCESS_FINE_LOCATION 获取物理位置权限 -->
+
+<!-- Android6及以上需要申请位置权限 -->
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+<!-- Android12及以上需要申请蓝牙扫描、广播、连接权限 -->
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
 
 <!-- 如果您说您的应用需要该功能，那么 Google Play 商店将 在缺少这些功能的设备上向用户隐藏您的应用 -->
 <uses-feature
@@ -68,22 +74,103 @@
               android:required="true" />
 ```
 
-**运行时权限**
+如果app不需要定位权限，可以使用 neverForLocation ：
+
+```xml
+<!-- 仅当你可以强烈断言你的应用程序永远不会从蓝牙扫描结果中获取物理位置时，才包含“neverForLocation” -->
+
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+                     android:usesPermissionFlags="neverForLocation" />
+```
+
+**动态权限申请:**
 
 这里用到了 XXPermissions 权限框架。
 
 ```java
+//        List<String> mPermissionList = new ArrayList<>();
+//        // Android 版本大于等于 12 时，申请新的蓝牙权限
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//            mPermissionList.add(Manifest.permission.BLUETOOTH_SCAN);
+//            mPermissionList.add(Manifest.permission.BLUETOOTH_ADVERTISE);
+//            mPermissionList.add(Manifest.permission.BLUETOOTH_CONNECT);
+//            //根据实际需要申请定位权限
+//            mPermissionList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+//            mPermissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+//        } else {
+//            //Android 6.0开始 需要定位权限
+//            mPermissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+//            mPermissionList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+//        }
+
 XXPermissions.with(this)
-    .permission(Permission.BLUETOOTH_ADVERTISE, Permission.BLUETOOTH_CONNECT, Permission.BLUETOOTH_SCAN, Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_FINE_LOCATION)
+    .permission(Permission.Group.BLUETOOTH)
+    .permission(Permission.ACCESS_FINE_LOCATION, Permission.ACCESS_COARSE_LOCATION)
     .request(new OnPermissionCallback() {
         @Override
         public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+            for (int i = 0; i < permissions.size(); i++) {
+                Log.e("TAG", "onGranted " + i + " " + permissions.get(i));
+            }
+            if (allGranted) {
+                // 判断定位服务是否打开
+                if (!isLocationEnabled()) {
+                    openLocation();
+                }
+            }
         }
 
         @Override
         public void onDenied(@NonNull List<String> permissions, boolean doNotAskAgain) {
+            for (int i = 0; i < permissions.size(); i++) {
+                Log.e("TAG", "onDenied " + i + " " + permissions.get(i));
+            }
         }
     });
+```
+
+**开启手机的定位服务：**
+
+```java
+/**
+ * 判断定位服务是否开启，方式一：
+ */
+private boolean isLocationEnabled1() {
+    LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+    //gps定位
+    boolean isGpsProvider = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    //网络定位
+    boolean isNetWorkProvider = manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    return isGpsProvider || isNetWorkProvider;
+}
+
+/**
+ * 判断定位服务是否开启，方式二：
+ */
+private boolean isLocationEnabled2() {
+    int locationMode = 0;
+    String locationProviders;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        try {
+            locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+    } else {
+        locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        return !TextUtils.isEmpty(locationProviders);
+    }
+}
+
+/**
+  * 打开定位服务
+  */
+private void openLocation() {
+    Intent enableLocate = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+    startActivityForResult(enableLocate, 666);
+}
 ```
 
 ### 二、检查BLE是否可用

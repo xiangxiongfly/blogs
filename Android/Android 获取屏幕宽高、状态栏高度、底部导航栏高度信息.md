@@ -10,8 +10,6 @@
 
 
 
-
-
 ## 使用
 
 ```java
@@ -59,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 }
 ```
 
-在vivo iqoo2手机下输出信息：
+**在vivo iqoo2手机下输出信息：**
 
 ```
 屏幕宽高：1080 - 2340
@@ -72,7 +70,7 @@ DecorView的宽高：1080 - 2340
 Content View的宽高：1080 - 1962
 ```
 
-在xiaomi13手机下输出信息：
+**在xiaomi13手机下输出信息：**
 
 ```
 屏幕宽高：1440 - 3200
@@ -87,15 +85,15 @@ Content View的宽高：1440 - 2702
 
 **说明：**
 
-在小米13下：`ScreenUtils.getScreenHeight()` 等于 `ScreenUtils.getAppScreenWidth() + 状态栏高度 +导航栏高度`。
+在小米13下：ScreenUtils.getScreenHeight()  等于 ScreenUtils.getAppScreenWidth() + 状态栏高度 +底部导航栏高度。
 
-但在在vivo iqoo2手机下：ScreenUtils.getScreenHeight() 等于 `ScreenUtils.getAppScreenWidth() + 199`，状态栏高度是84，导航栏高度是126，这个199是什么？说明 ScreenUtils.getAppScreenWidth() 这个方法是不稳定的。
+但在在vivo iqoo2手机下：ScreenUtils.getScreenHeight() 等于 ScreenUtils.getAppScreenWidth() + 199，状态栏高度是84，底部导航栏高度是126，这个199是什么？说明 ScreenUtils.getAppScreenWidth() 这个方法是不稳定的。
 
 
 
 ## 开启全面屏手势
 
-在vivo iqoo2手机下输出信息：
+**在vivo iqoo2手机下输出信息：**
 
 ```
 屏幕宽高：1080 - 2340
@@ -112,7 +110,7 @@ Content View的宽高：1080 - 2088
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/f5577cf0484e4f56bf5ff8a0f4934c5b.png)
 
-在xiaomi13手机下输出信息：
+**在xiaomi13手机下输出信息：**
 
 ```
 屏幕宽高：1440 - 3200
@@ -132,13 +130,20 @@ Content View的宽高：1440 - 2811
 
 **说明：**
 
-开启全面屏手势后，获取底部导航栏高度都不准确了，在vivo iqoo2手机直接隐藏导航栏，而小米13手机的导航栏高度则变小了。
+开启全面屏手势后，获取底部导航栏高度都不准确了，在vivo iqoo2手机直接隐藏底部导航栏，而小米13手机的底部导航栏高度则变小了。
+
+
+
+## 总结
+
+- 在获取屏幕宽高时，建议使用 getRealSize() 方法。
+- 在获取底部导航栏高度时，需要在布局绘制完成后，先判断是否显示，然后通过屏幕高度减去状态栏高度和ActionBar高度和ContentView高度。
 
 
 
 ## 工具类
 
-**ScreenUtils.java**
+### ScreenUtils.java
 
 ```java
 public class ScreenUtils {
@@ -214,7 +219,7 @@ public class ScreenUtils {
 }
 ```
 
-**BarUtils.java**
+### BarUtils.java
 
 ```java
 public final class BarUtils {
@@ -309,7 +314,7 @@ public final class BarUtils {
 }
 ```
 
-**RomUtils.java**
+### RomUtils.java
 
 ```java
 public final class RomUtils {
@@ -747,9 +752,3 @@ public final class RomUtils {
 }
 ```
 
-
-
-## 总结
-
-- 在获取屏幕宽高时，建议使用 getRealSize() 方法。
-- 在获取导航栏高度时，需要在布局绘制完成后判断是否显示，然后通过屏幕高度减去状态栏高度和ActionBar高度和ContentView高度。
