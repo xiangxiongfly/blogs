@@ -1,6 +1,6 @@
 [TOC]
 
-# Android 验证启动模式
+# Android 验证Activity启动模式
 
 ## 查看任务栈
 

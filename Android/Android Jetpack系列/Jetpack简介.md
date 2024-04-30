@@ -1,14 +1,32 @@
 [TOC]
 
-### Android Jetpack
+# Android Jetpack
 
-- Jetpack是一套库、工具和指南的集合，帮助开发者更轻松地编写优质应用。
-- Jetpack特性：
-  - 加速开发：组件可单独使用，也可以协同工作，当使用kotlin时，效率更高。
-  - 消除样板代码：Jetpack可以管理繁琐的Activity。
-  - 构建高质量的应用：具有向后兼容性，可以减少崩溃和内存泄露。
+## 概述
+
+Android Jetpack是一组库、工具和指南，旨在帮助开发者轻松地编写高质量的Android应用。它是Google推出的，旨在加速Android应用开发过程，同时保持应用的稳定性和兼容性。Jetpack通过提供向后兼容的、可靠的组件，使得开发者可以专注于编写他们应用的独特功能，而不是处理Android平台的复杂性。
+
+[官网](https://developer.android.google.cn/jetpack)
+
+
+
+## Jetpack与Android关系
+
+- 补充：Jetpack并不是替代Android SDK的，而是作为补充存在。它提供了一系列的库和工具，帮助开发者更有效地使用Android SDK。
+- 向后兼容：许多Jetpack组件提供了向后兼容性，这意味着开发者可以在旧版本的Android上使用新特性，从而扩大应用的受众范围。
+
+
+
+## Jetpack包含内容
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20191230163930395.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzE0ODc2MTMz,size_16,color_FFFFFF,t_70)
+
+#### Foundationy 基础组件
+
+基础组件提供了横向功能，如向后兼容、测试、安全你、kotlin支持。
+
+- Android KTX：优化了供kotlin使用的Jetpack和Android的API。
+- AppCompat：提供较低版本的兼容。
 
 
 
@@ -26,13 +44,6 @@ Architecture指的是架构组件，帮助开发者设计文件、可测试且�
 - WorkManager：管理Android的后台工作。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20191230163946666.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzE0ODc2MTMz,size_16,color_FFFFFF,t_70)
-
-#### Foundationy 基础组件
-
-基础组件提供了横向功能，如向后兼容、测试、安全你、kotlin支持。
-
-- Android KTX：优化了供kotlin使用的Jetpack和Android的API。
-- AppCompat：提供较低版本的兼容。
 
 
 

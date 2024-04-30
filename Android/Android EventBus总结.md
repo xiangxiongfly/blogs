@@ -49,9 +49,11 @@ EventBus是一种用于Android的事件发布-订阅总线，用于简化各模�
 ```java
 @Override
 protected void onCreate(Bundle savedInstanceState) {
+    // 注册
     EventBus.getDefault().register(this);
 }
 
+// 接收事件
 @Subscribe(threadMode = ThreadMode.MAIN)
 public void onEvent(MessageEvent<String> event) {
     if (event.getCode() == 100) {
@@ -62,11 +64,13 @@ public void onEvent(MessageEvent<String> event) {
 @Override
 protected void onDestroy() {
     super.onDestroy();
+    // 取消注册
     EventBus.getDefault().unregister(this);
 }
 ```
 
 ```java
+// 发送事件
 EventBus.getDefault().post(new MessageEvent<String>(100, "hello 这是一条普通事件"));
 ```
 
@@ -89,7 +93,7 @@ EventBus.getDefault().postSticky(new MessageEvent<String>(200, "这是一条粘�
 
 ### 验证：粘性事件订阅者收到普通事件
 
-如果先注册粘性事件订阅者，再发送普通事件，是可以收到普通事件的。
+如果先注册粘性事件订阅者，再发送普通事件，订阅者是可以收到普通事件的。
 
 ```java
 public class OneActivity extends AppCompatActivity {
@@ -126,7 +130,7 @@ public class OneActivity extends AppCompatActivity {
 
 ### 验证：普通事件订阅者收到粘性消息
 
-如果先注册普通事件订阅者，再发送粘性事件，则是可以收到粘性事件的。
+如果先注册普通事件订阅者，再发送粘性事件，订阅者是可以收到粘性事件的。
 
 ```java
 public class OneActivity extends AppCompatActivity {
@@ -304,4 +308,8 @@ public class OneActivity extends BaseActivity {
     }
 }
 ```
+
+
+
+## [Kotlin版封装](https://blog.csdn.net/qq_14876133/article/details/136844179)
 

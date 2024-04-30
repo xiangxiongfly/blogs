@@ -39,18 +39,18 @@ View的内部提供`post()`系列方法，一定程度上可以替代Handler
 
 **format属性详解**
 
-| 类型      | 说明                                |
-| --------- | ----------------------------------- |
-| color     | 颜色值，如：#000000                 |
-| string    | 字符串类型，如："abc123"            |
-| dimension | 尺寸值，如：16dp、18sp              |
-| boolean   | 布尔值，true或false判断             |
-| integer   | 整数类型                            |
-| float     | 浮点类型                            |
-| fraction  | 百分比，如：10%、50%p               |
-| reference | 资源类型id                          |
-| enum      | 枚举类型，单选值，子项value为整数值 |
-| flags     | 位运算，可以多选，子项value为整数值 |
+| 类型      | 说明       | 举例                                |
+| --------- | ---------- | ----------------------------------- |
+| color     | 颜色值类型 | #000000                             |
+| string    | 字符串类型 | "abc"、”123“                        |
+| dimension | 尺寸值类型 | 16dp、18sp                          |
+| boolean   | 布尔值类型 | true或false                         |
+| integer   | 整型值类型 | 1、10、100                          |
+| float     | 浮点值类型 | 1.11、2.22                          |
+| fraction  | 分数类型   | 10%、50%p                           |
+| reference | 资源类型   | @drawable/bg.png                    |
+| enum      | 枚举类型   | 单选值，子项value为整数值           |
+| flags     | 标记类型   | 位运算，可以多选，子项value为整数值 |
 
 **在 `res/values/attrs.xml` 文件中写入：**
 

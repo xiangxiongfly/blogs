@@ -237,6 +237,27 @@ class MyAdapter(
 
 
 
+## 禁止水平滚动的ViewPager
+
+```kotlin
+class NoScrollViewPager(context: Context, attrs: AttributeSet? = null) : ViewPager(context, attrs) {
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun onTouchEvent(ev: MotionEvent?): Boolean {
+        return false
+    }
+
+    override fun executeKeyEvent(event: KeyEvent): Boolean {
+        return false
+    }
+}
+```
+
+
+
 ## ViewPager+Fragment懒加载（方式一）
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/8d3901ba9d634516b1ebf5d818f5b1cf.gif)
@@ -398,5 +419,5 @@ class NewLazyActivity : BaseActivity() {
 
 
 
-## [代码下载](https://github.com/xiangxiongfly/MyAndroid/tree/main/home/src/main/java/com/example/home/viewpager)
+## [代码下载](https://github.com/xiangxiongfly/MyAndroidProject/tree/main/module/home/src/main/java/com/example/home/viewpager)
 
