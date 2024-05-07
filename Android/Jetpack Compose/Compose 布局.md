@@ -147,6 +147,8 @@ Compose中的”水平线性布局“。
 
 ### Row属性
 
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/d0c3aac2b6cc4206908012cfa4509771.png)
+
 ```kotlin
 @Composable
 inline fun Row(
@@ -175,6 +177,37 @@ fun MyRow() {
         MyText("one")
         MyText("two")
         MyText("three")
+    }
+}
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/800775dae7d24cab8effb8929a1ddc39.png)
+
+```kotlin
+Surface(
+    shape = RoundedCornerShape(8.dp),
+    modifier = Modifier
+        .padding(horizontal = 12.dp)
+        .fillMaxWidth()
+) {
+    Column(modifier = Modifier.padding(12.dp)) {
+        Text("Jetpack Compose", style = MaterialTheme.typography.h6)
+        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+        Text("Jetpack Compose 是 Google 推出的一个用于构建现代 Android 用户界面的工具包。它采用了一种反应式的编程模型，使得开发者可以更加高效地构建复杂的用户界面，并提供了丰富的布局、样式和动画功能。")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Filled.Favorite, null)
+            }
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Filled.Call, null)
+            }
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Filled.Person, null)
+            }
+        }
     }
 }
 ```
@@ -326,44 +359,324 @@ fun MyBox() {
 
 
 
+## Surface
+
+Surface从字面上来理解，是一个平面，在Material Design设计准则中也同样如此，我们可以将很多的组件摆放在这个平面之上，可以设置这个平面的边框、圆角、颜色等。
+
+### Surface属性
+
+```kotlin
+@Composable
+fun Surface(
+    modifier: Modifier = Modifier, // 修饰符
+    shape: Shape = RectangleShape, // 形状
+    color: Color = MaterialTheme.colors.surface, // 背景颜色
+    contentColor: Color = contentColorFor(color), // 内容颜色，如内部文字
+    border: BorderStroke? = null, // 边框
+    elevation: Dp = 0.dp, // 高度，也就是阴影大小
+    content: @Composable () -> Unit
+)
+```
+
+### 使用
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/f8746e9217f340be9cdffe739b5530aa.png)
+
+```kotlin
+Surface(
+    shape = RoundedCornerShape(8.dp),
+    elevation = 10.dp,
+    modifier = Modifier
+        .width(300.dp)
+        .height(100.dp)
+) {
+    Row(modifier = Modifier.clickable { }) {
+        Image(
+            painter = painterResource(id = R.drawable.img),
+            contentDescription = null,
+            modifier = Modifier.size(100.dp),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.padding(horizontal = 12.dp))
+        Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
+            Text("Hello World", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            Text("hello compose")
+        }
+    }
+}
+```
+
+### Surface与Box区别
+
+- 如果我们需要快速设置界面的形状、阴影、边框、颜色等，则用Surface更为合适，它可以减少Modifier的使用量。
+- 如果只是需要简单地设置界面的背景颜色、大小，且有时候需要简单安排里面布局的位置，则可以使用Box。
+
+
+
 ## ConstraintLayout
 
 Compose中的”约束布局“。
 
-**添加依赖库：**
+### 添加依赖库
 
 ```
 implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 ```
 
-**使用：**
+### ConstrainScope属性
+
+在 ConstrainScope 中可以设置 width 和 height：
+
+| Dimension值            | 说明                                                         |
+| ---------------------- | ------------------------------------------------------------ |
+| wrapContent()          | 内容自适应尺寸                                               |
+| matchParent()          | 填充父容器尺寸                                               |
+| fillToConstraints()    | 拉伸填充父容器尺寸                                           |
+| preferredWrapContent() | 如果剩余空间大于内容尺寸，则实际尺寸为内容尺寸；如果剩余空间小于内容尺寸，则实际尺寸为剩余空间尺寸 |
+| ratio(String)          | 宽高比，如 width = Dimension.ratio('1:2') 表示将宽度设置为高度的一半 |
+| percent(Float)         | 占比尺寸                                                     |
+| value(Dp)              | 固定尺寸                                                     |
+| preferredValue(Dp)     | 如果剩余空间大于固定尺寸，则实际尺寸为固定尺寸；如果剩余空间小于固定尺寸，则实际尺寸为剩余空间 |
+
+### 简单使用
 
 - createRefs()：创建多个引用。
 - createRef()：创建一个引用。
 - constrainAs：定义约束。
 - linkTo：约束关系。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/7b4e9adb30044b238fa33bff9916c555.png)
+
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/8ba8eb249521403cb13af58480135f65.png)
 
 ```kotlin
-ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-    val (one, two) = createRefs()  
-    val three = createRef() 
-    DefaultText(text = "One", modifier = Modifier.constrainAs(one) {
-        start.linkTo(parent.start)
-        end.linkTo(parent.end)
-        top.linkTo(parent.top, margin = 16.dp)
-    })
-    DefaultText(text = "Two", modifier = Modifier.constrainAs(two) {
-        start.linkTo(parent.start)
-        end.linkTo(parent.end)
-        top.linkTo(one.bottom, margin = 16.dp)
-    })
-    DefaultText(text = "Three", modifier = Modifier.constrainAs(three) {
-        start.linkTo(parent.start)
-        end.linkTo(parent.end)
-        bottom.linkTo(parent.bottom, margin = 16.dp)
-    })
+ConstraintLayout(
+    modifier = Modifier
+        .width(300.dp)
+        .height(100.dp)
+        .padding(10.dp)
+) {
+    val (portraitImageRef, usernameTextRef, descTextRef) = remember { createRefs() }
+    Image(
+        painterResource(id = R.drawable.img),
+        null,
+        modifier = Modifier.clip(RoundedCornerShape(10.dp))
+            .constrainAs(portraitImageRef) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+            }
+        )
+                Text (
+                "Jetpack Compose",
+        fontSize = 16.sp,
+        maxLines = 1,
+        textAlign = TextAlign.Left,
+        modifier = Modifier.constrainAs(usernameTextRef) {
+            top.linkTo(portraitImageRef.top)
+            start.linkTo(portraitImageRef.end, 10.dp)
+        }
+    )
+    Text(
+        "这是一堆描述信息",
+        fontSize = 14.sp,
+        color = Color.Gray,
+        fontWeight = FontWeight.Light,
+        modifier = Modifier.constrainAs(descTextRef) {
+            top.linkTo(usernameTextRef.bottom, 5.dp)
+            start.linkTo(portraitImageRef.end, 10.dp)
+        }
+    )
+}
+```
+
+### 使用preferredWrapContent
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/4f116a1ee12c4914873492dee183f095.png)
+
+```kotlin
+Text(
+    "这是一堆描述信息这是一堆描述信息这是一堆描述信息这是一堆描述信息这是一堆描述信息这是一堆描述信息这是一堆描述信息这是一堆描述信息",
+    fontSize = 14.sp,
+    color = Color.Gray,
+    fontWeight = FontWeight.Light,
+    maxLines = 1,
+    modifier = Modifier.constrainAs(descTextRef) {
+        top.linkTo(usernameTextRef.bottom, 5.dp)
+        start.linkTo(portraitImageRef.end, 10.dp)
+        width = Dimension.preferredWrapContent
+    }
+)
+```
+
+### 使用Barrier
+
+Barrier 分界线。
+
+使用createEndBarrier创建一条结尾分界线，该分界线位置位于两个文本中较长文本的结尾处。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/23b1cceaf45e4378b02614d413b7726d.png)
+
+```kotlin
+ConstraintLayout(
+    modifier = Modifier
+    .width(400.dp)
+    .padding(10.dp)
+) {
+    val (usernameTextRef, passwordTextRef, usernameInputRef, passwordInputRef, dividerRef) = remember { createRefs() }
+    val barrier = createEndBarrier(usernameTextRef, passwordTextRef)
+    Text(
+        "用户名",
+        fontSize = 14.sp,
+        textAlign = TextAlign.Left,
+        modifier = Modifier.constrainAs(usernameTextRef) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+        }
+    )
+    Divider(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .constrainAs(dividerRef) {
+                top.linkTo(usernameTextRef.bottom)
+                bottom.linkTo(passwordTextRef.top)
+            })
+    Text(
+        "密码",
+        fontSize = 14.sp,
+        textAlign = TextAlign.Left,
+        modifier = Modifier.constrainAs(passwordTextRef) {
+            top.linkTo(dividerRef.bottom)
+            start.linkTo(parent.start)
+        }
+    )
+    OutlinedTextField(
+        value = "",
+        onValueChange = {},
+        modifier = Modifier.constrainAs(usernameInputRef) {
+            start.linkTo(barrier, 10.dp)
+            top.linkTo(usernameTextRef.top)
+            bottom.linkTo(usernameTextRef.bottom)
+            height = Dimension.fillToConstraints
+        }
+    )
+    OutlinedTextField(
+        value = "",
+        onValueChange = {},
+        modifier = Modifier.constrainAs(passwordInputRef) {
+            start.linkTo(barrier, 10.dp)
+            top.linkTo(passwordTextRef.top)
+            bottom.linkTo(passwordTextRef.bottom)
+            height = Dimension.fillToConstraints
+        }
+    )
+}
+```
+
+### 使用Guideline
+
+Guideline 引导线。
+
+可以使用createGuidelineFromTop创建从顶部出发的引导线。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/23b1cceaf45e4378b02614d413b7726d.png)
+
+```kotlin
+ConstraintLayout(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(300.dp)
+        .background(Color.LightGray)
+) {
+    val (portraitRef, bgRef, welcomeRef) = remember { createRefs() }
+    val guideLine = createGuidelineFromTop(0.5F)
+    Box(modifier = Modifier
+        .background(Color.Blue)
+        .constrainAs(bgRef) {
+            top.linkTo(parent.top)
+            bottom.linkTo(guideLine)
+            height = Dimension.fillToConstraints
+            width = Dimension.matchParent
+        }
+       )
+    Image(
+        painter = painterResource(id = R.drawable.img),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(100.dp)
+            .clip(CircleShape)
+            .border(width = 2.dp, color = Color.Red, shape = CircleShape)
+            .constrainAs(portraitRef) {
+                top.linkTo(guideLine)
+                bottom.linkTo(guideLine)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+    )
+    Text(
+        "Jetpack Compose",
+        color = Color.White,
+        fontSize = 26.sp,
+        modifier = Modifier.constrainAs(welcomeRef) {
+            top.linkTo(portraitRef.bottom, 20.dp)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    )
+}
+```
+
+### 使用Chain
+
+Chain 链接约束。
+
+通过链接约束可以允许多个组件平均分配布局空间，这个功能类似于weight修饰符。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/16adfbe11ef2401aa2eef4bd22ac0fba.png)
+
+```kotlin
+ConstraintLayout(
+    modifier = Modifier
+    .fillMaxWidth()
+    .height(300.dp)
+    .background(Color.LightGray)
+) {
+    val (oneRef, twoRef, threeRef, fourRef) = remember { createRefs() }
+    createVerticalChain(oneRef, twoRef, threeRef, fourRef, chainStyle = ChainStyle.Spread)
+    Text(
+        text = "AAAAAAAAAAAAAAAAAA",
+        color = Color.White,
+        modifier = Modifier.constrainAs(oneRef) {
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    )
+    Text(
+        text = "AAAAAAAAAAAAAAAAAA",
+        color = Color.White,
+        modifier = Modifier.constrainAs(twoRef) {
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    )
+    Text(
+        text = "AAAAAAAAAAAAAAAAAA",
+        color = Color.White,
+        modifier = Modifier.constrainAs(threeRef) {
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    )
+    Text(
+        text = "AAAAAAAAAAAAAAAAAA",
+        color = Color.White,
+        modifier = Modifier.constrainAs(fourRef) {
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    )
 }
 ```
 

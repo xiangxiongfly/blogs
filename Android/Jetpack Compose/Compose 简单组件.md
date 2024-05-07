@@ -1052,3 +1052,93 @@ LinearProgressIndicator(
 )
 ```
 
+
+
+## 弹窗组件
+
+Compose的对话框不像传统视图的对话框那样通过show()、dismiss()等命令式的方式显隐，它像不同的Composable组件一样，显示与否要看是否在重组中被执行，所以它的显示与否要依赖状态控制。Dialog和普通Composable组件的不同在于其底层需要依赖独立的Window进行显示。
+
+### Dialog属性
+
+```kotlin
+@Composable
+fun Dialog(
+    onDismissRequest: () -> Unit, // 隐藏时回调
+    properties: DialogProperties = DialogProperties(), // 属性设置
+    content: @Composable () -> Unit // 内容
+)
+```
+
+### AlertDialog
+
+AlertDialog组件是Dialog组件的更高级别的封装，同时遵守着Material Design设计标准。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/abc5f5528ce344e6bb87e09972cfddf5.png)
+
+```kotlin
+val showAlertDialog = remember { mutableStateOf(false) }
+
+
+@Composable
+fun MyAlertDialog(showAlertDialog: MutableState<Boolean>) {
+    if (showAlertDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showAlertDialog.value = false },
+            title = { Text("标题") },
+            text = { Text("这是一些内容") },
+            confirmButton = {
+                TextButton(onClick = { showAlertDialog.value = false }) {
+                    Text("同意")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAlertDialog.value = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+}
+```
+
+### Dialog
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/00e1b25a37304beb83e6a194a8191ddf.png)
+
+```kotlin
+val showDialog = remember { mutableStateOf(false) }
+
+
+@Composable
+fun MyDialog(showDialog: MutableState<Boolean>) {
+    if (showDialog.value) {
+        Dialog(
+            onDismissRequest = { showDialog.value = false },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Surface(
+                modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth(),
+                color = Color.White,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("标题", fontSize = 24.sp, modifier = Modifier.padding(vertical = 10.dp))
+                    Text("这是一些内容", fontSize = 16.sp)
+                    TextButton(onClick = { showDialog.value = false }) {
+                        Text("确定", color = Color.Red)
+                    }
+                }
+            }
+        }
+    }
+}
+```
+

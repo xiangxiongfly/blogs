@@ -1,16 +1,18 @@
 [TOC]
 
-# Compose 智能重组
+# Compose 重组
 
 ## 概述
 
-重组就是系统根据需要使用新数据重新绘制的函数来重新组合，而Compose可以智能地仅重组已更改的组件。
+传统视图中通过修改View的私有属性来改变UI，Compose 则通过重组刷新UI。
+
+Compose 的重组非常“智能”，当重组发生时，只有状态发生更新的 Composable 才会参与重组，没有变化的 Composable 会跳过本次重组。
 
 
 
 ## 重组特性
 
-### 组件任意顺序运行
+### 组件会按任意顺序运行
 
 ```kotlin
 @Composable
@@ -25,9 +27,11 @@ fun Bottom() {
 
 组件 MyOne/MyTwo/MyThree 的执行顺序是任意，各组件之间是独立的。
 
+在一个Box布局中处于前景的UI具有较高的优先级，因此Composable会根据优先级来执行，这与代码中出现的位置可能并不一致。
+
 ### 组件并行运行
 
-Compose 是并行运行可组合函数来优化重组。
+重组中的Composable并不一定执行在UI线程，它们可能在后台线程池中并行执行，这有利于发挥多核处理器的性能优势。但是由于多个Composable在同一时间可能执行在不同线程，此时必须考虑线程安全问题。
 
 ```kotlin
 @Composable
@@ -91,4 +95,64 @@ private fun NamePickerItem(name: String, onClicked: (String) -> Unit) {
 
 ### 重组是乐观操作
 
-重组是乐观的操作，也就是说，Compose预计会在参数再次更改之前完成重组。如果某个参数在重组完成之前发生更改，Compose可能会取消重组，并使用新参数重新开始。取消重组后，Compose会从重组中舍弃界面树。如有任何附带效应依赖于显示的界面，则即使取消了重组操作，也会应用该附带效应。这可能会导致应用状态不一致。所以我们应该确保所有可组合函数和lambda都幂等且没有附带效应，以处理乐观的重组。
+所谓“乐观”是指Composable最终总会依据最新的状态正确地完成重组。在某些场景下，状态可能会连续变化，这可能会导致中间态的重组在执行中被打断，新的重组会插入进来。对于被打断的重组，Compose不会将执行一般的重组结果反应到视图树上，因为它知道最后一次状态总归是正确的，因此中间状态丢弃也没关系。
+
+
+
+## 重组作用域
+
+重组是智能的，会尽可能跳过不必要的重组。
+
+```kotlin
+@Composable
+fun RecomposePage() {
+    Log.e("TAG", "Scope-1 run")
+    var counter by remember { mutableStateOf(0) }
+    Column {
+        Log.e("TAG", "Scope-2 run")
+        Button(onClick = {
+            Log.e("TAG", "Button Click")
+            counter++
+        }) {
+            Log.e("TAG", "Scope-3 run")
+            Text("+")
+        }
+        Text("$counter")
+    }
+}
+```
+
+点击按钮后输出：
+
+```
+Button Click
+Scope-1 run
+Scope-2 run
+```
+
+经过Compose编译器处理后的Composable代码在对State进行读取的同时，能够自动建立关联，在运行过程中当State变化时，Compose会找到关联的代码块标记为Invalid。在下一渲染帧到来之前，Compose会触发重组并执行invalid代码块，Invalid代码块即下一次重组的范围。能够被标记为Invalid的代码必须是非inline且无返回值的Composable函数或lambda。
+
+说明：Column 是一个 inline 声明的高阶函数，内部 content 也会被展开在调用处，Scope-2与Scope-1共享重组范围，因此“Scope-1 run”日志被输出。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
