@@ -110,12 +110,14 @@ fun RecomposePage() {
     var counter by remember { mutableStateOf(0) }
     Column {
         Log.e("TAG", "Scope-2 run")
-        Button(onClick = {
-            Log.e("TAG", "Button Click")
-            counter++
+        Button(onClick = run {
+            Log.e("TAG", "Button Scope")
+            return@run {
+                counter++
+            }
         }) {
-            Log.e("TAG", "Scope-3 run")
-            Text("+")
+            Log.e("TAG", "Scope-4 run")
+            Text("hello")
         }
         Text("$counter")
     }
@@ -125,34 +127,14 @@ fun RecomposePage() {
 点击按钮后输出：
 
 ```
-Button Click
 Scope-1 run
 Scope-2 run
+Button Scope
 ```
 
 经过Compose编译器处理后的Composable代码在对State进行读取的同时，能够自动建立关联，在运行过程中当State变化时，Compose会找到关联的代码块标记为Invalid。在下一渲染帧到来之前，Compose会触发重组并执行invalid代码块，Invalid代码块即下一次重组的范围。能够被标记为Invalid的代码必须是非inline且无返回值的Composable函数或lambda。
 
-说明：Column 是一个 inline 声明的高阶函数，内部 content 也会被展开在调用处，Scope-2与Scope-1共享重组范围，因此“Scope-1 run”日志被输出。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+说明：Column 是一个 inline 声明的高阶函数，内部 content 也会被展开在调用处，Scope-2与Scope-1共享重组范围，因此“Scope-1 run”日志都会被输出。虽然Button没有依赖counter，但是Scope-2的重组会触发Button的重新调用，所以“Button-onclick”的日志也会输出。虽然Button会重新调用，但是其content内部并没有依赖counter，所以“Scope-3 run”也就不会输出。
 
 
 

@@ -10,7 +10,7 @@
 
 ## 使用
 
-### MutableState
+### 状态
 
 ```kotlin
 val counter: MutableState<Int> = mutableStateOf(0)
@@ -32,6 +32,52 @@ val counter: Int by mutableStateOf(0)
 ```
 
 这里的 counter 的读写会通过 getValue 和 setValue这 两个运算符的重写最终代理为对 value 的操作，通过 by 关键字，可以像访问一个普通的Int变量一样对状态进行读写。
+
+### StatelessComposable & StatefulComposable
+
+- StatelessComposable：
+  - 无状态组件。
+  - 是一个“纯函数”，这类函数不管理任何内部状态，它的输出完全受输入参数影响，参数不变UI就不会变化，StatelessComposable 函数在每次调用时都会重新计算输出，并且不会保留任何中间状态因此Compose编译器针对其进行了优化。
+  - StatelesComposable 的重组只能来自上层 Composable 的调用。它适用于那些不需要在不同调用之间保持状态的组件，例如简单的显示文本、图片或按钮等。
+- StatefulComposable：
+  - 有状态组件。
+  - 这类函数管理内部状态，并可以根据状态的变化更新输出。StatefulComposable 函数会在第一次调用时创建一个状态对象，并在后续调用中使用该状态对象来更新输出。
+  - StatefulComposable 的重组来自其依赖状态的变化。适用于那些需要在不同调用之间保持状态的组件，例如计数器、开关、滑动条等。
+
+**StatelessComposable：**
+
+```kotlin
+@Composable
+fun MyTextComponent(text: String) {  
+    Text(text = text)
+}
+```
+
+说明：`MyTextComponent` 是一个 StatelessComposable，它接受一个字符串参数 `text`，并将其显示为文本。
+
+**StatefulComposable：**
+
+```kotlin
+@Composable
+fun MyCounterComponent() { 
+    var count by remember { mutableStateOf(0) }
+
+    Button(onClick = { count++ }) {
+        Text(text = "计数器：$count")
+    }
+}
+```
+
+说明：`MyCounterComponent` 是一个 StatefulComposable，它内部使用 `mutableStateOf` 来管理一个整数状态 `count`。当点击按钮时，`count` 会增加 1，并更新计数器的显示。
+
+**总结：**
+
+|              | StatelessComposable        | StatefulComposable |
+| ------------ | -------------------------- | ------------------ |
+| 状态         | 不管理                     | 管理               |
+| 重新渲染条件 | 取决于输入参数             | 取决于状态         |
+| 性能         | 性能较好，参数不变，UI不变 |                    |
+| 用法         | 无状态的界面组件           | 状态的界面组件     |
 
 ### remember
 
@@ -58,40 +104,6 @@ fun Test3() {
 ```
 
 说明：使用 `remember { mutableStateOf() }` 记录状态，当 index 发生变化时，Text显示的值也会跟着发生变化。
-
-### StatelessComposable & StatefulComposable
-
-**StatelessComposable** 不管理任何状态，它的输出仅取决于输入参数。它是无状态的，每次调用都会重新计算输出，并且不会记住之前的状态。
-
-例如，一个简单的文本显示组件可以是一个 `StatelessComposable`：
-
-```kotlin
-@Composable
-fun MyTextComponent(text: String) { // StatelessComposable
-    Text(text = text)
-}
-```
-
-说明：`MyTextComponent` 是一个 `StatelessComposable`，它接受一个字符串参数 `text`，并将其显示为文本。
-
-**StatefulComposable** 会管理状态，内部持有或访问状态，并根据状态的变化来更新输出。
-
-例如，一个计数器组件可以是一个 `StatefulComposable`：
-
-```kotlin
-@Composable
-fun MyCounterComponent() { // StatefulComposable
-    var count by remember { mutableStateOf(0) }
-
-    Button(onClick = { count++ }) {
-        Text(text = "计数器：$count")
-    }
-}
-```
-
-说明：`MyCounterComponent` 是一个 `StatefulComposable`，它内部使用 `mutableStateOf` 来管理一个整数状态 `count`。当点击按钮时，`count` 会增加 1，并更新计数器的显示。
-
-`StatelessComposable` 更简单、高效，适用于不需要管理状态的组件，Stateless是一个“纯函数”，参数是变化的唯一来源，参数不变UI就不会变化。因此Compose编译器针对其进行了优化；而 `StatefulComposable` 更灵活、强大，适用于需要管理状态的组件。StatelesComposable 的重组只能来自上层 Composable 的调用，而 StatefulComposable 的重组来自其依赖状态的变化。
 
 ### 状态提升
 
