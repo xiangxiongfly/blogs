@@ -4,9 +4,14 @@
 
 ## 概述
 
-传统视图中通过修改View的私有属性来改变UI，Compose 则通过重组刷新UI。
+组合阶段用于生成并维护 LayoutNode 视图树，当使用 Activity 中的 setContent() 时，会开始首次组合，这时执行的代码中的所有 Composable 函数体都会生成与之对应的 LayoutNode 视图树。同样，传统 View 体系也是在 setContentView() 中首次构建 View 视图树。
 
-Compose 的重组非常“智能”，当重组发生时，只有状态发生更新的 Composable 才会参与重组，没有变化的 Composable 会跳过本次重组。
+在 Compose 中如果 Composable 函数中依赖了可变状态，当该状态发生变更时，会触发当前 Composable 进行重组，在当前组件发生重组时，子Composable也会被依次重新调用：
+
+- 子 Composable 会将输入参数与重组前的参数做比较，如果参数变化，则 Composable 会进行重组，更新LayoutNode 视图树上对应节点，UI发生更新；如果参数无变化，则跳过本次执行，也就是智能重组，UI无变化。
+- 如果子 Composable 在重组中没有被再次调用，则对应的节点以及子节点会从 LayoutNode 视图树中被移除，UI从屏幕移除。
+
+重组可以自动维护 LayoutNode 视图树，使其永远保持最新的视图状态。而传统的 View 体系，则只能对 ViewGroup 进行 add/remove 等操作维护View视图树，这是两种视图体系的区别。
 
 
 
@@ -135,6 +140,5 @@ Button Scope
 经过Compose编译器处理后的Composable代码在对State进行读取的同时，能够自动建立关联，在运行过程中当State变化时，Compose会找到关联的代码块标记为Invalid。在下一渲染帧到来之前，Compose会触发重组并执行invalid代码块，Invalid代码块即下一次重组的范围。能够被标记为Invalid的代码必须是非inline且无返回值的Composable函数或lambda。
 
 说明：Column 是一个 inline 声明的高阶函数，内部 content 也会被展开在调用处，Scope-2与Scope-1共享重组范围，因此“Scope-1 run”日志都会被输出。虽然Button没有依赖counter，但是Scope-2的重组会触发Button的重新调用，所以“Button-onclick”的日志也会输出。虽然Button会重新调用，但是其content内部并没有依赖counter，所以“Scope-3 run”也就不会输出。
-
 
 
