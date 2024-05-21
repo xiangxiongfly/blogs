@@ -10,46 +10,85 @@
 
 ## 点击事件
 
-**clickable点击事件：**
+### clickable
+
+**属性：**
 
 ```kotlin
-val count = remember {
-    mutableStateOf(0)
-}
-Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    Text("${count.value}", modifier = Modifier
-         .width(100.dp)
-         .background(Color.Gray)
-         .clickable {
-             count.value += 2
-         }
-        )
-}
+fun Modifier.clickable(
+    enabled: Boolean = true,
+    onClickLabel: String? = null,
+    role: Role? = null,
+    onClick: () -> Unit
+)
 ```
 
-**pointerInput监听点击事件：**
+**使用：**
 
 ```kotlin
-Text("${count.value}", modifier = Modifier
-     .width(100.dp)
-     .background(Color.Gray)
-     .pointerInput(Unit) {
-         detectTapGestures(
-             onPress = { Log.e("TAG", "onPress") },
-             onLongPress = { Log.e("TAG", "onLongPress") },
-             onTap = {
-                 Log.e("TAG", "onTap")
-                 count.value += 2
-             },
-             onDoubleTap = { Log.e("TAG", "onDoubleTap") }
-         )
-     }
-    )
+val count = remember { mutableStateOf(0) }
+Text(
+    "${count.value}",
+    textAlign = TextAlign.Center,
+    modifier = Modifier
+        .width(100.dp)
+        .background(Color.Gray)
+        .clickable {
+            count.value += 2
+        }
+)
+```
+
+### pointerInput
+
+```kotlin
+val count = remember { mutableStateOf(0) }
+Text(
+    "${count.value}",
+    textAlign = TextAlign.Center,
+    modifier = Modifier
+        .width(100.dp)
+        .background(Color.Gray)
+        .pointerInput(Unit) {
+            detectTapGestures(
+                onPress = { Log.e("TAG", "onPress") },
+                onLongPress = { Log.e("TAG", "onLongPress") },
+                onTap = {
+                    Log.e("TAG", "onTap")
+                    count.value += 2
+                },
+                onDoubleTap = { Log.e("TAG", "onDoubleTap") }
+            )
+        }
+)
+```
+
+### combinedClickable
+
+```kotlin
+val count = remember { mutableStateOf(0) }
+Text(
+    "${count.value}",
+    textAlign = TextAlign.Center,
+    modifier = Modifier
+        .width(100.dp)
+        .background(Color.Gray)
+        .combinedClickable(
+            onLongClick = { Log.e("TAG", "onLongClick") },
+            onDoubleClick = { Log.e("TAG", "onDoubleClick") },
+            onClick = {
+                Log.e("TAG", "onTap")
+                count.value += 2
+            },
+        )
+)
 ```
 
 
 
 ## 滚动事件
+
+### horizontalScroll & verticalScroll
 
 可以使用 verticalScroll 和 horizontalScroll 修饰符实现滚动效果。
 
@@ -82,48 +121,92 @@ Column(
 }
 ```
 
+### scrollable
+
+horizontalScroll 与 verticalScroll 都是基于 scrollable 修饰符实现的，scrollable 修饰符只提供了最基本的滚动手势监听，而上层 horizontalScroll 与 verticalScroll 分别额外提供了滚动在布局内容方面的偏移。
+
+```kotlin
+
+```
+
 
 
 ## 嵌套滚动
 
+### nestedScroll 
+
+**属性：**
+
 ```kotlin
-Column(
-    modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        repeat(5) {
-            Text(
-                "hello world",
-                color = Color.Black,
-                modifier = Modifier
-                    .background(Color.Yellow)
-                    .fillMaxWidth()
-                    .border(1.dp, Color.Red)
-                    .padding(50.dp),
-                textAlign = TextAlign.Center
-            )
+fun Modifier.nestedScroll(
+    connection: NestedScrollConnection, // 处理手势逻辑
+    dispatcher: NestedScrollDispatcher? = null // 调度器
+)
+```
+
+NestedScrollConnection 提供四个回调方法：
+
+```kotlin
+interface NestedScrollConnection {
+    // 预先劫持滑动事件。
+    fun onPreScroll(available: Offset, source: NestedScrollSource): Offset = Offset.Zero
+
+    fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource
+    ): Offset = Offset.Zero
+
+    suspend fun onPreFling(available: Velocity): Velocity = Velocity.Zero
+
+    suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        return Velocity.Zero
+    }
+}
+```
+
+
+
+
+
+**使用：**
+
+```kotlin
+val toolbarHeight = 48.dp
+val toolbarHeightPx = with(LocalDensity.current) {
+    toolbarHeight.roundToPx().toFloat()
+}
+val toolbarOffsetHeightPx = remember { mutableStateOf(0f) }
+val nestedScrollConnection = remember {
+    object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            val delta = available.y
+            val newOffset = toolbarOffsetHeightPx.value + delta
+            toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightPx, 0f)
+            return Offset.Zero
         }
     }
-    Spacer(modifier = Modifier.height(50.dp))
-    Box(
+}
+
+Box(
+    Modifier
+    .fillMaxSize()
+    .nestedScroll(nestedScrollConnection)
+) {
+    LazyColumn(contentPadding = PaddingValues(top = toolbarHeight)) {
+        items(100) { index ->
+                    Text(
+                        "I'm item $index", modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                    )
+                   }
+    }
+    TopAppBar(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .background(Color.Green)
-    )
-    Spacer(modifier = Modifier.height(50.dp))
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .background(Color.Blue)
+        .height(toolbarHeight)
+        .offset { IntOffset(x = 0, y = toolbarOffsetHeightPx.value.roundToInt()) },
+        title = { Text("toolbar offset is ${toolbarOffsetHeightPx.value}") }
     )
 }
 ```
@@ -132,37 +215,35 @@ Column(
 
 ## 拖动事件
 
-**使用draggable实现横向或纵向拖动：**
+### draggable
+
+draggable 只能监听垂直方向或水平方向的偏移。
 
 ```kotlin
-val offsetY = remember {
-    mutableStateOf(0F)
-}
+var offsetY by remember { mutableStateOf(0F) }
 Box(modifier = Modifier.fillMaxSize()) {
     Text("拖动",
          fontSize = 30.sp,
          fontWeight = FontWeight.Bold,
          modifier = Modifier
-         .offset { IntOffset(0, offsetY.value.toInt()) }
+         .offset { IntOffset(0, offsetY.toInt()) }
          .draggable(
              orientation = Orientation.Vertical,
              state = rememberDraggableState(onDelta = { delta ->
-                                                       offsetY.value += delta
+                                                       offsetY += delta
                                                       })
          )
         )
 }
 ```
 
-**使用detectDragGestures实现整体拖动：**
+### detectDragGestures
+
+detectDragGestures 可以监听任意方向。
 
 ```kotlin
-val offsetX = remember {
-    mutableStateOf(0F)
-}
-val offsetY = remember {
-    mutableStateOf(0F)
-}
+val offsetX = remember { mutableStateOf(0F) }
+val offsetY = remember { mutableStateOf(0F) }
 Box(modifier = Modifier.fillMaxSize()) {
     Text("拖动",
          fontSize = 30.sp,
@@ -184,7 +265,13 @@ Box(modifier = Modifier.fillMaxSize()) {
 
 ## 滑动事件
 
-**使用swipeable实现滑动：**
+### swipeable
+
+与Draggable修饰符一样，Swipeable修饰符只能监听水平或垂直方向的手势事件。
+
+Swipeable修饰符允许开发者通过锚点设置，为组件增加位置吸附交互效果，常用于开关、下拉刷新等。
+
+**属性：**
 
 ```kotlin
 fun <T> Modifier.swipeable(
@@ -199,6 +286,8 @@ fun <T> Modifier.swipeable(
     velocityThreshold: Dp = VelocityThreshold
 )
 ```
+
+**使用：**
 
 ```kotlin
 val size = 48.dp
@@ -224,6 +313,59 @@ Box(
         .offset { IntOffset(swipeableState.offset.value.roundToInt(), 0) }
         .size(size)
         .background(Color.Green)
+    )
+}
+```
+
+
+
+## 多点触控
+
+### transformable
+
+**属性：**
+
+```kotlin
+fun Modifier.transformable(
+    state: TransformableState,
+    lockRotationOnZoomPan: Boolean = false, // 为true时，在发生双指拖动或缩放时，不会同时监听用户的旋转
+    enabled: Boolean = true
+) 
+```
+
+**使用：**
+
+rotate修饰符需要先于offset调用，若先用offset再调用rotate，则组件会先偏移再旋转，这会导致组件最终位置不可预期。
+
+```kotlin
+val boxSize = 100.dp
+var offset by remember { mutableStateOf(Offset.Zero) }
+var rotationAngle by remember { mutableStateOf(1F) }
+var scale by remember { mutableStateOf(1F) }
+val transformableState =
+rememberTransformableState { zoomChange: Float, panChange: Offset, rotationChange: Float ->
+                            scale *= zoomChange
+                            offset += panChange
+                            rotationAngle += rotationChange
+                           }
+
+Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center
+) {
+    Box(
+        Modifier
+        .size(boxSize)
+        .rotate(rotationAngle)
+        .offset {
+            IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+        }
+        .scale(scale)
+        .background(Color.Green)
+        .transformable(
+            state = transformableState,
+            lockRotationOnZoomPan = true
+        )
     )
 }
 ```

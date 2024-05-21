@@ -6,11 +6,13 @@
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/64bcc532125148b8b42282c811a75b94.png)
 
-**手机屏幕高度 = 状态栏高度 + ActionBar高度 + ContentView高度 + 导航栏高度**
+**手机屏幕高度 = 状态栏高度 + ActionBar高度 + ContentView高度 + 导航栏高度 = DecorView高度**
 
 
 
-## 使用
+## 不开启全面屏手势
+
+不开启全面屏手势，手机底部保留传统的导航栏。
 
 ```java
 public class MainActivity extends AppCompatActivity {
@@ -85,13 +87,15 @@ Content View的宽高：1440 - 2702
 
 **说明：**
 
-在小米13下：ScreenUtils.getScreenHeight()  等于 ScreenUtils.getAppScreenWidth() + 状态栏高度 +底部导航栏高度。
+在小米13下：ScreenUtils.getScreenHeight()  等于 ScreenUtils.getAppScreenHeight() + 状态栏高度 +底部导航栏高度。
 
-但在在vivo iqoo2手机下：ScreenUtils.getScreenHeight() 等于 ScreenUtils.getAppScreenWidth() + 199，状态栏高度是84，底部导航栏高度是126，这个199是什么？说明 ScreenUtils.getAppScreenWidth() 这个方法是不稳定的。
+但在在vivo iqoo2手机下：ScreenUtils.getScreenHeight() 等于 ScreenUtils.getAppScreenHeight() + 199，状态栏高度是84，底部导航栏高度是126，这个199是什么？说明 ScreenUtils.getAppScreenHeight() 这个方法是不稳定的。
 
 
 
 ## 开启全面屏手势
+
+开启全面屏手势后，手机底部的导航栏会被隐藏，支持手势操作。
 
 **在vivo iqoo2手机下输出信息：**
 
