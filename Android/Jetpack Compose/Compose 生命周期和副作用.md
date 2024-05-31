@@ -55,9 +55,9 @@ fun LifecyclePage() {
 }
 ```
 
-### SIdeEffect
+### SideEffect
 
-SIdeEffect 会在重组成功时执行，不适合处理那些耗时或者异步的副作用逻辑。
+SideEffect 会在重组成功时执行，不适合处理那些耗时或者异步的副作用逻辑。
 
 ```kotlin
 @Composable

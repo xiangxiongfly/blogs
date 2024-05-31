@@ -148,46 +148,42 @@ NestedScrollConnection 提供四个回调方法：
 
 ```kotlin
 interface NestedScrollConnection {
-    // 预先劫持滑动事件。
+    // 预先劫持滑动事件，消费后再交由子布局。
     fun onPreScroll(available: Offset, source: NestedScrollSource): Offset = Offset.Zero
 
+    // 获取子布局处理后的滑动事件。
     fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource
     ): Offset = Offset.Zero
 
+    // 获取 Fling 开始时的速度。
     suspend fun onPreFling(available: Velocity): Velocity = Velocity.Zero
 
+    // 获取 Fling 结束时的速度信息。
     suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         return Velocity.Zero
     }
 }
 ```
 
-
-
-
-
 **使用：**
 
 ```kotlin
-val toolbarHeight = 48.dp
-val toolbarHeightPx = with(LocalDensity.current) {
-    toolbarHeight.roundToPx().toFloat()
-}
-val toolbarOffsetHeightPx = remember { mutableStateOf(0f) }
+val toolbarHeight = 80.dp
+val toolbarHeightPx = with(LocalDensity.current) { toolbarHeight.roundToPx().toFloat() }
+val toolbarOffsetHeightPx = remember { mutableStateOf(0F) }
 val nestedScrollConnection = remember {
     object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            val delta = available.y
+            val delta = available.y // 每次滑动的偏移值
             val newOffset = toolbarOffsetHeightPx.value + delta
-            toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightPx, 0f)
+            toolbarOffsetHeightPx.value = newOffset.coerceIn(-toolbarHeightPx, 0F)
             return Offset.Zero
         }
     }
 }
-
 Box(
     Modifier
     .fillMaxSize()
@@ -196,7 +192,8 @@ Box(
     LazyColumn(contentPadding = PaddingValues(top = toolbarHeight)) {
         items(100) { index ->
                     Text(
-                        "I'm item $index", modifier = Modifier
+                        "I'm item $index",
+                        modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
                     )
@@ -239,7 +236,10 @@ Box(modifier = Modifier.fillMaxSize()) {
 
 ### detectDragGestures
 
-detectDragGestures 可以监听任意方向。
+- detectDragGestures：监听任意方向的拖动手势。
+- detectDragGesturesAfterLongPress：监听长按后的拖动手势。
+- detectHorizontalDragGestures：监听水平拖动手势。
+- detectVerticalDragGestures：监听垂直拖动手势。
 
 ```kotlin
 val offsetX = remember { mutableStateOf(0F) }
@@ -251,11 +251,27 @@ Box(modifier = Modifier.fillMaxSize()) {
          modifier = Modifier
          .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
          .pointerInput(Unit) {
+             // 监听任意方向的拖动手势：
              detectDragGestures { change, dragAmount ->
-                                 change.consume()
                                  offsetX.value += dragAmount.x
                                  offsetY.value += dragAmount.y
                                 }
+
+             // 监听水平拖动手势：
+             //                    detectHorizontalDragGestures { change, dragAmount ->
+             //                        offsetX.value += dragAmount
+             //                    }
+
+             // 监听垂直拖动手势：
+             //                    detectVerticalDragGestures { change, dragAmount ->
+             //                        offsetY.value += dragAmount
+             //                    }
+
+             // 监听长按后的拖动手势：
+             //                    detectDragGesturesAfterLongPress { change, dragAmount ->
+             //                        offsetX.value += dragAmount.x
+             //                        offsetY.value += dragAmount.y
+             //                    }
          }
         )
 }
@@ -369,4 +385,46 @@ Box(
     )
 }
 ```
+
+### detectTransformGestures
+
+```kotlin
+val boxSize = 100.dp
+var offset by remember { mutableStateOf(Offset.Zero) }
+var rotateAngle by remember { mutableStateOf(0F) }
+var scale by remember { mutableStateOf(1F) }
+Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center
+) {
+    Box(
+        Modifier
+        .size(boxSize)
+        .rotate(rotateAngle)
+        .scale(scale)
+        .offset {
+            IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+        }
+        .background(Color.Green)
+        .pointerInput(Unit) {
+            detectTransformGestures(
+                panZoomLock = true,
+                onGesture = { centroid: Offset, pan: Offset, zoom: Float, rotation: Float ->
+                             offset += pan
+                             scale *= zoom
+                             rotateAngle += rotation
+                            }
+            )
+        }
+    )
+}
+```
+
+
+
+## forEachGesture
+
+在传统View体系中，手指按下一次、移动到抬起过程中的所有手势事件可以看作是一个完整的手势交互序列。每当用户触摸屏幕交互时，可以根据这一次用户输入的手势交互序列中的信息进行相应的处理。
+
+Compose为我们提供了forEachGesture方法，保证了每一轮手势处理逻辑的一致性。实际上前面介绍的GestureDetect系列API，其内部实现都使用了forEachGesture。
 

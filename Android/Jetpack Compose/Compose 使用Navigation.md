@@ -4,7 +4,7 @@
 
 ## 概述
 
-Navigation也是Jetpack中的导航库，它可以处理多个Fragment之间的跳转、传值等操作。Navigation专门为Compose做了适配，让我们在Compose中也可以完美地进行页面之间的跳转。
+Navigation也是Jetpack中的导航库，它可以处理多个Fragment之间的跳转、传值等操作。Compose本身不提供任何页面导航的能力，因此Navigation专门为Compose做了适配，让我们在Compose中也可以完美地进行页面之间的跳转。
 
 
 
@@ -18,11 +18,22 @@ implementation "androidx.navigation:navigation-compose:2.5.1"
 
 ## 使用
 
+### 基本概念
+
+NavDestination：页面导航中跳转到各个节点。
+
+NavigationGraph：页面导航中各节点的跳转关系。
+
+NavHost：显示节点的容器。
+
+NavController：管理跳转行为。
+
 ### 简单使用
 
-- rememberNavController()：创建NavController对象。
-- NavHost()：定义导航。
-- composable：将composable添加到NavGraphBuilder。
+- 使用 rememberNavController() 创建 NavController 实例。
+- 使用 NavHost() 提供导航容器。
+- 使用 composable() 声明路由。
+- 使用 navigate() 页面跳转。
 - NavHostController#navigate()：跳转指定页面。
 - NavHostController#navigateUp()：返回上一个页面。
 
@@ -94,6 +105,32 @@ fun MyNavigation() {
     }
 }
 ```
+
+### 跳转方式
+
+```kotlin
+navController.navigate("home") {
+    popUpTo("welcome")
+}
+```
+
+说明：清空当前节点到welcome节点之间的所有节点，不包含welcome，然后再入栈home节点。
+
+```kotlin
+navController.navigate("home") {
+    popUpTo("welcome") { inclusive = true }
+}
+```
+
+说明：清空当前节点到weclome节点之间的所有节点，包含welcome，然后再入栈home节点。
+
+```kotlin
+navController.navigate("home") {
+    launchSingleTop = true
+}
+```
+
+说明：如果栈顶是home节点，则不再重新入栈home节点，类似于Activity中的singleTop启动模式。
 
 ### 传递参数
 
