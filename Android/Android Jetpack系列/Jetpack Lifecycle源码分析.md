@@ -2,32 +2,47 @@
 
 # Jetpack Lifecycle源码分析
 
+## 前提
+
+- LifecycleOwner：接口，生命周期拥有者。
+  - ComponentActivity：实现类，宿主
+- ReportFragment：分发生命周期事件，在ComponentActivity中注册。
+- Lifecycle：抽象类，管理生命周期和事件，添加观察者和移除观察者。
+  - LifecycleRegistry：子类
+- LifecycleObserver：接口，生命周期观察者。
+  - FullLifecycleObserver：子类
+    - DefaultLifecycleObserver：子类
+
+
+
 ## 流程图
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e7436c369bb14b5f893c3aed2128ce64.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/e8e55727534643c0b6e32b337cb52fff.png)
+
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/6d79c9a277e64968b6749add1a973041.png#pic_center)
 
 
 
 ## 源码分析
 
-### Lifecycle类
+### Lifecycle类说明
 
 ```java
 public abstract class Lifecycle {
-    //添加观察者
+    // 添加观察者
     @MainThread
     public abstract void addObserver(@NonNull LifecycleObserver observer);
 
-    //移除观察者
+    // 移除观察者
     @MainThread
     public abstract void removeObserver(@NonNull LifecycleObserver observer);
 
-    //获取当前状态
+    // 获取当前状态
     @MainThread
     @NonNull
     public abstract State getCurrentState();
 
-    //生命周期事件
+    // 生命周期事件
     public enum Event {
         ON_CREATE,
         ON_START,
@@ -38,7 +53,7 @@ public abstract class Lifecycle {
         ON_ANY  
     }
 
-    //生命周期状态
+    // 生命周期状态
     public enum State {
         DESTROYED,
         INITIALIZED,
@@ -54,17 +69,13 @@ public abstract class Lifecycle {
 
 说明：
 
-- Event：生命周期事件，对应Activity/Fragment的生命周期方法。
+- Event：生命周期事件，对应 Activity/Fragment 的生命周期方法。
 - State：生命周期状态。
 - ON_CREATE/ON_START/ON_RESUME事件是在LifecycleOwner对应方法之后分发，ON_PAUSE/ON_STOP/ON_DESTROY事件是在LifecycleOwner对应方法之前分发。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e8e55727534643c0b6e32b337cb52fff.png)
+### ComponentActivity类
 
-
-
-### androidx.activity.ComponentActivity类
-
-ComponentActivity类实现了LifecycleOwner接口，重写`getLifecycle()`方法。
+AppCompatActivity 间接继承自 ComponentActivity类，ComponentActivity 实现了LifecycleOwner接口，重写`getLifecycle()`方法。
 
 ```java
 public class ComponentActivity extends androidx.core.app.ComponentActivity implements 		  LifecycleOwner{
@@ -76,7 +87,8 @@ public class ComponentActivity extends androidx.core.app.ComponentActivity imple
         mSavedStateRegistryController.performRestore(savedInstanceState);
         mContextAwareHelper.dispatchOnContextAvailable(this);
         super.onCreate(savedInstanceState);
-        ReportFragment.injectIfNeededIn(this); //使用ReportFragment分发事件
+        // 内部依赖Fragment，通过ReportFragment分发事件
+        ReportFragment.injectIfNeededIn(this); 
         if (mContentLayoutId != 0) {
             setContentView(mContentLayoutId);
         }
@@ -111,22 +123,28 @@ ComponentActivity类实现了LifecycleOwner接口，并在`getLifecycle()`中返
 
 ### ReportFragment类
 
+#### ReportFragment#injectIfNeededIn()
+
+```java
+public static void injectIfNeededIn(Activity activity) {
+    if (Build.VERSION.SDK_INT >= 29) {
+        // 在高版本（API29及以上）中直接观察Activity生命周期
+        LifecycleCallbacks.registerIn(activity);
+    }
+
+    // 在低版本使用无界面的Fragment间接监听Activity生命周期
+    android.app.FragmentManager manager = activity.getFragmentManager();
+    if (manager.findFragmentByTag(REPORT_FRAGMENT_TAG) == null) {
+        manager.beginTransaction().add(new ReportFragment(), REPORT_FRAGMENT_TAG).commit();
+        manager.executePendingTransactions();
+    }
+}
+```
+
+#### 监听Fragment生命周期
+
 ```java
 public class ReportFragment extends android.app.Fragment {
-
-    public static void injectIfNeededIn(Activity activity) {
-        if (Build.VERSION.SDK_INT >= 29) {
-            //在高版本（API29及以上）中直接观察Activity生命周期
-            LifecycleCallbacks.registerIn(activity);
-        }
-
-        //在低版本使用无界面的Fragment间接监听Activity生命周期
-        android.app.FragmentManager manager = activity.getFragmentManager();
-        if (manager.findFragmentByTag(REPORT_FRAGMENT_TAG) == null) {
-            manager.beginTransaction().add(new ReportFragment(), REPORT_FRAGMENT_TAG).commit();
-            manager.executePendingTransactions();
-        }
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -390,7 +408,7 @@ static class ObserverWithState {
     LifecycleEventObserver mLifecycleObserver;
 
     ObserverWithState(LifecycleObserver observer, State initialState) {
-        mLifecycleObserver = Lifecycling.lifecycleEventObserver(observer);
+        mLifecycleObserver = Lifecycling.lifecycleEventObserver(observer); // FullLifecycleObserver->DefaultLifecycleObserver
         mState = initialState;
     }
 
@@ -405,6 +423,5 @@ static class ObserverWithState {
     }
 }
 ```
-
 
 

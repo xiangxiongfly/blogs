@@ -4,9 +4,9 @@
 
 ## 概述
 
-[**官网文档**](https://developer.android.google.cn/topic/libraries/view-binding)
+视图绑定功能可让您更轻松地编写与视图交互的代码。在模块中启用视图绑定后，它会为该模块中显示的每个 XML 布局文件生成一个绑定类。绑定类的实例包含对在相应布局中具有 ID 的所有视图的直接引用。
 
-通过视图绑定功能，您可以更轻松地编写可与视图交互的代码。在模块中启用视图绑定之后，系统会为该模块中的每个 XML 布局文件生成一个绑定类。绑定类的实例包含对在相应布局中具有 ID 的所有视图的直接引用。
+[官网](https://developer.android.google.cn/topic/libraries/view-binding)
 
  
 
@@ -14,24 +14,24 @@
 
 **ViewBinding优点**
 
-- **Null 安全**：由于视图绑定会创建对视图的直接引用，因此不存在因视图 ID 无效而引发 Null 指针异常的风险。
-- **类型安全**：每个绑定类中的字段均具有与它们在 XML 文件中引用的视图相匹配的类型。因此不存强制转换导致的异常风险。
+- **Null 安全**：由于视图绑定会创建对视图的直接引用，因此不存在因视图 ID 无效而引发 null 指针异常的风险。此外，当视图仅存在于布局的某些配置中时，绑定类中包含其引用的字段会标记为 `@Nullable`。
+- **类型安全**：每个绑定类中的字段都具有与其在 XML 文件中引用的视图相匹配的类型。这意味着不存在发生类转换异常的风险。
 
 **与findViewById区别**
 
-- findViewById编写过于冗余。
-- 类型仍然不安全。
+- findViewById 编写过于冗余。
+- 类型不安全。
 
 **与ButterKnife区别**
 
 - 官宣不维护，推荐使用ViewBinding。
-- 类型仍然不安全。
-- 对组件化项目不友好。
+- 类型不安全。
+- 对组件化不友好。
 
 **与Kotlin Android Extensions**
 
 - JetBrains废弃该插件。
-- 类型仍然不安全。
+- 类型不安全。
 - 性能偏低。
 
 
@@ -58,7 +58,7 @@ android {
 }
 ```
 
-如果需要忽略某个布局文件，需要添加`tools:viewBindingIgnore="true"`属性到布局中
+如果需要忽略某个布局文件，需要添加 `tools:viewBindingIgnore="true"` 属性到布局中。
 
 ```xml
 <LinearLayout
@@ -74,15 +74,15 @@ android {
 
 当开启ViewBinding后，系统会为该模块中每个XML布局文件生成一个绑定类（转换为驼峰命名并在末尾添加Binding），每个绑定类均包含根视图已交具有id的所有视图的引用。
 
-例如：布局文件名为`activity_main.xml`，生成绑定类为`ActivityMainBinding`
+例如：布局文件名为 `activity_main.xml`，生成绑定类为 `ActivityMainBinding`。
 
 ### 在Activity中使用
 
 **使用流程**
 
 - 开启视图绑定功能后，系统会为该模块中的XML布局生成一个绑定类，每个绑定类都包含根布局和具有ID布局的引用。
-- 调用绑定类的`inflate()`方法获取绑定类对象。
-- 调用绑定类对象的`getRoot()`方法获取根布局传递到`setContentView()`。
+- 调用绑定类的静态 `inflate()` 方法获取绑定类对象。
+- 调用绑定类对象的 `getRoot()` 方法获取根布局传递到 `setContentView()`。
 
 **XML布局**
 
@@ -139,22 +139,19 @@ class ViewBindingSimpleActivity : BaseActivity() {
 }
 ```
 
-
-
 ### 在Fragment中使用
 
-**方式一**
+#### 方式一：inflate()
 
-- 调用绑定类的`inflate()`方法，获取绑定类对象。
-- 再调用`getRoot()`方法获取根布局。
-- 在`onCreateView()`方法返回根布局，使其成为屏幕上的活动视图。
-- 由于Fragment的存在时间比视图长。因此需要在Fragment的`onDestroyView()`方法中清除对绑定类对象的所有引用。
+- 调用绑定类的静态 `inflate()` 方法，获取绑定类对象。
+- 再调用 `getRoot()` 方法获取根布局。
+- 在 `onCreateView()` 方法返回根布局，使其成为屏幕上的活动视图。
+- 由于 Fragment 的存在时间比视图长。因此需要在 Fragment 的 `onDestroyView()` 方法中清除对绑定类对象的所有引用。
 
 ```kotlin
 class MyFragment : BaseFragment() {
     private var _viewBinding: FragmentMyBinding? = null
-    private val viewBinding
-    	get() = _viewBinding!!
+    private val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -180,13 +177,12 @@ class MyFragment : BaseFragment() {
 }
 ```
 
-**方式二**
+#### 方式二：bind()
 
 ```kotlin
 class MyFragment : BaseFragment() {
     private var _viewBinding: FragmentMyBinding? = null
-    private val viewBinding
-        get() = _viewBinding!!
+    private val viewBinding get() = _viewBinding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -212,44 +208,58 @@ class MyFragment : BaseFragment() {
 }
 ```
 
-
-
-### 在RecyclerView adapter中使用
+### 在RecyclerView中使用
 
 ```kotlin
-class MyAdapter(context: Context, private val data: ArrayList<String>) :
-	RecyclerView.Adapter<MyAdapter.ViewHolder>() {
-    val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val text: TextView = itemView.findViewById(R.id.text)
-    }
+class MyAdapter(private val context: Context, private val data: ArrayList<String>) :
+    RecyclerView.Adapter<MyAdapter.ViewHolder>() {
+    private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val viewBinding = ItemTextBinding.inflate(layoutInflater, parent, false)
-        return ViewHolder(viewBinding.root)
+        val itemBinding = ItemTextBinding.inflate(layoutInflater, parent, false)
+        val viewHolder = ViewHolder(itemBinding)
+        viewHolder.itemView.setOnClickListener {
+            Toast.makeText(context, data[viewHolder.adapterPosition], Toast.LENGTH_SHORT).show()
+        }
+        return viewHolder
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.text.text = data[position]
+        holder.dest.text = data[position]
     }
 
     override fun getItemCount(): Int {
         return data.size
     }
-}
 
+    class ViewHolder(private val itemBinding: ItemTextBinding) :
+        RecyclerView.ViewHolder(itemBinding.root) {
+        val dest: TextView = itemBinding.dest
+    }
+}
 ```
 
+### 在Dialog中使用
 
+```kotlin
+class TipDialog(context: Context) : Dialog(context) {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dialogBinding = DialogLayoutBinding.inflate(layoutInflater)
+        setContentView(dialogBinding.root)
+        dialogBinding.title.text = "标题"
+    }
+}
+```
 
 ### 在include标签中使用
 
-ViewBinding可以与`<include>`标签一起使用
+ViewBinding可以与 `<include>` 标签一起使用
 
 #### 不使用merge标签
 
-- 一定要给`<include>`标签定义id，使用该id访问布局中的控件。
+- 一定要给 `<include>` 标签定义id，使用该id访问布局中的控件。
 
 **XML布局**
 
@@ -339,13 +349,11 @@ public class IncludeActivity extends AppCompatActivity {
 }
 ```
 
-
-
 #### 使用merge标签
 
-- `<merge>`标签有利于减少布局层次。
-- 需要使用`bind()`方法绑定根视图。
-- 不能给`<include>`标签设置id。
+- `<merge>` 标签有利于减少布局层次。
+- 需要使用 `bind()` 方法绑定根视图。
+- 不能给 `<include> `标签设置id。
 
 **布局：detail_layout.xml**
 
@@ -381,18 +389,6 @@ public class IncludeActivity extends AppCompatActivity {
 **在include标签中使用**
 
 ```kotlin
-package com.example.viewbindingdemo;
-
-import android.content.Context;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.viewbindingdemo.databinding.ActivityIncludeBinding;
-import com.example.viewbindingdemo.databinding.DetailLayoutBinding;
-
 public class IncludeActivity extends AppCompatActivity {
 
     private Context context;
@@ -431,7 +427,9 @@ abstract class BindingActivity<VB : ViewBinding> : BaseActivity() {
 
     abstract fun getViewBinding(): VB
 }
+```
 
+```kotlin
 abstract class BindingFragment<VB : ViewBinding> : BaseFragment() {
     private lateinit var _viewBinding: VB
     protected val mViewBinding get() = _viewBinding
@@ -468,7 +466,9 @@ class OneActivity : BindingActivity<ActivityOneBinding>() {
         return ActivityOneBinding.inflate(layoutInflater)
     }
 }
+```
 
+```kotlin
 class OneFragment : BindingFragment<FragmentOneBinding>() {
     override fun getViewBinding(
         inflater: LayoutInflater,
@@ -502,9 +502,8 @@ abstract class BindingActivity<VB : ViewBinding> : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mContext = this
-        val type = javaClass.genericSuperclass
-        if (type is ParameterizedType) {
+        val type: Type? = javaClass.genericSuperclass //获取父类的泛型类型
+        if (type != null && type is ParameterizedType) {
             val clz = type.actualTypeArguments[0] as Class<*>
             val method = clz.getMethod("inflate", LayoutInflater::class.java)
             _viewBinding = method.invoke(null, layoutInflater) as VB
@@ -512,7 +511,9 @@ abstract class BindingActivity<VB : ViewBinding> : BaseActivity() {
         }
     }
 }
+```
 
+```kotlin
 abstract class BindingFragment<VB : ViewBinding> : BaseFragment() {
     private var _viewBinding: VB? = null
     protected val mViewBinding get() = _viewBinding!!
@@ -520,8 +521,8 @@ abstract class BindingFragment<VB : ViewBinding> : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val type = javaClass.genericSuperclass
-        if (type is ParameterizedType) {
+        val type: Type? = javaClass.genericSuperclass
+        if (type != null && type is ParameterizedType) {
             val clz = type.actualTypeArguments[0] as Class<*>
             val method = clz.getMethod(
                 "inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.java
@@ -552,7 +553,9 @@ class TwoActivity : BindingActivity<ActivityTwoBinding>() {
         }
     }
 }
+```
 
+```kotlin
 class TwoFragment : BindingFragment<FragmentTwoBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -573,8 +576,6 @@ class TwoFragment : BindingFragment<FragmentTwoBinding>() {
 **封装**
 
 ```kotlin
-//Activity ViewBinding
-
 inline fun <reified VB : ViewBinding> ComponentActivity.viewBindings(
     noinline factory: (LayoutInflater) -> VB,
     setContentView: Boolean = true
@@ -591,9 +592,8 @@ class ActivityViewBindingDelegate1<VB : ViewBinding>(
 
     override fun getValue(thisRef: ComponentActivity, property: KProperty<*>): VB {
         viewBinding?.let { return it }
-
-        viewBinding = factory(thisRef.layoutInflater).also { viewBinding ->
-            if (setContentView) thisRef.setContentView(viewBinding.root)
+        viewBinding = factory(thisRef.layoutInflater).also { it ->
+            if (setContentView) thisRef.setContentView(it.root)
         }
         return viewBinding!!
     }
@@ -607,11 +607,10 @@ class ActivityViewBindingDelegate2<VB : ViewBinding>(
 
     override fun getValue(thisRef: ComponentActivity, property: KProperty<*>): VB {
         viewBinding?.let { return it }
-
         val inflateMethod = clazz.getMethod("inflate", LayoutInflater::class.java)
         viewBinding =
-            (inflateMethod.invoke(null, thisRef.layoutInflater) as VB).also { viewBinding ->
-                if (setContentView) thisRef.setContentView(viewBinding.root)
+            (inflateMethod.invoke(null, thisRef.layoutInflater) as VB).also { it ->
+                if (setContentView) thisRef.setContentView(it.root)
             }
         return viewBinding!!
     }
@@ -619,8 +618,6 @@ class ActivityViewBindingDelegate2<VB : ViewBinding>(
 ```
 
 ```kotlin
-//Fragment ViewBinding
-
 inline fun <reified VB : ViewBinding> Fragment.viewBindings(noinline factory: (View) -> VB) =
     FragmentViewBindingDelegate1(factory)
 
@@ -631,6 +628,8 @@ class FragmentViewBindingDelegate1<VB : ViewBinding>(
     private val factory: (View) -> VB,
 ) : ReadOnlyProperty<Fragment, VB> {
     private var viewBinding: VB? = null
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun getValue(thisRef: Fragment, property: KProperty<*>): VB {
         viewBinding?.let { return it }
@@ -643,15 +642,18 @@ class FragmentViewBindingDelegate1<VB : ViewBinding>(
                 "Access to viewBinding after Lifecycle is destroyed or hasn't created yet. The instance of viewBinding will be not cached."
             )
         } else {
-            thisRef.viewLifecycleOwnerLiveData.observe(thisRef) { viewLifecycleOwner ->
-                viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-                    override fun onDestroy(owner: LifecycleOwner) {
+            thisRef.lifecycle.addObserver(object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    thisRef.lifecycle.removeObserver(this)
+                    //说明：
+                    //Fragment的ViewLifecycleOwner通知更新Lifecycle的ON_DESTROY时机是发生在Fragment#onDestroyView()之前
+                    //因此，需要将主线程上的所有操作完后才能清理ViewBinding
+                    mainHandler.post {
                         viewBinding = null
                     }
-                })
-            }
+                }
+            })
         }
-
         return viewBinding!!
     }
 }
@@ -662,6 +664,8 @@ class FragmentViewBindingDelegate2<VB : ViewBinding>(
     private var viewBinding: VB? = null
 
     private val bindMethod = clazz.getMethod("bind", View::class.java)
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun getValue(thisRef: Fragment, property: KProperty<*>): VB {
         viewBinding?.let { return it }
@@ -674,21 +678,19 @@ class FragmentViewBindingDelegate2<VB : ViewBinding>(
                 "Access to viewBinding after Lifecycle is destroyed or hasn't created yet. The instance of viewBinding will be not cached."
             )
         } else {
-            thisRef.viewLifecycleOwnerLiveData.observe(thisRef) { viewLifecycleOwner ->
-                viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-                    override fun onDestroy(owner: LifecycleOwner) {
+            thisRef.lifecycle.addObserver(object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    thisRef.lifecycle.removeObserver(this)
+                    mainHandler.post {
                         viewBinding = null
                     }
-                })
-            }
+                }
+            })
         }
-
         return viewBinding!!
     }
 }
 ```
-
-
 
 **使用**
 
@@ -728,11 +730,9 @@ class ThreeFragment : BaseFragment(R.layout.fragment_three) {
 }
 ```
 
+**[第三方框架](https://github.com/androidbroadcast/ViewBindingPropertyDelegate)**
+
 
 
 ## [源码分析](https://blog.csdn.net/qq_14876133/article/details/126930594)
-
-
-
-## [代码下载](https://github.com/xiangxiongfly/MyAndroid/tree/main/jetpack/src/main/java/com/example/jetpack/viewbinding)
 

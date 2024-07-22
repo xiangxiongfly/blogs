@@ -4,9 +4,9 @@
 
 ## 概述
 
-- Lifecycle是Jetpack组件中用来感知生命周期的组件，使用Lifecycle可以帮助开发者写出与生命周期相关且简洁、易于维护的代码。
+Lifecycle 是 Jetpack 架构组件中用来感知生命周期的组件，使用 Lifecycle 可以帮助开发者写出与生命周期相关且更简洁、更易维护的代码。
 
-- Lifecycle 是多个 Jetpack 组件的基础，例如我们熟悉的 LiveData 就是以 Lifecycle 为基础实现的生命周期感知型数据容器。
+[官网](https://developer.android.google.cn/topic/libraries/architecture/lifecycle?hl=en)
 
 
 
@@ -21,15 +21,43 @@ implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
 
 
 
-## Lifecycle事件状态图
+## 生命周期的状态和事件
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2021031412231130.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzE0ODc2MTMz,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/5b9010e438a94de6b83c98b58ae93110.png)
+
+```java
+public enum Event { 
+    ON_CREATE, 
+    ON_START, 
+    ON_RESUME, 
+    ON_PAUSE, 
+    ON_STOP, 
+    ON_DESTROY, 
+    ON_ANY
+}
+```
+
+说明：前面几个状态分别对应 Activity 的生命周期，最后一个 ON_ANY 状态则表示可对应Activity的任意生命周期。
+
+```java
+public enum State { 
+    DESTROYED, 
+    INITIALIZED, 
+    CREATED, 
+    STARTED, 
+    RESUMED;
+}
+```
+
+说明：如果 getCurrentState() 返回值是 STARTED，表示当前 Activity 已经执行了 onStart() 方法，但是还未执行 onResume() 方法。 
 
 
 
 ## 简单使用
 
 ### 传统方式监听生命周期
+
+**定义接口：**
 
 ```kotlin
 interface IObserver {
@@ -40,77 +68,73 @@ interface IObserver {
     fun dispatchStop()
     fun dispatchDestroy()
 }
+```
 
-class CustomObserver : IObserver {
+**实现接口：**
+
+```kotlin
+class MyObserver : IObserver {
     override fun dispatchCreate() {
-        Log.e(LIFECYCLE, "Activity onCreate")
+        Log.e("TAG", "Activity#onCreate()")
     }
 
     override fun dispatchStart() {
-        Log.e(LIFECYCLE, "Activity onStart")
+        Log.e("TAG", "Activity#onStart()")
     }
 
     override fun dispatchResume() {
-        Log.e(LIFECYCLE, "Activity onResume")
+        Log.e("TAG", "Activity#onResume()")
     }
 
     override fun dispatchPause() {
-        Log.e(LIFECYCLE, "Activity onPause")
+        Log.e("TAG", "Activity#onPause()")
     }
 
     override fun dispatchStop() {
-        Log.e(LIFECYCLE, "Activity onStop")
+        Log.e("TAG", "Activity#onStop()")
     }
 
     override fun dispatchDestroy() {
-        Log.e(LIFECYCLE, "Activity onDestroy")
+        Log.e("TAG", "Activity#onDestroy()")
     }
 }
 ```
 
-```kotlin
-class LifecycleSimpleActivity : BaseActivity() {
-    val customObserver = CustomObserver()
+**使用：**
 
-    companion object {
-        fun start(context: Context) {
-            context.startActivity(Intent(context, LifecycleSimpleActivity::class.java).apply {
-                putExtra(KEY_TITLE, "Lifecycle简单使用")
-            })
-        }
-    }
+```kotlin
+class LifecycleActivity : AppCompatActivity() {
+    val myObserver = MyObserver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_lifecycle_simple)
-        lifecycle.addObserver(MyObserver())
-        lifecycle.addObserver(MyObserver2())
-        customObserver.dispatchCreate()
+        setContentView(R.layout.activity_lifecycle)
+        myObserver.dispatchCreate()
     }
 
     override fun onStart() {
         super.onStart()
-        customObserver.dispatchStart()
+        myObserver.dispatchStart()
     }
 
     override fun onResume() {
         super.onResume()
-        customObserver.dispatchResume()
+        myObserver.dispatchResume()
     }
 
     override fun onPause() {
         super.onPause()
-        customObserver.dispatchPause()
+        myObserver.dispatchPause()
     }
 
     override fun onStop() {
         super.onStop()
-        customObserver.dispatchStop()
+        myObserver.dispatchStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        customObserver.dispatchDestroy()
+        myObserver.dispatchDestroy()
     }
 }
 ```
@@ -119,73 +143,57 @@ class LifecycleSimpleActivity : BaseActivity() {
 
 - 通过`getLifecycle()`方法获取Lifecycler对象，再使用`addObserver()`方法注册监听。
 - 创建观察者：
-  - 方式一，实现`LifecycleObserver`接口，使用注解。
-  - 方式二，实现`DefaultLifecycleObserver`接口，非注解方式较推荐。
+  - 方式一，实现 LifecycleObserver 接口，使用注解。
+  - 方式二，实现 DefaultLifecycleObserver 接口，推荐非注解方式。
 
 ```kotlin
-//方式一：
-class MyObserver : LifecycleObserver {
+// 方式一，实现 LifecycleObserver 接口
+class MyObserver2 : LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onInit() {
-        Log.e(LIFECYCLE, "MyObserver 初始化")
+        Log.e("TAG", "MyObserver2 初始化")
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onConnect(owner: LifecycleOwner) {
-        Log.e(LIFECYCLE, "MyObserver 建立连接")
+    fun onConnect() {
+        Log.e("TAG", "MyObserver2 建立连接")
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onDisconnect(owner: LifecycleOwner) {
-        Log.e(LIFECYCLE, "MyObserver 断开连接")
+    fun onDisconnect() {
+        Log.e("TAG", "MyObserver2 断开连接")
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onRelease() {
-        Log.e(LIFECYCLE, "MyObserver 释放")
+        Log.e("TAG", "MyObserver2 释放资源")
     }
 }
 ```
 
 ```kotlin
-//方式二
-class MyObserver2 : DefaultLifecycleObserver {
+// 方式二，实现 DefaultLifecycleObserver 接口
+class MyObserver3 : DefaultLifecycleObserver {
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        onInit()
-    }
-
-    private fun onInit() {
-        Log.e(LIFECYCLE, "MyObserver2 初始化")
+        Log.e("TAG", "MyObserver3 初始化")
     }
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        onConnect(owner)
-    }
-
-    private fun onConnect(owner: LifecycleOwner) {
-        Log.e(LIFECYCLE, "MyObserver2 建立连接")
+        Log.e("TAG", "MyObserver3 建立连接")
     }
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        onDisconnect(owner)
-    }
-
-    private fun onDisconnect(owner: LifecycleOwner) {
-        Log.e(LIFECYCLE, "MyObserver2 断开连接")
+        Log.e("TAG", "MyObserver3 断开连接")
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        onRelease()
-    }
-
-    private fun onRelease() {
-        Log.e(LIFECYCLE, "MyObserver2 释放")
+        Log.e("TAG", "MyObserver3 释放资源")
     }
 }
 ```
@@ -194,8 +202,8 @@ class MyObserver2 : DefaultLifecycleObserver {
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_lifecycle_simple)
-    lifecycle.addObserver(MyObserver())
     lifecycle.addObserver(MyObserver2())
+    lifecycle.addObserver(MyObserver3())
 }
 ```
 
@@ -203,35 +211,31 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 ## 广告页案例
 
-开启广告页，显示5秒广告后进入下一页，也可以在广告结束前点击跳过广告直接进入下一页。
-
-页面销毁时，计时器销毁。
+打开广告页，显示5秒广告后进入下一页，也可以在点击按钮在广告结束前跳转下一页，页面销毁时，计时器销毁。
 
 ### 使用传统方式
 
-**广告管理类**
+**定义管理类：**
 
 ```kotlin
-class AdvertisingManage {
-
-    private var mAdvertisingManageListener: AdvertisingManageListener? = null
-
-    private var countDownTimer: CountDownTimer? =
-        object : CountDownTimer(5000L, 1000L) {
-            override fun onTick(millisUntilFinished: Long) {
-                mAdvertisingManageListener?.time((millisUntilFinished / 1000L).toInt())
-            }
-
-            override fun onFinish() {
-                mAdvertisingManageListener?.gotoActivity()
-            }
-        }
+class AdvertisingManager {
+    private var mOnAdvertisingListener:  OnAdvertisingListener? = null
+    private var countDownTimer: CountDownTimer? = null
 
     /**
      * 开始计时
      */
     fun start() {
-        countDownTimer?.start()
+        countDownTimer = object : CountDownTimer(5000L, 1000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                mOnAdvertisingListener?.time((millisUntilFinished / 1000L).toInt())
+            }
+
+            override fun onFinish() {
+                mOnAdvertisingListener?.jumpToActivity()
+            }
+        }
+        countDownTimer!!.start()
     }
 
     /**
@@ -242,90 +246,90 @@ class AdvertisingManage {
         countDownTimer = null
     }
 
-    fun setAdvertisingManageListener(advertisingManageListener: AdvertisingManageListener) {
-        mAdvertisingManageListener = advertisingManageListener
+    fun setOnAdvertisingListener(onAdvertisingListener: OnAdvertisingListener) {
+        mOnAdvertisingListener = onAdvertisingListener
     }
 
-    interface AdvertisingManageListener {
+    interface OnAdvertisingListener {
         /**
          * 计时
          */
         fun time(second: Int)
 
         /**
-         * 计时结束后进入主界面
+         * 调整下一页
          */
-        fun gotoActivity()
+        fun jumpToActivity()
     }
 }
 ```
 
-**广告页**
+**使用：**
 
 ```kotlin
-class AdvertisingActivity : BaseActivity() {
-    private lateinit var tvAdvertisingTime: TextView
-    private lateinit var btnEnter: Button
-    private var advertisingManage: AdvertisingManage? = null
+class AdvertisingActivity : AppCompatActivity() {
+    private lateinit var textView: TextView
+    private lateinit var btnNext: Button
+
+    private var advertisingManager: AdvertisingManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_advertising1)
-        initView()
-        advertisingManage = AdvertisingManage()
-        advertisingManage?.setAdvertisingManageListener(
-            object : AdvertisingManage.AdvertisingManageListener {
-                override fun time(second: Int) {
-                    tvAdvertisingTime.text = "广告剩余 $second 秒"
-                }
-
-                override fun gotoActivity() {
-                    SecondActivity.start(mContext)
-                    finish()
-                }
-            })
-        btnEnter.setOnClickListener {
-            SecondActivity.start(mContext)
+        setContentView(R.layout.activity_advertising)
+        val context = this
+        textView = findViewById(R.id.text_view)
+        btnNext = findViewById(R.id.btn_next)
+        btnNext.setOnClickListener {
+            startActivity(Intent(context, SecondActivity::class.java))
             finish()
         }
-        advertisingManage?.start()
-    }
 
-    private fun initView() {
-        tvAdvertisingTime = findViewById(R.id.tv_advertising_time)
-        btnEnter = findViewById(R.id.btn_enter)
+        advertisingManager = AdvertisingManager()
+        advertisingManager!!.setOnAdvertisingListener(object :
+            AdvertisingManager.OnAdvertisingListener {
+            override fun time(second: Int) {
+                textView.text = "广告剩余时间：${second}秒"
+            }
+
+            override fun jumpToActivity() {
+                startActivity(Intent(context, SecondActivity::class.java))
+                finish()
+            }
+        })
+        advertisingManager!!.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        advertisingManage?.cancel()
-        advertisingManage = null
+        advertisingManager!!.cancel()
+        advertisingManager = null
     }
 }
 ```
 
-
-
 ### 使用Lifecycle
 
-**广告管理类**
+**定义管理类：**
 
 ```kotlin
-class AdvertisingManage2 : DefaultLifecycleObserver {
+class AdvertisingManager2 : DefaultLifecycleObserver {
+    private var mOnAdvertisingListener: OnAdvertisingListener? = null
+    private var countDownTimer: CountDownTimer? = null
 
-    private var mAdvertisingManageListener: AdvertisingManageListener? = null
+    /**
+     * 开始计时
+     */
+    fun start() {
+        countDownTimer = object : CountDownTimer(5000L, 1000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                mOnAdvertisingListener?.time((millisUntilFinished / 1000L).toInt())
+            }
 
-    private var countDownTimer: CountDownTimer? =
-    object : CountDownTimer(5000L, 1000L) {
-        override fun onTick(millisUntilFinished: Long) {
-            Log.e(TAG, "广告剩余 ${millisUntilFinished / 1000L} 秒")
-            mAdvertisingManageListener?.time((millisUntilFinished / 1000L).toInt())
+            override fun onFinish() {
+                mOnAdvertisingListener?.jumpToActivity()
+            }
         }
-
-        override fun onFinish() {
-            Log.e(TAG, "广告结束，跳转页面")
-            mAdvertisingManageListener?.gotoActivity()
-        }
+        countDownTimer!!.start()
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -333,9 +337,12 @@ class AdvertisingManage2 : DefaultLifecycleObserver {
         start()
     }
 
-    private fun start() {
-        Log.e(TAG, "开始计时")
-        countDownTimer?.start()
+    /**
+     * 结束计时
+     */
+    fun cancel() {
+        countDownTimer?.cancel()
+        countDownTimer = null
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
@@ -343,79 +350,73 @@ class AdvertisingManage2 : DefaultLifecycleObserver {
         cancel()
     }
 
-    /**
-     * 结束计时
-     */
-    private fun cancel() {
-        Log.e(TAG, "结束计时")
-        countDownTimer?.cancel()
-        countDownTimer = null
+    fun setOnAdvertisingListener(onAdvertisingListener: OnAdvertisingListener) {
+        mOnAdvertisingListener = onAdvertisingListener
     }
 
-    fun setAdvertisingManageListener(advertisingManageListener: AdvertisingManageListener) {
-        mAdvertisingManageListener = advertisingManageListener
-    }
-
-    interface AdvertisingManageListener {
+    interface OnAdvertisingListener {
         /**
          * 计时
          */
         fun time(second: Int)
 
         /**
-         * 计时结束后进入主界面
+         * 调整下一页
          */
-        fun gotoActivity()
+        fun jumpToActivity()
     }
 }
 ```
 
-**广告页**
+**使用：**
 
 ```kotlin
-class AdvertisingActivity2 : BaseActivity() {
-    private lateinit var tvAdvertisingTime: TextView
-    private lateinit var btnEnter: Button
-    private var advertisingManage: AdvertisingManage2? = null
+class AdvertisingActivity2 : AppCompatActivity() {
+    private lateinit var textView: TextView
+    private lateinit var btnNext: Button
+
+    private var advertisingManager: AdvertisingManager2? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_advertising2)
-        initView()
-        advertisingManage = AdvertisingManage2()
-        lifecycle.addObserver(advertisingManage!!)
-        advertisingManage?.setAdvertisingManageListener(
-            object : AdvertisingManage2.AdvertisingManageListener {
-                override fun time(second: Int) {
-                    tvAdvertisingTime.text = "广告剩余 $second 秒"
-                }
-
-                override fun gotoActivity() {
-                    SecondActivity.start(mContext)
-                    finish()
-                }
-            })
-        btnEnter.setOnClickListener {
-            SecondActivity.start(mContext)
+        setContentView(R.layout.activity_advertising)
+        val context = this
+        textView = findViewById(R.id.text_view)
+        btnNext = findViewById(R.id.btn_next)
+        btnNext.setOnClickListener {
+            startActivity(Intent(context, SecondActivity::class.java))
             finish()
         }
-    }
 
-    private fun initView() {
-        tvAdvertisingTime = findViewById(R.id.tv_advertising_time)
-        btnEnter = findViewById(R.id.btn_enter)
+        advertisingManager = AdvertisingManager2()
+        lifecycle.addObserver(advertisingManager!!)
+        advertisingManager!!.setOnAdvertisingListener(object :
+            AdvertisingManager2.OnAdvertisingListener {
+            override fun time(second: Int) {
+                textView.text = "广告剩余时间：${second}秒"
+            }
+
+            override fun jumpToActivity() {
+                startActivity(Intent(context, SecondActivity::class.java))
+                finish()
+            }
+        })
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        advertisingManage = null
+        advertisingManager = null
     }
 }
 ```
 
-
-
 ### 自定义LifecycleOwner
+
+AppCompatActivity 继承自 FragmentActivity 继承自 ComponentActivity 实现了 LifecycleOwner 接口。
+
+使用 getLifecycle 方法的前提是当前父类实现了 LifecycleOwner 接口，因此若需要在没有实现 LifecycleOwner 接口的类中使用该方法，则需要自定义 LifecycleOwner。
+
+如下面的 Activity 类就需要实现 LifecycleOwner 接口：
 
 ```kotlin
 class LifecycleCustomActivity : Activity(), LifecycleOwner {
@@ -511,9 +512,11 @@ class LifecycleDialogActivity : BaseActivity() {
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/1b23517b650a444baed0268522ebd5b8.png)
 
-
+这是因为在Activity关闭的时候，Dialog没有关闭，进而导致内存泄漏。
 
 ### 传统方式解决
+
+在 Activity 销毁时关闭Dialog。
 
 ```kotlin
 class LifecycleDialogActivity : BaseActivity() {
@@ -539,9 +542,9 @@ class LifecycleDialogActivity : BaseActivity() {
 
 可以在`onDestroy()`方法中编写额外的代码，但这样破坏了代码的完整性。
 
-
-
 ### 使用Lifecycle
+
+修改 Dialog 的代码，使得 Dialog 可以感应生命周期变化。
 
 ```kotlin
 class LifecycleDialog(context: Context) : Dialog(context), LifecycleObserver {
@@ -594,7 +597,8 @@ class LifecycleDialog(context: Context) : Dialog(context), LifecycleEventObserve
 class BaseApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        ProcessLifecycleOwner.get().lifecycle.addObserver(ApplicationLifecycleObserver())
+        ProcessLifecycleOwner.get().lifecycle
+            .addObserver(ApplicationLifecycleObserver())
     }
 }
 
@@ -605,8 +609,8 @@ class ApplicationLifecycleObserver : DefaultLifecycleObserver {
         onAppForeground()
     }
 
-    fun onAppForeground() {
-        Log.e("TAG", "App在前台")
+    private fun onAppForeground() {
+        Log.e("TAG", "当前在前台")
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -614,8 +618,8 @@ class ApplicationLifecycleObserver : DefaultLifecycleObserver {
         onAppBackground()
     }
 
-    fun onAppBackground() {
-        Log.e("TAG", "App在后台")
+    private fun onAppBackground() {
+        Log.e("TAG", "当前在后台")
     }
 }
 ```
@@ -624,7 +628,4 @@ class ApplicationLifecycleObserver : DefaultLifecycleObserver {
 
 ## [源码分析](https://blog.csdn.net/qq_14876133/article/details/126969491)
 
-
-
-## [代码下载](https://github.com/xiangxiongfly/MyAndroid/tree/main/jetpack/src/main/java/com/example/jetpack/lifecycle)
 

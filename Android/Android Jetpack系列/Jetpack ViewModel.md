@@ -4,9 +4,13 @@
 
 ## 概述
 
-ViewModel 类目的在于以注重生命周期的方式存储和管理界面相关数据。ViewModel类让数据可在发生屏幕旋转等配置更改后继续留存。
+ViewModel 类目的在于以注重生命周期的方式存储和管理界面相关数据。
 
- 
+ViewModel 可以让数据可在发生屏幕旋转等配置更改后继续留存。
+
+ [官网](https://developer.android.google.cn/topic/libraries/architecture/viewmodel?hl=en)
+
+
 
 ## 添加依赖库
 
@@ -27,21 +31,25 @@ implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 
 
 
+## ViewModel生命周期
 
+创建 ViewModel 的方法采用的是工厂模式，创建好之后将其缓存在ViewModelStore中。如果当前需要创建的ViewModel对象已经存在，则直接从ViewModelStore中取出。所以在屏幕旋转前后使用的ViewModel是同一个对象。也就是说在创建ViewModel的时候，只要传入的class对象是一样的，那么获取到的ViewModel就是同一个对象。
 
-## ViewModel的生命周期
-
-[`ViewModel`](https://developer.android.google.cn/reference/androidx/lifecycle/ViewModel?hl=zh-cn) 对象存在的时间范围是获取 [`ViewModel`](https://developer.android.google.cn/reference/androidx/lifecycle/ViewModel?hl=zh-cn) 时传递给 [`ViewModelProvider`](https://developer.android.google.cn/reference/androidx/lifecycle/ViewModelProvider?hl=zh-cn) 的 [`Lifecycle`](https://developer.android.google.cn/reference/androidx/lifecycle/Lifecycle?hl=zh-cn)。[`ViewModel`](https://developer.android.google.cn/reference/androidx/lifecycle/ViewModel?hl=zh-cn) 将一直留在内存中，直到限定其存在时间范围的 [`Lifecycle`](https://developer.android.google.cn/reference/androidx/lifecycle/Lifecycle?hl=zh-cn) 永久消失：对于 Activity，是在 Activity 完成时；而对于 Fragment，是在 Fragment 分离时。 
-
-由于ViewModel的生命周期长于Activity，因此不能将View或者Activity的context传给ViewModel，否则会引起内存泄露。
+由于 ViewModel 的生命周期长于 Activity，因此不能将 View 或者 Activity 传递给 ViewModel，否则会引起内存泄露。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210315142343341.png)
 
 
 
-## 基本使用
+## 使用
+
+### 简单使用
+
+**竖屏：**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/81f025304e1f4d9abec4ef78fb6bbee0.png)
+
+**横屏：**
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/e05b5cb75d304ea197fe5fee994bd0ff.png)
 
@@ -51,7 +59,6 @@ implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
 class MyViewModel : ViewModel() {
     private val _countLiveData = MutableLiveData<Int>()
     val countLiveData = _countLiveData
-
     private var count = 0
 
     fun increase() {
@@ -64,108 +71,215 @@ class MyViewModel : ViewModel() {
 }
 ```
 
-**获取ViewModel对象，方式一**
+**获取ViewModel对象**
 
 ```kotlin
-var viewModel: MyViewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-```
+// 方式一：
+private val viewModel: MyViewModel by lazy {
+    ViewModelProvider(this).get(MyViewModel::class.java)
+}
 
-**获取ViewModel对象，方式二**
-
-```kotlin
-val viewModel: MyViewModel by viewModels()
+// 方式二：
+private val viewModel: MyViewModel by viewModels()
 ```
 
 **在Activity中使用**
 
 ```kotlin
-class ViewModelSimpleActivity : BaseActivity() {
+class SimpleActivity : BaseActivity() {
+    private lateinit var tvOrientation: TextView
     private lateinit var tvCount: TextView
-    private lateinit var tvScreen: TextView
 
     private val viewModel: MyViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_view_model_simple)
-        Log.e(VIEWMODEL, "onCreate")
+        setContentView(R.layout.activity_simple)
+        Log.e("TAG", "onCreate")
 
-        initView()
-        val screenOrientation =
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) "竖屏" else "横屏"
-        tvScreen.text = "屏幕方向：$screenOrientation"
+        tvOrientation = findViewById(R.id.tv_orientation)
+        tvCount = findViewById(R.id.tv_count)
 
+        tvOrientation.text =
+            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) "竖屏" else "横屏"
         viewModel.countLiveData.observe(this, object : Observer<Int> {
             override fun onChanged(t: Int?) {
-                Log.e(VIEWMODEL, "onChanged")
-                tvCount.text = t.toString()
+                tvCount.text = "${t}"
             }
         })
     }
 
-    private fun initView() {
-        tvCount = findViewById(R.id.tv_count)
-        tvScreen = findViewById(R.id.tv_screen)
-    }
-
-    fun clickIncrease(v: View) {
+    fun onIncrease(view: View) {
         viewModel.increase()
     }
 
-    fun clickDecrease(v: View) {
+    fun onDecrease(view: View) {
         viewModel.decrease()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.e(VIEWMODEL, "onDestroy")
+        Log.e("TAG", "onDestroy")
     }
 }
 ```
 
-
-
 ### AndroidViewModel
 
-因为ViewModel对象的存活时间较长，因此不能将Activity的Context传递给ViewModel，否则会引起内存泄露。如果需要使用context，这时可以使用AndroidViewModel接收Application的对象。
+AndroidViewModel 是 ViewModel 的子类，拥有 Application 的实例，可以访问资源文件。
 
 ```kotlin
 class MyAndroidViewModel(application: Application) : AndroidViewModel(application) {
+    val appContext = application.applicationContext
     private val _countLiveData = MutableLiveData<Int>()
     val countLiveData = _countLiveData
-
     private var count = 0
 
     fun increase() {
+        Log.e("TAG", "context:${appContext}")
         _countLiveData.postValue(++count)
     }
 
     fun decrease() {
         _countLiveData.postValue(--count)
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.e("TAG", "onCleared")
+    }
 }
 ```
 
+### ViewModel添加依赖
 
+**定义ViewModel：**
 
+```kotlin
+class UserViewModel(private var user: User) : ViewModel() {
 
-## Fragment之间共享数据
+    private val _userLiveData = MutableLiveData<User>()
+    val userLiveData = _userLiveData
+
+    fun showUser() {
+        userLiveData.postValue(user)
+    }
+
+    fun changeUser() {
+        user = User("小黑", 28, arrayOf<String>("上海市", "浦东区"))
+        userLiveData.postValue(user)
+    }
+}
+```
+
+**定义ViewModelFactory：**
+
+```kotlin
+class UserViewModelFactory(private val user: User) : ViewModelProvider.Factory {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            return UserViewModel(user) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+```
+
+**使用：**
+
+```kotlin
+class UserActivity : BaseActivity() {
+    private lateinit var tvUser: TextView
+
+    // 获取ViewModel对象，方式一：
+    private val viewModel: UserViewModel by lazy {
+        val factory = UserViewModelFactory(User("小白", 18, arrayOf("北京市", "朝阳区")))
+        ViewModelProvider(this, factory).get(UserViewModel::class.java)
+    }
+
+    // 获取ViewModel对象，方式二：
+    private val viewModel2: UserViewModel by viewModels {
+        UserViewModelFactory(
+            User(
+                "小白",
+                18,
+                arrayOf("北京市", "朝阳区")
+            )
+        )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_user)
+        tvUser = findViewById(R.id.tv_user)
+
+        viewModel.userLiveData.observe(this, object : Observer<User> {
+            override fun onChanged(user: User) {
+                tvUser.text = "${user}"
+            }
+        })
+    }
+
+    fun onShow(view: View) {
+        viewModel.showUser()
+    }
+
+    fun onChange(view: View) {
+        viewModel.changeUser()
+    }
+}
+```
+
+**规范Factory：**
+
+```kotlin
+class UserViewModel(private var user: User) : ViewModel() {
+
+    private val _userLiveData = MutableLiveData<User>()
+    val userLiveData = _userLiveData
+
+    companion object {
+        fun provideFactory(user: User): ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+                        return UserViewModel(user) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class")
+                }
+            }
+        }
+    }
+}
+```
+
+**使用：**
+
+```kotlin
+private val viewModel: UserViewModel by viewModels {
+    UserViewModel.provideFactory(User("小白", 18, arrayOf("北京市", "朝阳区")))
+}
+```
+
+### Fragment之间共享数据
 
 **优点：**
 
-- Activity不需要做其他操作
-- Fragment之间没有任何干扰，只需要约定ViewModel
+- Activity不需要做其他操作。
+- Fragment之间没有任何干扰，只需要约定共享的 ViewModel。
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/5defb6be83eb4da69a067632e19ae224.png)
 
-**SharedViewModel类**
+**定义ViewModel：**
 
 ```kotlin
 class SharedViewModel : ViewModel() {
     private val _liveData = MutableLiveData<String>()
     val liveData = _liveData
 
-    fun select(item: String) {
+    fun setData(item: String) {
         _liveData.postValue("$item detail")
     }
 }
@@ -174,13 +288,12 @@ class SharedViewModel : ViewModel() {
 **Activity类**
 
 ```kotlin
-class MenuActivity : BaseActivity() {
-   override fun onCreate(savedInstanceState: Bundle?) {
+class SharedDataActivity : BaseActivity(R.layout.activity_sharred_data) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_menu)
         supportFragmentManager.beginTransaction()
-            .add(R.id.fl_menu, MenuFragment.newInstance())
-            .add(R.id.fl_detail, DetailFragment.newInstance())
+            .replace(R.id.fl_menu, MenuFragment.newInstance())
+            .replace(R.id.fl_detail, DetailFragment.newInstance())
             .commit()
     }
 }
@@ -189,19 +302,11 @@ class MenuActivity : BaseActivity() {
 **MenuFragment**
 
 ```kotlin
-class MenuFragment : BaseFragment() {
+class MenuFragment : BaseFragment(R.layout.fragment_menu) {
     private val sharedViewModel: SharedViewModel by activityViewModels()
 
     companion object {
         fun newInstance() = MenuFragment()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_menu, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -214,7 +319,7 @@ class MenuFragment : BaseFragment() {
         }
         listView.adapter = ArrayAdapter(mContext, android.R.layout.simple_list_item_1, data)
         listView.setOnItemClickListener { parent, view, position, id ->
-            sharedViewModel.select(data[position])
+            sharedViewModel.setData(data[position])
         }
     }
 }
@@ -223,20 +328,13 @@ class MenuFragment : BaseFragment() {
 **DetailFragment**
 
 ```kotlin
-class DetailFragment : BaseFragment() {
+class DetailFragment : BaseFragment(R.layout.detail_fragment) {
     private val sharedViewModel: SharedViewModel by activityViewModels()
 
     companion object {
         fun newInstance() = DetailFragment()
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.detail_fragment, container, false)
-    }
-
+    
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val textView = view.findViewById<TextView>(R.id.textView)
@@ -256,19 +354,16 @@ class DetailFragment : BaseFragment() {
 - ViewModel：适用于配置变更导致的数据恢复，这是因为内存容量相对较大，可以存储较多的数据。
 - onSaveInstanceState()：适用于被系统回收后重建时的数据恢复，这是因为系统回收时应用进程会消亡，因此不能用内存存储而是使用持久化存储，同时这部分数据需要通过Bundle机制传输数据，Bundle缓冲区有大小限制，只能适用于小规模数据。
 
-|                          | ViewModel                                 | onSaveInstanceState()                              |
-| ------------------------ | ----------------------------------------- | -------------------------------------------------- |
-| 存储方式                 | 在内存中                                  | 序列化在磁盘                                       |
-| 读写效率                 | 高（内存中访问）                          | 较慢（需要序列化、反序列化操作）                   |
-| 配置更改后，数据是否留存 | 是                                        | 否                                                 |
-| 系统回收后，数据是否留存 | 否                                        | 是                                                 |
-| 使用场景                 | 屏幕旋转等配置更改后保存                  | Activity异常销毁时才会被调用                       |
-| 存储限制                 | 可存储复杂数据，存储大小受App可用内存影响 | 只能存储可序列化对象，有存储大小有限制（一般为1M） |
+|                                    | ViewModel                        | onSaveInstanceState()                      | 持久化             |
+| ---------------------------------- | -------------------------------- | ------------------------------------------ | ------------------ |
+| 存储位置                           | 在内存中                         | 在内存中                                   | 在磁盘或网络       |
+| 配置修改后是否存在                 | 是                               | 是                                         | 是                 |
+| 在系统启动的进程死亡后存活         | 否                               | 是                                         | 是                 |
+| 关闭activity或onFinish()后是否存在 | 否                               | 否                                         | 是                 |
+| 数据限制                           | 支持复制类型，空间受可用内存限制 | 适用于基本数据类型和简单的小对象，如字符串 | 仅受限于磁盘空间   |
+| 读写效率                           | 快（内存操作）                   | 慢（需要序列化和反序列化）                 | 慢（需要磁盘读写） |
 
 
 
-## [代码下载](https://github.com/xiangxiongfly/MyAndroid/tree/main/jetpack/src/main/java/com/example/jetpack/viewmodel)
-
-
-
+## [ViewModel源码分析](https://blog.csdn.net/qq_14876133/article/details/126989117)
 
