@@ -1,6 +1,6 @@
 [TOC]
 
-# Handler机制分析
+# Android Handler机制
 
 ## 前提
 
@@ -35,7 +35,7 @@ mHandler.sendMessage(message);
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20190813161634706.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzE0ODc2MTMz,size_16,color_FFFFFF,t_70)
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/9201ade1900149148423609bfe12c58a.png)
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/d52e4a3350c147dd9a097118207c0ff0.png)
 
 - 通过 Handler 发送到消息都会调用 Handler#sendMessageAtTime() 方法，接着调用 Handler#enqueueMessage() 方法，再调用 Message#enqueueMessage() 方法将消息插入消息队列中。
 - 主线程的Looper在主线程执行时被创建。Looper 会一直执行 loop() 方法，这是一个死循环，会一直调用 MessageQueue#next() 方法从消息队列中获取消息，如果消息队列没有消息了会被睡眠式阻塞，直到再次收到消息被唤醒。Looper 将获取的消息交给 Handler#dispatchMessage()，最后分发给 Handler#handleMessage() 处理。

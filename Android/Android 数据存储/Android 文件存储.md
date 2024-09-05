@@ -241,26 +241,23 @@ Log.e(TAG, "content: ${content}")
 
 ## Android 10
 
-Android长久以来都支持外置存储空间这个功能，也就是我们常说的SD卡存储。这个功能使用得极其广泛，几乎所有的App都喜欢在SD卡的根目录下建立一个自己专属的目录，用来存放各类文件和数据。 
+Android 10 之前的问题：
 
-这些文件存放的目的：
+- 存储在SD卡的文件不会计入到应用程序的占用空间当中，如：你在SD卡存放了1G的文件，但是你的应用程序在设置中显示的占用空间仍然可能只有几十K。
+- 存储在SD卡的文件，即使应用程序被卸载了，这些文件仍然会被保留下来。
 
-- 第一，存储在SD卡的文件不会计入到应用程序的占用空间当中，也就是说即使你在SD卡存放了1G的文件，你的应用程序在设置中显示的占用空间仍然可能只有几十K。
-- 第二，存储在SD卡的文件，即使应用程序被卸载了，这些文件仍然会被保留下来，这有助于实现一些需要数据被永久保留的功能。 
+因此 Android 10 引入分区存储，引入分区存储是为了更好的保护用户数据并限制冗余文件增加。
 
-Android 10 引入分区存储，引入分区存储是为了更好的保护用户数据并限制冗余文件增加。
+**分区存储将外部存储分为两部分：**
 
-分区存储将外部存储分为**应用专属目录**和**公共目录**两部分。应用专属目录和以前一样，可以通过路径访问；公共目录不允许直接使用路径访问，可以使用 MediaStore 或 SAF 访问。
+- 应用专属目录：应用专属目录和以前一样，可以通过路径访问。
+- 公共目录：公共目录不允许直接使用路径访问，可以使用 MediaStore 或 SAF 访问。
+  - 公共目录指系统定义好的媒体目录，如：DCIM、Pictures、Movies、Music。Download等，同时分区存储将文件分为媒体文件和非媒体文件。如果将txt文件放到DCIM目录中，系统会抛异常。
+  - 应用程序向媒体库贡献的图片、音频和视频可以自动获取读写权限，不需要申请 READ_EXTERNAL_STORAGE 和 WRITE_EXTERNAL_STORAGE 权限。
+  - 读取其他应用程序向媒体库共享的图片、音频、视频，需要申请 READ_EXTERNAL_STORAGE 权限。
+  - 图片、音频、视频这三类文件可以通过 MediaStore 访问，非媒体文件(pdf、office、doc、txt等)， 只能够通过 Storage Access Framework 方式访。 
 
-公共目录指系统定义好的媒体目录，如：DCIM、Pictures、Movies、Music。Download等，同时分区存储将文件分为媒体文件和非媒体文件。如果将txt文件放到DCIM目录中，系统会抛异常。
-
-一、应用程序向媒体库贡献的图片、音频和视频可以自动获取读写权限，不需要申请 READ_EXTERNAL_STORAGE 和 WRITE_EXTERNAL_STORAGE 权限。
-
-二、读取其他应用程序向媒体库共享的图片、音频、视频，需要申请 READ_EXTERNAL_STORAGE 权限。
-
-三、图片、音频、视频这三类文件可以通过MediaStore访问，非媒体文件(pdf、office、doc、txt等)， 只能够通过Storage Access Framework方式访。 
-
-**在Android 10 上不开启分区存储，可以如下配置：**
+**在 Android 10 上不开启分区存储，可以如下配置：**
 
 ```xml
 <application
@@ -272,7 +269,7 @@ Android 10 引入分区存储，引入分区存储是为了更好的保护用户
 
 ## Android 11 及以上版本
 
-在Android 11中已经强制启用分区存储了。 
+在 Android 11中 已经强制启用分区存储了。 
 
 如果你的 targetSdkVersion 等于30，Scoped Storage就会被强制启用，requestLegacyExternalStorage 标记会被忽略。 
 
