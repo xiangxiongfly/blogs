@@ -15,7 +15,7 @@ SystemServer 的启动大致可分为两个阶段：
 
 ## 流程图
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/4a6c6bacfd7f41d4be1d2368cc1e15ae.png)
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/1bfa70d2ffee4ca9b98cd475449b2c69.png)
 
 
 

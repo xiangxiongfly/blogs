@@ -65,6 +65,12 @@ Zygote  是一个特殊的守护进程，它的主要作用是用来启动新的
 
 Zygote  进程在系统启动时被创建，之后所有的应用进程都是通过  fork  它来创建的。这种方式可以提高进程启动速度，因为新的进程所需要资源已经在  Zygote 进程中加载和初始化一次，进程被创建时会复制 Zygote 的共享的资源，避免重复初始化。
 
+### 为什么从Zygote进程fork而不是init、SystemServer进程？
+
+- Zygote 进程已经加载了很多资源，fork 出来的新进程可以直接使用。
+- 如果是 init 进程需要重新加载一遍，比较耗费性能。
+- SystemServer 进程开启了一系列的 AMS、PMS 等几十个服务，App 进程不需要这些。
+
 ### 为什么Zygote使用socket而不是binder？
 
 - 时机：Binder 通信需要在 Android 运行时（ART）和 Binder 驱动已经初始化之后才能使用，而 Zygote 进程在这些组件之前就已经启动。
