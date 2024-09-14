@@ -4,23 +4,23 @@
 
 ## 概述
 
-Promise是在ES6中新增的一种用于解决异步编程的方案。
+Promise是在ES6中新增的一种用于解决异步编程的方案。可以用来解决回调地狱问题。
 
-Promise可以用来解决回调地狱问题。
+“promise”：承诺，“resolve”：解决，“reject”：拒绝。
 
 
 
-## Promise生命周期
+## 状态
 
-每个Promise对象有3种状态：
+每个Promise对象有三种状态：
 
 - pending：进行中
-- fulfilled：已完成
+- fulfilled：已成功
 - rejected：已失败
 
-Promise在创建时处于pending状态；执行成功时，由pending转为fulfilled状态；执行失败时，由pending转为rejected状态。
+状态只能由 pending 变为 fulfilled，由 pending 变为 rejected。状态一旦发生改变，就不能再改变。
 
-状态一旦发生改变，就不能再改变。
+Promise 在创建时处于 pending 状态；执行成功时，由 pending 转为 fulfilled 状态；执行失败时，由 pending 转为 rejected 状态。
 
 
 
@@ -28,11 +28,11 @@ Promise在创建时处于pending状态；执行成功时，由pending转为fulfi
 
 ### Promise基本使用
 
-Promise创建后会立即执行。
-
-Promise构造函数会接收一个函数，该函数有两个参数分为为resolve和reject：
-- 执行`resolve()`方法：Promise状态由pending转变为fulfilled，表示执行成功。
-- 执行`reject()`方法：Promise状态由pending转变为rejected，表示执行失败。
+- Promise 是一个类，可以翻译成 `承诺、许诺` 、`期约`。
+- 在创建 Promise 对象时，需要传入一个 executor 回调函数：
+  - 这个回调函数会立即执行，并且需要传入另外两个回调函数 resolve、reject
+  - 当调用 resolve 回调函数时，会执行 Promise 对象的 then 方法。Promise 状态由 pending 转变为 fulfilled，表示执行成功。
+  - 当调用 reject 回调函数时，会执行 Promise 对象的 catch 方法。Promise 状态由 pending 转变为 rejected，表示执行失败。
 
 ```javascript
 let promise = new Promise(function(resolve, reject) {
@@ -64,14 +64,33 @@ console.log("hello");
 // resolve
 ```
 
+```javascript
+new Promise((resolve, reject) => {
+  resolve("已解决");
+  reject("已拒绝");
+})
+  .then((res) => {
+    console.log("res:", res);
+  })
+  .catch((err) => {
+    console.log("err:", err);
+  });
 
+//res: 已解决
+```
 
 ### then
 
-then()方法可以接收两个回调函数：
+then() 方法可以接收两个参数：
 
-- 第一个回调函数是Promise对象的状态变为`resolved`时调用。
-- 第二个回调函数是Promise对象的状态变为`rejected`时调用。这两个回调函数是可选的。
+- 参数一：状态变为 fulfilled 的回调函数。
+- 参数二：可选， 状态变为 reject 的回调函数。
+
+then() 方法是可以被多次调用的：
+
+- 当 Promise 的状态变为 fulfilled 时，这些回调函数都会被执行。
+
+then() 方法的返回值是一个 Promise。
 
 在then()函数中不能返回Promise实例本身，否则会出现Promise循环引用的问题，抛出异常。
 
@@ -88,6 +107,7 @@ new Promise((resolve, reject) => {
         console.log(`失败回调：${errMsg}`);
     }
 );
+
 //成功回调：hello 成功
 ```
 
@@ -107,32 +127,30 @@ new Promise((resolve, reject) => {
 }).then(result => {
     console.log(result);
 })
+
 // 1
 // 2
 // 3
 // 4
 ```
 
-
-
 ### catch
 
-catch()方法是专门处理失败状态。
+catch() 方法是专门处理失败状态。
 
 ```javascript
 new Promise((resolve, reject) => {
     reject("hello 失败");
-})
-    .then(
+}) .then(
     succssMsg => {
         console.log(`成功回调：${succssMsg}`);
     }
-)
-    .catch(
+) .catch(
     errMsg => {
         console.log(`失败回调：${errMsg}`);
     }
 );
+
 //失败回调：hello 失败
 ```
 
@@ -147,6 +165,7 @@ new Promise((resolve, reject) => {
     .catch((err) => {
     console.log(err); // Error: test
 });
+
 //Error: 失败了
 
 //在Promise执行过程中出现了异常，就会被自动抛出，并触发reject(err)，而不用我们去使用try...catch，在catch()函数中手动调用reject()函数。
@@ -158,8 +177,6 @@ new Promise((resolve, reject) => {
     console.log(err); 
 });
 ```
-
-
 
 ### finally
 
@@ -211,13 +228,11 @@ new Promise((resolve, reject) => {
 // 执行完毕
 ```
 
-
-
 ### Promise.all()
 
-- `Promise.all()`观察所有Promise对象的状态变化。
-- 所有状态为resolved时，最终状态才会变为resolved。
-- 只要有一个为rejected，最终状态为rejected。
+- 观察所有Promise对象的状态变化。
+- 所有状态为 fulfilled时，最终状态才会变为 fulfilled。
+- 只要有一个为 rejected，最终状态为 rejected。
 
 ```java
 const p1 = new Promise((resolve, reject) => {
@@ -249,11 +264,10 @@ Promise.all([p1, p2])
 //失败：TypeError: Cannot read property 'name' of null
 ```
 
-
-
 ### Promise.race()
 
-Promise.race()状态取决于最先完成的Promise实例对象，如果第一个完成对象的成功了，那最终就成功；如果第一个完成对象的失败，那就最终失败。
+- race 竞技、竞赛的意思，表示多个 Promise 对象相互竞争，谁先有结果就用谁的。
+- 如果第一个完成对象的成功了，那最终就成功；如果第一个完成对象的失败，那就最终失败。
 
 ```javascript
 const p1 = new Promise((resolve, reject) => {
@@ -271,10 +285,9 @@ Promise.race([p1, p2])
     .catch(
     err => console.log("失败：" + err)
 );
+
 //失败：no1
 ```
-
-
 
 ### Promise.allSettled()
 
@@ -304,19 +317,16 @@ Promise.allSettled([p1, p2])
 //true
 ```
 
-
-
 ### Promise.resolve()
 
 Promise.resolve()成功状态简写。
 
 ```javascript
 Promise.resolve("hello 成功")
-//等价于
+
+//等价于：
 new Promise(resolve => resolve("成功"));
 ```
-
-
 
 ###  Promise.reject()
 
@@ -324,7 +334,8 @@ new Promise(resolve => resolve("成功"));
 
 ```javascript
 Promise.reject("hello 失败");
-//等价于
+
+//等价于：
 new Promise((resolve, reject) => reject("hello 失败"));
 ```
 
@@ -477,6 +488,4 @@ ajax("https://jsonplaceholder.typicode.com/posts", "GET")
 	</body>
 </html>
 ```
-
-
 
