@@ -1,54 +1,39 @@
 [toc]
 
-# 异常总结
+# Java 异常总结
 
 ## 概述
 
-- 异常机制值当程序出现错误后，程序的处理方式。
+异常机制值当程序出现错误后，程序的处理方式。
 
-- 程序错误分三种：
+**从程序执行的过程来看编译时异常和运行时异常：**
 
-  1. 编译错误：指程序没有遵循语法规则
-  2. 运行错误：程序执行时，运行环境出现异常问题
-  3. 逻辑错误：代码逻辑存在问题
-
-  
-
-## 异常结构
-
-在Java中，所有的异常都有一个共同的祖先`Throwable`类，`Throwable`有两个重要的子类：`Exception`类和`Error`类。
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/e100f810a0c24f918d3b60d2ab087ba2.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_20,color_FFFFFF,t_70,g_se,x_16)
+- 编译时异常：程序在编译时发生的异常（javac 源文件名.java）
+- 运行时异常: 程序在运行时发生的异常（java 字节码文件名）
 
 
 
-### Error  错误
+## 异常的结构
 
-Error是指正常情况下，不大可能出现的情况，绝大多数`Error`都会导致程序处理非正常、不可恢复状态。因为是非正常情况，所以不方便也不需要捕获，如`OutOfMemoryError`之类等，都是`Error`的子类。
+![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/2d0c6566f0a944ceb3418247bf2d2b2c.png)
 
-### Exception 异常
-
-Exception是程序正常运行中，可以预料的意外情况，可以嗯那个并且应该被捕获，进行相应处理。
-
-Exception异常分两大类：运行时异常和非运行时异常。
-
-
-
-## 异常分类
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/f87395d706ca409bb2d364fed8894410.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAeGlhbmd4aW9uZ2ZseTkxNQ==,size_12,color_FFFFFF,t_70,g_se,x_16)
-
-### 检查异常
-
-检查异常，是在源码阶段必须显式地进行捕获处理，是编译器检查的一部分。之前的Error是属于Throwable而不是Exception。
-
-### 非检查异常
-
-非检查异常，指所谓的运行时异常，如`NullPointerException`、`ArrayIndexOutOfBoundsException`等，通常是可以避免的逻辑错误，具体根据需要判断是否需要捕获，不在编译器强制要求。
+- Throwable：是 Java 所有错误和异常的父类，其有两个子类 Error 和 Exception
+  - Error（错误）：Error通常表示与虚拟机相关的问题，如系统崩溃、虚拟机错误、动态链接失败等。这些错误是无法恢复或捕获的，它们会导致应用程序中断。因此，在编程时，我们一般无法处理Error类型的异常。
+  - Exception（异常）：程序可以捕获并且可以处理的异常。其可以分两种：
+    - 检查异常（Checked Exceptions）：
+      - 继承自 `java.lang.Exception` 类，但不包括 `java.lang.RuntimeException` 及其子类。
+      - 编译器会检查此类异常，如果程序中出现此类异常，比如说 IOException，必须对该异常进行处理，要么使用 try-catch捕获，要么使用 throws 语句抛出，否则编译不通过。
+      - 如：IOException、ClassNotFoundException、SQLException 。
+    - 非检查异常（Unchecked Exceptions）：
+      - 继承自 `java.lang.RuntimeException` 类。
+      - 这类异常在运行期间可能出现的错误。编译器不会检查此类异常，并且不要求处理异常，一般是由程序逻辑错误引起的，在程序中可以选择捕获处理，也可以不处理。
+      - 如：NullPointerException、ArrayIndexOutOfBoundsException、ArithmeticException 。
 
 
 
 ## 异常处理机制
+
+### try-catch
 
 ```java
 private static void fun1() {
@@ -62,14 +47,21 @@ private static void fun1() {
         e.printStackTrace();
     }
 }
+```
 
-//方法抛出异常
+### throws
+
+```java
 private static void fun2() throws Exception {
     int a = 1;
     int b = 0;
     int c = a / b;
 }
+```
 
+### throw
+
+```java
 private static void fun3() {
     int a = 1;
     int b = 0;
@@ -117,8 +109,6 @@ try (PrintWriter output = new PrintWriter("text.txt")) {
 
 
 
-
-
 ## 自定义异常类
 
 Java提供类许多异常类，尽量使用它们而不是创建自己的异常类。
@@ -146,3 +136,4 @@ if (age < 0) {
     throw new InvalidAgeException(age);
 }
 ```
+
